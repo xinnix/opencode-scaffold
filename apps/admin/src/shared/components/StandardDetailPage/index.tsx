@@ -17,33 +17,25 @@ import {
 } from "antd";
 import {
   ArrowLeftOutlined,
-  EditOutlined,
-  DeleteOutlined,
 } from "@ant-design/icons";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PermissionGuard } from "../PermissionGuard";
-import type { StandardDetailPageProps, FieldConfig, TabConfig, ActionConfig, StatisticConfig } from "./types";
+import type {
+  StandardDetailPageProps,
+  DetailFieldConfig,
+  DetailTabConfig,
+} from "./types";
 
-/**
- * StandardDetailPage - 标准详情页面组件
- *
- * 提供完整的详情页面框架,包括:
- * - 返回按钮 + Header 区域
- * - Descriptions 信息展示
- * - Tabs 结构(基本信息 + 关联数据)
- * - 统计卡片
- * - 操作按钮
- */
 export function StandardDetailPage<T extends Record<string, any> = any>(
   props: StandardDetailPageProps<T>
 ) {
   const {
     resource,
     maxWidth = 1200,
-    headerType = 'simple',
-    titleField = 'name',
+    headerType = "simple",
+    titleField = "name",
     avatarField,
-    statusField = 'status',
+    statusField = "status",
     statusConfig,
     headerTags,
     fields = [],
@@ -54,28 +46,48 @@ export function StandardDetailPage<T extends Record<string, any> = any>(
     statistics = [],
     actions,
     hideBackButton = false,
-    permissions,
+    backPath,
+    backLabel = "返回",
+    cardExtra,
     meta,
     renderHeader,
     renderDescriptions,
     renderTabContent,
     renderActions,
+    onLoaded,
   } = props;
 
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState(defaultTab || tabs?.[0]?.key || 'info');
+  const [activeTab, setActiveTab] = useState(
+    defaultTab || tabs?.[0]?.key || "info"
+  );
 
-  // 数据获取
-  const { data, isLoading, isError } = useOne<T>({
+  const { result, query } = useOne<T>({
     resource,
     id: id!,
     meta,
+    queryOptions: { enabled: !!id },
   });
 
-  const entity = data?.data;
+  const entity = result as T | undefined;
+  const isLoading = query.isLoading;
+  const isError = query.isError;
 
-  // 加载状态
+  useEffect(() => {
+    if (entity && onLoaded) {
+      onLoaded(entity);
+    }
+  }, [entity]);
+
+  const handleBack = () => {
+    if (backPath) {
+      navigate(backPath);
+    } else {
+      navigate(-1);
+    }
+  };
+
   if (isLoading) {
     return (
       <div style={{ maxWidth, margin: "0 auto", padding: "24px" }}>
@@ -86,15 +98,18 @@ export function StandardDetailPage<T extends Record<string, any> = any>(
     );
   }
 
-  // 错误状态
   if (isError || !entity) {
     return (
       <div style={{ maxWidth, margin: "0 auto", padding: "24px" }}>
         <Card>
           <Empty description="数据不存在或加载失败" />
           {!hideBackButton && (
-            <Button type="link" icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)}>
-              返回
+            <Button
+              type="link"
+              icon={<ArrowLeftOutlined />}
+              onClick={handleBack}
+            >
+              {backLabel}
             </Button>
           )}
         </Card>
@@ -102,9 +117,8 @@ export function StandardDetailPage<T extends Record<string, any> = any>(
     );
   }
 
-  // 获取字段值(支持嵌套字段)
   const getFieldValue = (key: string): any => {
-    const keys = key.split('.');
+    const keys = key.split(".");
     let value: any = entity;
     for (const k of keys) {
       value = value?.[k];
@@ -113,109 +127,162 @@ export function StandardDetailPage<T extends Record<string, any> = any>(
     return value;
   };
 
-  // 渲染 Header
+  // Header
   const renderDefaultHeader = () => {
-    const title = getFieldValue(titleField);
+    const displayTitle =
+      props.title || getFieldValue(titleField) || "详情";
     const avatar = avatarField ? getFieldValue(avatarField) : undefined;
     const status = statusField ? getFieldValue(statusField) : undefined;
-    const statusInfo = status && statusConfig?.[status];
+    const statusInfo = status !== undefined && statusConfig?.[String(status)];
 
-    if (headerType === 'avatar') {
+    if (headerType === "avatar") {
       return (
         <Space size="large" align="start">
-          {avatar && (
-            <Avatar
-              size={64}
-              src={avatar}
-              shape="square"
-            />
-          )}
+          {avatar && <Avatar size={64} src={avatar} shape="square" />}
           <div>
-            <h1 style={{ margin: 0, fontSize: 24, fontWeight: "bold" }}>{title}</h1>
-            {statusInfo && (
-              <Tag color={statusInfo.color} style={{ marginTop: 8 }}>
-                {statusInfo.text}
-              </Tag>
-            )}
-            {headerTags && headerTags.map((tag, index) => (
-              <Tag key={index} color={tag.color}>
-                {tag.text || (tag.field ? getFieldValue(tag.field) : '')}
-              </Tag>
-            ))}
+            <h1 style={{ margin: 0, fontSize: 24, fontWeight: "bold" }}>
+              {displayTitle}
+            </h1>
+            <Space style={{ marginTop: 8 }}>
+              {statusInfo && (
+                <Tag color={statusInfo.color}>{statusInfo.text}</Tag>
+              )}
+              {headerTags?.map((tag, i) => (
+                <Tag key={i} color={tag.color}>
+                  {tag.text ||
+                    (tag.field ? getFieldValue(tag.field) : "") ||
+                    (tag.render ? tag.render(entity) : "")}
+                </Tag>
+              ))}
+            </Space>
           </div>
         </Space>
       );
     }
 
-    // simple 类型
     return (
       <Space>
-        <h1 style={{ margin: 0, fontSize: 24, fontWeight: "bold" }}>{title}</h1>
-        {statusInfo && (
-          <Tag color={statusInfo.color}>
-            {statusInfo.text}
-          </Tag>
-        )}
-        {headerTags && headerTags.map((tag, index) => (
-          <Tag key={index} color={tag.color}>
-            {tag.text || (tag.field ? getFieldValue(tag.field) : '')}
+        <h1 style={{ margin: 0, fontSize: 24, fontWeight: "bold" }}>
+          {displayTitle}
+        </h1>
+        {statusInfo && <Tag color={statusInfo.color}>{statusInfo.text}</Tag>}
+        {headerTags?.map((tag, i) => (
+          <Tag key={i} color={tag.color}>
+            {tag.text ||
+              (tag.field ? getFieldValue(tag.field) : "") ||
+              (tag.render ? tag.render(entity) : "")}
           </Tag>
         ))}
       </Space>
     );
   };
 
-  // 渲染字段
-  const renderField = (field: FieldConfig) => {
+  // Field rendering
+  const renderField = (field: DetailFieldConfig) => {
     const value = getFieldValue(field.key);
+    const fb = field.fallback ?? "-";
 
     if (field.render) {
       return field.render(value, entity);
     }
 
-    // 默认渲染
+    if (value === null || value === undefined) {
+      return fb;
+    }
+
     switch (field.type) {
-      case 'datetime':
-        return value ? new Date(value).toLocaleString("zh-CN") : '-';
-      case 'date':
-        return value ? new Date(value).toLocaleDateString("zh-CN") : '-';
-      case 'image':
-        return value ? (
-          <img src={value} alt={field.label} style={{ maxWidth: 200, maxHeight: 200, objectFit: 'cover' }} />
-        ) : '-';
-      case 'tag':
-        return value ? <Tag>{value}</Tag> : '-';
-      case 'relation':
-        return value?.name || value?.title || value?.username || '-';
-      case 'currency':
-        return value ? `¥${Number(value).toFixed(2)}` : '-';
-      case 'number':
-        return value ?? '-';
-      case 'text':
+      case "datetime":
+        return new Date(value).toLocaleString("zh-CN");
+      case "date":
+        return new Date(value).toLocaleDateString("zh-CN");
+      case "boolean": {
+        const labels = field.booleanLabels || ["否", "是"];
+        const colors = field.booleanColors || ["default", "success"];
+        const boolVal = !!value;
+        return (
+          <Tag color={boolVal ? colors[1] : colors[0]}>
+            {boolVal ? labels[1] : labels[0]}
+          </Tag>
+        );
+      }
+      case "tag": {
+        const color = field.tagColors?.[String(value)];
+        const text = field.tagLabels?.[String(value)] || String(value);
+        return <Tag color={color}>{text}</Tag>;
+      }
+      case "number":
+        return String(value);
+      case "currency": {
+        const symbol = field.currencySymbol || "¥";
+        const precision = field.currencyPrecision ?? 2;
+        return `${symbol}${Number(value).toFixed(precision)}`;
+      }
+      case "percent":
+        return `${value}%`;
+      case "image":
+        return (
+          <img
+            src={value}
+            alt={field.label}
+            style={{
+              maxWidth: field.imageWidth || 200,
+              maxHeight: field.imageHeight || 200,
+              objectFit: "cover",
+            }}
+          />
+        );
+      case "relation": {
+        const tryFields = field.relationFields || [
+          "name",
+          "title",
+          "username",
+        ];
+        for (const f of tryFields) {
+          if (value?.[f]) return value[f];
+        }
+        return fb;
+      }
+      case "email":
+        return <a href={`mailto:${value}`}>{value}</a>;
+      case "url":
+        return (
+          <a href={value} target={field.urlTarget || "_blank"} rel="noreferrer">
+            {value}
+          </a>
+        );
+      case "text":
       default:
-        return value || '-';
+        return value || fb;
     }
   };
 
-  // 渲染 Descriptions
+  // Descriptions
   const renderDefaultDescriptions = () => (
     <Descriptions bordered={bordered} column={column}>
-      {fields.map((field) => (
-        <Descriptions.Item key={field.key} label={field.label}>
-          {renderField(field)}
-        </Descriptions.Item>
-      ))}
+      {fields
+        .filter((f) => !f.showCondition || f.showCondition(entity))
+        .map((field) => (
+          <Descriptions.Item
+            key={field.key}
+            label={field.label}
+            span={field.span}
+            labelStyle={field.labelStyle}
+          >
+            {renderField(field)}
+          </Descriptions.Item>
+        ))}
     </Descriptions>
   );
 
-  // 渲染统计卡片
+  // Statistics
   const renderStatistics = () => {
     if (statistics.length === 0) return null;
 
     return (
       <Row gutter={16} style={{ marginBottom: 24 }}>
         {statistics.map((stat, index) => {
-          const value = stat.value ?? (stat.field ? getFieldValue(stat.field) : 0);
+          const value =
+            stat.value ?? (stat.field ? getFieldValue(stat.field) : 0);
 
           return (
             <Col span={6} key={index}>
@@ -236,17 +303,17 @@ export function StandardDetailPage<T extends Record<string, any> = any>(
     );
   };
 
-  // 渲染操作按钮
+  // Actions
   const renderDefaultActions = () => {
     if (!actions || actions.length === 0) return null;
 
     return (
-      <Space>
+      <Space style={{ marginTop: 16 }}>
         {actions.map((action) => {
           const button = (
             <Button
               key={action.key}
-              type={action.type || 'default'}
+              type={action.type || "default"}
               icon={action.icon}
               danger={action.danger}
               onClick={() => action.handler?.(entity)}
@@ -255,22 +322,43 @@ export function StandardDetailPage<T extends Record<string, any> = any>(
             </Button>
           );
 
+          const wrappedButton = action.confirm ? (
+            <Popconfirm
+              title={action.confirm}
+              onConfirm={() => action.handler?.(entity)}
+            >
+              <Button
+                type={action.type || "default"}
+                icon={action.icon}
+                danger={action.danger}
+              >
+                {action.label}
+              </Button>
+            </Popconfirm>
+          ) : (
+            button
+          );
+
           if (action.permission) {
             return (
-              <PermissionGuard key={action.key} permission={action.permission}>
-                {button}
+              <PermissionGuard
+                key={action.key}
+                resource={action.permission.resource}
+                action={action.permission.action}
+              >
+                {wrappedButton}
               </PermissionGuard>
             );
           }
 
-          return button;
+          return <span key={action.key}>{wrappedButton}</span>;
         })}
       </Space>
     );
   };
 
-  // 渲染 Tab 内容
-  const renderTabPane = (tab: TabConfig) => {
+  // Tab content
+  const renderTabPane = (tab: DetailTabConfig) => {
     if (renderTabContent) {
       return renderTabContent(tab.key, entity);
     }
@@ -283,39 +371,37 @@ export function StandardDetailPage<T extends Record<string, any> = any>(
       return tab.component;
     }
 
-    // 默认显示基本信息 Tab
-    if (tab.key === 'info') {
+    if (tab.key === "info") {
       return renderDefaultDescriptions();
     }
 
     return <Empty description="暂无数据" />;
   };
 
+  const resolvedCardExtra =
+    typeof cardExtra === "function" ? cardExtra(entity) : cardExtra;
+
   return (
     <div style={{ maxWidth, margin: "0 auto", padding: "24px" }}>
-      <Card>
-        {/* 返回按钮 */}
+      <Card extra={resolvedCardExtra}>
         {!hideBackButton && (
           <Button
             type="link"
             icon={<ArrowLeftOutlined />}
-            onClick={() => navigate(-1)}
+            onClick={handleBack}
             style={{ marginBottom: 16 }}
           >
-            返回
+            {backLabel}
           </Button>
         )}
 
-        {/* Header */}
-        {renderHeader ? renderHeader(entity) : renderDefaultHeader()}
+        {headerType !== "none" &&
+          (renderHeader ? renderHeader(entity) : renderDefaultHeader())}
 
-        {/* 操作按钮 */}
         {renderActions ? renderActions(entity) : renderDefaultActions()}
 
-        {/* 统计卡片 */}
         {renderStatistics()}
 
-        {/* Tabs */}
         {tabs && tabs.length > 0 ? (
           <Tabs
             activeKey={activeTab}
@@ -323,11 +409,13 @@ export function StandardDetailPage<T extends Record<string, any> = any>(
             items={tabs.map((tab) => ({
               key: tab.key,
               label: tab.countField
-                ? `${tab.label} (${getFieldValue(tab.countField) || 0})`
+                ? `${tab.label} (${getFieldValue(tab.countField) ?? 0})`
                 : tab.label,
               children: renderTabPane(tab),
             }))}
           />
+        ) : renderDescriptions ? (
+          renderDescriptions(entity)
         ) : (
           renderDefaultDescriptions()
         )}

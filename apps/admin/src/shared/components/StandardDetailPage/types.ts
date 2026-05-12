@@ -1,135 +1,185 @@
-// StandardDetailPage 类型定义
-
-import { ReactNode } from "react";
-import { ButtonType } from "antd/es/button";
-
-/**
- * Header 类型
- */
-export type HeaderType = 'simple' | 'avatar';
+import type { ReactNode, CSSProperties } from "react";
+import type { ButtonType } from "antd/es/button";
 
 /**
  * 字段类型
  */
-export type FieldType = 'text' | 'datetime' | 'date' | 'image' | 'tag' | 'relation' | 'currency' | 'number';
+export type DetailFieldType =
+  | "text"
+  | "datetime"
+  | "date"
+  | "boolean"
+  | "number"
+  | "currency"
+  | "percent"
+  | "tag"
+  | "image"
+  | "relation"
+  | "email"
+  | "url"
+  | "custom";
 
 /**
  * 字段配置
  */
-export interface FieldConfig {
-  key: string;                           // 字段名（支持嵌套：category.name）
-  label: string;                         // 字段标签
-  type?: FieldType;                      // 字段类型
-  render?: (value: any, entity: any) => ReactNode;  // 自定义渲染
+export interface DetailFieldConfig {
+  key: string;
+  label: string;
+  type?: DetailFieldType;
+  span?: number;
+  labelStyle?: CSSProperties;
+  fallback?: string;
+
+  // boolean
+  booleanLabels?: [string, string];
+  booleanColors?: [string, string];
+
+  // tag
+  tagColors?: Record<string, string>;
+  tagLabels?: Record<string, string>;
+
+  // relation
+  relationFields?: string[];
+
+  // image
+  imageWidth?: number;
+  imageHeight?: number;
+
+  // currency
+  currencySymbol?: string;
+  currencyPrecision?: number;
+
+  // url
+  urlTarget?: string;
+
+  // custom
+  render?: (value: any, entity: any) => ReactNode;
+
+  // conditional
+  showCondition?: (entity: any) => boolean;
 }
 
 /**
  * 状态配置
  */
 export interface StatusConfig {
-  color: string;                         // Tag 颜色
-  text: string;                          // 显示文本
+  color: string;
+  text: string;
 }
 
 /**
- * Header 标签配置
+ * Header 标签
  */
-export interface TagConfig {
-  field?: string;                        // 字段名
-  color?: string;                        // 颜色
-  text?: string;                         // 文本
-  render?: (entity: any) => ReactNode;   // 自定义渲染
+export interface HeaderTagConfig {
+  field?: string;
+  color?: string;
+  text?: string;
+  render?: (entity: any) => ReactNode;
 }
 
 /**
  * Tab 配置
  */
-export interface TabConfig {
-  key: string;                           // Tab key
-  label: string;                         // Tab 标签
-  render?: (entity: any) => ReactNode;   // 自定义渲染内容
-  component?: ReactNode;                 // 预定义组件
-  countField?: string;                   // 数量显示字段（可选，如 _count.handlers）
+export interface DetailTabConfig {
+  key: string;
+  label: string;
+  render?: (entity: any) => ReactNode;
+  component?: ReactNode;
+  countField?: string;
 }
 
 /**
- * 操作配置
+ * 操作按钮配置
  */
-export interface ActionConfig {
-  key: string;                           // 操作 key
-  label: string;                         // 操作标签
-  icon?: ReactNode;                      // 图标
-  permission?: string;                   // 权限标识（可选）
-  handler?: (entity: any) => void;       // 操作处理函数
-  type?: ButtonType;                     // 按钮类型
-  danger?: boolean;                      // 是否危险操作
+export interface DetailActionConfig {
+  key: string;
+  label: string;
+  icon?: ReactNode;
+  type?: ButtonType;
+  danger?: boolean;
+  permission?: { resource: string; action: string };
+  handler?: (entity: any) => void;
+  confirm?: string;
 }
 
 /**
  * 统计卡片配置
  */
 export interface StatisticConfig {
-  title: string;                         // 统计项标题
-  field?: string;                        // 统计字段名（可选）
-  value?: number;                        // 固定值（可选）
-  icon?: ReactNode;                      // 图标
-  color?: string;                        // 颜色
-  precision?: number;                    // 数字精度（默认0）
-  prefix?: ReactNode;                    // 前缀
-  suffix?: ReactNode;                    // 后缀
+  title: string;
+  field?: string;
+  value?: number;
+  icon?: ReactNode;
+  color?: string;
+  precision?: number;
+  prefix?: ReactNode;
+  suffix?: ReactNode;
 }
 
 /**
  * 权限配置
  */
 export interface PermissionConfig {
-  update?: string;                       // 更新权限
-  delete?: string;                       // 删除权限
+  update?: string;
+  delete?: string;
 }
+
+/**
+ * Header 类型
+ */
+export type HeaderType = "simple" | "avatar" | "none";
 
 /**
  * StandardDetailPage Props
  */
 export interface StandardDetailPageProps<T = any> {
-  // 必需配置
-  resource: string;                      // Refine resource 名称
+  resource: string;
 
-  // 可选配置
-  maxWidth?: number;                     // 页面容器宽度（默认1200）
+  // layout
+  maxWidth?: number;
 
-  // Header 配置
-  headerType?: HeaderType;               // Header 类型（默认 simple）
-  titleField?: string;                   // 标题字段名（默认 name）
-  avatarField?: string;                  // Avatar 字段名（可选）
-  statusField?: string;                  // 状态字段名（默认 status）
-  statusConfig?: Record<string, StatusConfig>;  // 状态映射
-  headerTags?: TagConfig[];              // Header 区域额外标签
+  // header
+  headerType?: HeaderType;
+  title?: string;
+  titleField?: string;
+  avatarField?: string;
+  statusField?: string;
+  statusConfig?: Record<string, StatusConfig>;
+  headerTags?: HeaderTagConfig[];
 
-  // Descriptions 配置
-  fields?: FieldConfig[];                // 信息展示字段配置
-  bordered?: boolean;                    // Descriptions bordered（默认 true）
-  column?: number;                       // 列数（默认 2）
+  // fields
+  fields?: DetailFieldConfig[];
+  bordered?: boolean;
+  column?: number;
 
-  // Tabs 配置
-  tabs?: TabConfig[];                    // Tabs 配置
-  defaultTab?: string;                   // 默认激活 Tab
+  // tabs
+  tabs?: DetailTabConfig[];
+  defaultTab?: string;
 
-  // 统计卡片配置
-  statistics?: StatisticConfig[];        // 统计项配置
+  // statistics
+  statistics?: StatisticConfig[];
 
-  // 操作按钮
-  actions?: ActionConfig[];              // 操作按钮配置
-  hideBackButton?: boolean;              // 隐藏返回按钮
+  // actions
+  actions?: DetailActionConfig[];
+  hideBackButton?: boolean;
+  backPath?: string;
+  backLabel?: string;
 
-  // 权限控制
-  permissions?: PermissionConfig;        // 权限配置
+  // card extra
+  cardExtra?: ReactNode | ((entity: any) => ReactNode);
 
-  // Refine meta
-  meta?: any;                            // useOne 的 meta 参数
+  // permissions
+  permissions?: PermissionConfig;
 
-  // 自定义渲染
-  renderHeader?: (entity: T) => ReactNode;  // 自定义 Header
-  renderDescriptions?: (entity: T) => ReactNode;  // 自定义信息展示
-  renderTabContent?: (tabKey: string, entity: T) => ReactNode;  // 自定义 Tab 内容
-  renderActions?: (entity: T) => ReactNode;  // 自定义操作按钮
+  // refine meta
+  meta?: any;
+
+  // custom rendering
+  renderHeader?: (entity: T) => ReactNode;
+  renderDescriptions?: (entity: T) => ReactNode;
+  renderTabContent?: (tabKey: string, entity: T) => ReactNode;
+  renderActions?: (entity: T) => ReactNode;
+
+  // callbacks
+  onLoaded?: (entity: T) => void;
 }
