@@ -117,6 +117,28 @@ export default defineUniPages({
       path: "pages/wallet/index",
       type: "page",
     },
+    {
+      path: "pages/agents/index",
+      type: "page",
+      style: {
+        backgroundColor: "#F5FAFF",
+        navigationStyle: "default",
+        navigationBarBackgroundColor: "#F5FAFF",
+        navigationBarTextStyle: "black",
+        navigationBarTitleText: "AI 助手",
+      },
+    },
+    {
+      path: "pages/agents/chat",
+      type: "page",
+      style: {
+        backgroundColor: "#F5FAFF",
+        navigationStyle: "default",
+        navigationBarBackgroundColor: "#F5FAFF",
+        navigationBarTextStyle: "black",
+        navigationBarTitleText: "AI 对话",
+      },
+    },
   ],
   globalStyle: {
     backgroundColor: "@bgColor",

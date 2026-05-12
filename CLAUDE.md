@@ -100,6 +100,27 @@ export class ProductService extends BaseService<Product> {
 - `infra/shared` 是唯一的验证真理源
 - 所有端共享 `@opencode/shared` 类型
 
+## Schema 变更流程
+
+修改 `schema.prisma` 后，必须按以下顺序执行：
+
+```
+1. 修改 schema.prisma
+2. /db-migrate                    → 生成迁移 SQL + 应用到本地库 + 生成 Prisma Client + Seed
+3. /sync                          → 重新构建 @opencode/shared（Zod Schema 与 Prisma Client 对齐）
+4. git add infra/database/prisma/migrations/ && git commit && git push
+5. CI 自动 prisma migrate deploy  → 生产数据库同步
+```
+
+**关键原则：**
+
+| 原则 | 说明 |
+|------|------|
+| 唯一真理源 | `schema.prisma` 是唯一的模型定义来源 |
+| 禁止 db push 到生产 | `db push` 不生成迁移记录，生产环境必须用 `migrate deploy` |
+| 迁移文件必须入库 | 迁移文件提交到 git，CI 才能拿到 |
+| 先本地验证再推送 | `migrate dev` 在本地验证迁移 SQL 正确性，避免生产事故 |
+
 ## 双用户认证体系
 
 - **Admin 用户**（管理后台）：RBAC 角色-权限系统

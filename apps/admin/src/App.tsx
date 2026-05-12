@@ -11,6 +11,7 @@ import { AdminLayout } from "./shared/layouts";
 import { AdminListPage, AdminDetailPage } from "./modules/admin";
 import { UserListPage, UserDetailPage } from "./modules/user";
 import { RoleListPage, RoleDetailPage } from "./modules/role";
+import { AgentListPage, AgentChatPage } from "./modules/agents";
 import { useMessageInitializer } from "./shared/hooks/useMessageInitializer";
 
 // Create QueryClient outside component to prevent re-creation
@@ -74,6 +75,7 @@ function AppContent() {
                 { name: "user", list: "/users" },
                 { name: "admin", list: "/admins" },
                 { name: "role", list: "/roles" },
+                { name: "agents", list: "/agents" },
               ]}
             >
               <Routes>
@@ -87,6 +89,8 @@ function AppContent() {
                   <Route path="roles/:id" element={<RoleDetailPage />} />
                   <Route path="admins" element={<AdminListPage />} />
                   <Route path="admins/:id" element={<AdminDetailPage />} />
+                  <Route path="agents" element={<AgentListPage />} />
+                  <Route path="agents/chat/:id" element={<AgentChatPage />} />
                 </Route>
                 <Route path="/404" element={<NotFoundPage />} />
                 <Route path="*" element={<NotFoundPage />} />

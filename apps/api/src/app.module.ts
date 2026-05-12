@@ -12,8 +12,7 @@ import { PermissionModule } from "./modules/permission/module";
 import { UploadModule } from "./modules/upload/module";
 import { WechatModule } from "./modules/wechat/wechat.module";
 import { PaymentModule } from "./modules/payment/module";
-import { AgentsModule } from "./modules/agents/agents.module";
-
+import { AgentsModule } from "./modules/agents/module";
 // 全局过滤器/拦截器
 import { APP_FILTER, APP_INTERCEPTOR } from "@nestjs/core";
 import { AllExceptionsFilter } from "./core/filters/http-exception.filter";

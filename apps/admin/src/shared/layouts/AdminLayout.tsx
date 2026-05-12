@@ -9,6 +9,7 @@ import {
   SettingOutlined,
   EditOutlined,
   LockOutlined,
+  RobotOutlined,
 } from "@ant-design/icons";
 import { useState, useMemo } from "react";
 import { useAuth } from "../auth";
@@ -20,6 +21,15 @@ const { Header, Sider, Content } = Layout;
 // 菜单配置 - genModule 会自动追加新模块到此数组
 // prettier-ignore
 const menuConfig = [
+  {
+    key: "ai",
+    label: "AI 助手",
+    icon: "RobotOutlined",
+    permission: null,
+    children: [
+      { key: "/agents", label: "Agent 管理", icon: "RobotOutlined", permission: "menu:agents" },
+    ],
+  },
   {
     key: "system",
     label: "系统管理",
@@ -35,6 +45,7 @@ const menuConfig = [
 const iconMap: Record<string, React.ReactNode> = {
   AppstoreOutlined: <SettingOutlined />,
   EditOutlined: <EditOutlined />,
+  RobotOutlined: <RobotOutlined />,
   SafetyCertificateOutlined: <SafetyCertificateOutlined />,
   SettingOutlined: <SettingOutlined />,
   UserOutlined: <UserOutlined />,

@@ -15,11 +15,11 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 10.12.4
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
@@ -29,3 +29,36 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+  migrate:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    needs: build
+    permissions:
+      contents: read
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: 📦 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🔄 Generate Prisma Client
+        run: pnpm --filter @opencode/database exec prisma generate
+
+      - name: 🗄️ Run database migrations
+        run: pnpm --filter @opencode/database exec prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}

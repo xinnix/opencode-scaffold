@@ -83,6 +83,7 @@ export const PERMISSIONS = {
   MENU: {
     ADMINS: 'menu:admins',
     ROLES: 'menu:roles',
+    AGENTS: 'menu:agents',
   },
   USER: {
     CREATE: 'user:create',
@@ -102,6 +103,12 @@ export const PERMISSIONS = {
     READ: 'role:read',
     UPDATE: 'role:update',
     DELETE: 'role:delete',
+  },
+  AGENT: {
+    CREATE: 'agent:create',
+    READ: 'agent:read',
+    UPDATE: 'agent:update',
+    DELETE: 'agent:delete',
   },
 } as const;
 
@@ -269,3 +276,34 @@ export const AgentConfigSchema = z.object({
 });
 
 export type AgentConfig = z.infer<typeof AgentConfigSchema>;
+
+// ============================================
+// Agent CRUD Schemas (Database Model)
+// ============================================
+
+export const CreateAgentSchema = z.object({
+  name: z.string().min(1, "名称不能为空"),
+  slug: z.string().min(1, "标识不能为空"),
+  description: z.string().optional(),
+  icon: z.string().optional(),
+  difyApiUrl: z.string().min(1).optional().default("https://api.dify.ai/v1"),
+  difyApiKey: z.string().min(1, "API Key 不能为空"),
+  difyAppType: z.string().optional().default("agent"),
+  isActive: z.boolean().optional().default(true),
+  sort: z.number().int().optional().default(0),
+});
+
+export const UpdateAgentSchema = z.object({
+  name: z.string().min(1).optional(),
+  slug: z.string().min(1).optional(),
+  description: z.string().nullable().optional(),
+  icon: z.string().nullable().optional(),
+  difyApiUrl: z.string().min(1).optional(),
+  difyApiKey: z.string().min(1).optional(),
+  difyAppType: z.string().optional(),
+  isActive: z.boolean().optional(),
+  sort: z.number().int().optional(),
+});
+
+export type CreateAgentInput = z.infer<typeof CreateAgentSchema>;
+export type UpdateAgentInput = z.infer<typeof UpdateAgentSchema>;

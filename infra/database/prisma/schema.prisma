@@ -27,6 +27,8 @@ model Admin {
   // 关联
   refreshTokens AdminRefreshToken[]
   roles         AdminRole[]
+  agentCreatedBy Agent[] @relation("AgentCreatedBy")
+  agentUpdatedBy Agent[] @relation("AgentUpdatedBy")
 
   @@index([email])
   @@index([username])
@@ -182,5 +184,32 @@ model UserRefreshToken {
   @@index([userId])
   @@index([token])
   @@map("user_refresh_tokens")
+}
+
+// ============================================
+// Dify Agent 模型
+// ============================================
+model Agent {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  icon        String?
+  difyApiUrl  String   @default("https://api.dify.ai/v1")
+  difyApiKey  String
+  difyAppType String   @default("agent")
+  isActive    Boolean  @default(true)
+  sort        Int      @default(0)
+  createdById String?
+  updatedById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  createdBy Admin? @relation("AgentCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy Admin? @relation("AgentUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@index([slug])
+  @@index([isActive])
+  @@map("agents")
 }
 

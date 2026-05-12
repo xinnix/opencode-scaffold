@@ -62,7 +62,7 @@ schema.prisma ──► @opencode/database ──► AppRouter ──► @openco
                     ┌──────────────────┴──────────────────────────┐
                     │              apps/api (NestJS)               │
                     │  tRPC Router / BaseService / Guards         │
-                    │  Auth / RBAC / Wechat / Payment / Upload    │
+                    │  Auth / RBAC / Wechat / Payment / Upload / Agents │
                     └──────┬───────────────────────┬──────────────┘
                            │                       │
               ┌────────────┴────────┐   ┌──────────┴──────────┐
@@ -85,17 +85,17 @@ opencode-scaffold/
 ├── apps/
 │   ├── api/                    # NestJS backend
 │   │   └── src/
-│   │       ├── modules/        # Business modules (auth, user, admin, role, payment, upload, wechat)
+│   │       ├── modules/        # Business modules (auth, user, admin, role, payment, upload, wechat, agents)
 │   │       ├── trpc/           # tRPC config + AppRouter + createCrudRouter factory
 │   │       ├── common/         # BaseService base class
 │   │       └── core/           # Guards, Filters, Interceptors
 │   ├── admin/                  # React + Refine admin dashboard
 │   │   └── src/
-│   │       ├── modules/        # Business pages (admin, user, role, auth)
+│   │       ├── modules/        # Business pages (admin, user, role, auth, agents)
 │   │       └── shared/        # StandardListPage, StandardForm, dataProvider, trpcClient
 │   └── miniapp/                # uni-app WeChat mini program
 │       └── src/
-│           ├── pages/          # Pages (index, login, profile)
+│           ├── pages/          # Pages (index, login, profile, agents)
 │           ├── api/            # REST API calls
 │           └── utils/          # HTTP Client (token refresh + mutex)
 ├── infra/
@@ -325,7 +325,18 @@ Containers: `api` (NestJS), `admin` (Nginx + static), `postgres`, `redis`
 
 ### GitHub Actions CI/CD
 
-The project includes `.github/workflows/ci.yml` that runs on push to `main`: install → type-check → build
+The project includes `.github/workflows/ci.yml` that runs on push to `main`:
+
+1. **build** — install → type-check → build
+2. **migrate** — after build passes, runs `prisma migrate deploy` to sync production database (not triggered on PRs)
+
+> Requires `PROD_DATABASE_URL` in GitHub Secrets
+
+**Schema change workflow:**
+
+```
+Edit schema.prisma → /db-migrate → /sync → git commit & push → CI auto migrate deploy
+```
 
 ### 1Panel Deployment
 
@@ -361,6 +372,7 @@ See `.env.example` for the complete list.
 | upload | upload.service + upload.router | OSSUpload component | Multi-strategy file storage |
 | payment | payment.service + payment.router | — | WeChat Pay JSAPI + refund |
 | wechat | wechat.service | — | WeChat login + mini program API |
+| agents | agents.service + dify.service + agents.router | AgentListPage + AgentChatPage | Dify AI Agent chat (SSE streaming) |
 
 ## Contributing
 

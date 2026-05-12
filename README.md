@@ -62,7 +62,7 @@ schema.prisma ──► @opencode/database ──► AppRouter ──► @openco
                     ┌──────────────────┴──────────────────────────┐
                     │              apps/api (NestJS)               │
                     │  tRPC Router / BaseService / Guards         │
-                    │  Auth / RBAC / Wechat / Payment / Upload    │
+                    │  Auth / RBAC / Wechat / Payment / Upload / Agents │
                     └──────┬───────────────────────┬──────────────┘
                            │                       │
               ┌────────────┴────────┐   ┌──────────┴──────────┐
@@ -85,17 +85,17 @@ opencode-scaffold/
 ├── apps/
 │   ├── api/                    # NestJS 后端
 │   │   └── src/
-│   │       ├── modules/        # 业务模块 (auth, user, admin, role, payment, upload, wechat)
+│   │       ├── modules/        # 业务模块 (auth, user, admin, role, payment, upload, wechat, agents)
 │   │       ├── trpc/           # tRPC 配置 + AppRouter + createCrudRouter 工厂
 │   │       ├── common/         # BaseService 基类
 │   │       └── core/           # Guards, Filters, Interceptors
 │   ├── admin/                  # React + Refine 管理后台
 │   │   └── src/
-│   │       ├── modules/        # 业务页面 (admin, user, role, auth)
+│   │       ├── modules/        # 业务页面 (admin, user, role, auth, agents)
 │   │       └── shared/        # StandardListPage, StandardForm, dataProvider, trpcClient
 │   └── miniapp/                # uni-app 微信小程序
 │       └── src/
-│           ├── pages/          # 页面 (index, login, profile)
+│           ├── pages/          # 页面 (index, login, profile, agents)
 │           ├── api/            # REST API 调用
 │           └── utils/          # HTTP Client (token refresh + mutex)
 ├── infra/
@@ -325,7 +325,18 @@ docker compose -f docker-compose.prod.yml up -d
 
 ### GitHub Actions CI/CD
 
-项目包含 `.github/workflows/ci.yml`，push 到 `main` 时自动执行：install → type-check → build
+项目包含 `.github/workflows/ci.yml`，push 到 `main` 时自动执行：
+
+1. **build** — install → type-check → build
+2. **migrate** — 构建通过后自动运行 `prisma migrate deploy`，同步生产数据库（PR 不触发）
+
+> 需在 GitHub Secrets 中配置 `PROD_DATABASE_URL`
+
+**Schema 变更流程：**
+
+```
+修改 schema.prisma → /db-migrate → /sync → git commit & push → CI 自动 migrate deploy
+```
 
 ### 1Panel 部署
 
@@ -361,6 +372,7 @@ docker compose -f docker-compose.prod.yml up -d
 | upload | upload.service + upload.router | OSSUpload 组件 | 多策略文件存储 |
 | payment | payment.service + payment.router | — | 微信支付 JSAPI + 退款 |
 | wechat | wechat.service | — | 微信登录 + 小程序 API |
+| agents | agents.service + dify.service + agents.router | AgentListPage + AgentChatPage | Dify AI Agent 对话（SSE 流式） |
 
 ## 参与贡献
 

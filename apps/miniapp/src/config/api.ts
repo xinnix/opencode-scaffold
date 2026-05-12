@@ -30,6 +30,12 @@ export const API_ENDPOINTS = {
   // TODO 相关（示例模块）
   todos: '/todo',
   todoDetail: (id: string) => `/todo/${id}`,
+
+  // Agent 相关
+  agentsActive: '/agents/active',
+  agentChat: (id: string) => `/agents/${id}/user-chat`,
+  agentConversations: (id: string) => `/agents/${id}/conversations`,
+  agentMessages: (id: string, conversationId: string) => `/agents/${id}/messages/${conversationId}`,
 } as const
 
 export default API_CONFIG
