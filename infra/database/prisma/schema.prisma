@@ -1,0 +1,186 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================
+// 管理端用户模型 (Admin)
+// ============================================
+model Admin {
+  id            String    @id @default(cuid())
+  username      String    @unique
+  email         String    @unique
+  passwordHash  String
+  firstName     String?
+  lastName      String?
+  avatar        String?
+  isActive      Boolean   @default(true)
+  emailVerified DateTime?
+  lastLoginAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // 关联
+  refreshTokens AdminRefreshToken[]
+  roles         AdminRole[]
+
+  @@index([email])
+  @@index([username])
+  @@map("admins")
+}
+
+// ============================================
+// 小程序用户模型 (User)
+// ============================================
+model User {
+  id           String  @id @default(cuid())
+  username     String  @unique
+  email        String? // 可选字段（微信用户不需要）
+  passwordHash String
+
+  // 微信相关字段
+  openid     String? @unique // 微信用户唯一标识
+  unionid    String? @unique // 开放平台标识（可选）
+  sessionKey String? // 会话密钥（加密存储）
+
+  phone       String?
+  avatar      String?
+  nickname    String?
+  isActive    Boolean   @default(true)
+  lastLoginAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // 关联
+  refreshTokens UserRefreshToken[]
+
+  @@index([openid])
+  @@index([email])
+  @@index([username])
+  @@map("users")
+}
+
+// ============================================
+// 角色模型 (仅用于 Admin)
+// ============================================
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  level       Int      @default(0)
+  isSystem    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // 关联
+  permissions RolePermission[]
+  admins      AdminRole[]
+
+  @@index([slug])
+  @@map("roles")
+}
+
+// ============================================
+// 权限模型
+// ============================================
+model Permission {
+  id          String   @id @default(cuid())
+  resource    String
+  action      String
+  description String?
+  createdAt   DateTime @default(now())
+
+  // 关联
+  roles RolePermission[]
+
+  @@unique([resource, action])
+  @@index([resource])
+  @@map("permissions")
+}
+
+// ============================================
+// Admin 角色关联
+// ============================================
+model AdminRole {
+  id         String   @id @default(cuid())
+  adminId    String
+  roleId     String
+  assignedAt DateTime @default(now())
+  assignedBy String?
+
+  // 关联
+  role  Role  @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  admin Admin @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@unique([adminId, roleId])
+  @@index([adminId])
+  @@index([roleId])
+  @@map("admin_roles")
+}
+
+// ============================================
+// 角色权限关联
+// ============================================
+model RolePermission {
+  id           String   @id @default(cuid())
+  roleId       String
+  permissionId String
+  createdAt    DateTime @default(now())
+
+  // 关联
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@index([roleId])
+  @@index([permissionId])
+  @@map("role_permissions")
+}
+
+// ============================================
+// Admin 刷新令牌
+// ============================================
+model AdminRefreshToken {
+  id        String    @id @default(cuid())
+  token     String    @unique
+  adminId   String
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+  revokedAt DateTime?
+  ipAddress String?
+  userAgent String?
+
+  // 关联
+  admin Admin @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+  @@index([token])
+  @@map("admin_refresh_tokens")
+}
+
+// ============================================
+// User 刷新令牌
+// ============================================
+model UserRefreshToken {
+  id        String    @id @default(cuid())
+  token     String    @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+  revokedAt DateTime?
+  ipAddress String?
+  userAgent String?
+
+  // 关联
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@map("user_refresh_tokens")
+}
+

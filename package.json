@@ -1,0 +1,36 @@
+{
+  "name": "agentic-repo",
+  "version": "1.0.0",
+  "description": "Full-stack autonomous scaffold with NestJS + tRPC + Refine + UniApp",
+  "scripts": {
+    "sync": "./scripts/sync-all.sh",
+    "type-check": "./scripts/type-check.sh",
+    "dev": "pnpm -r --parallel --filter \"@opencode/api\" --filter \"admin\" run dev",
+    "dev:api": "pnpm -C apps/api dev",
+    "dev:admin": "pnpm -C apps/admin dev",
+    "dev:miniapp": "pnpm -C apps/miniapp dev",
+    "dev:all": "pnpm -r --parallel run dev",
+    "db:generate": "pnpm -C infra/database prisma generate",
+    "db:migrate": "pnpm -C infra/database prisma migrate dev",
+    "db:studio": "pnpm -C infra/database prisma studio",
+    "build:api": "pnpm -C apps/api build",
+    "build:admin": "pnpm -C apps/admin build",
+    "build:miniapp": "pnpm -C apps/miniapp build",
+    "build:shared": "pnpm -C infra/shared build"
+  },
+  "keywords": [
+    "nestjs",
+    "trpc",
+    "refine",
+    "monorepo"
+  ],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.12.4",
+  "devDependencies": {
+    "tsx": "4.21.0"
+  },
+  "dependencies": {
+    "ali-oss": "^6.23.0"
+  }
+}
