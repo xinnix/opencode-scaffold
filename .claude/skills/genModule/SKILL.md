@@ -28,7 +28,14 @@ node .claude/skills/genModule/scripts/generate-module.ts category
 - Database: Prisma schema with relations
 - Backend: tRPC router with factory function
 - Frontend: List page with smart UI components
-- Auto-registration: Updates App.tsx and app.router.ts
+- Auto-registration: Updates App.tsx, app.router.ts, and AdminLayout.tsx
+
+**Safety features:**
+- Idempotency check: Refuses to regenerate an existing module
+- Input validation: Validates module name format and reserved names
+- Project structure validation: Checks required files exist
+- Automatic rollback: Reverts all changes if any step fails
+- Dry-run mode: Preview without writing files
 
 **Phase 2 Smart Features:**
 - Currency fields (price, amount) → InputNumber with ¥ formatter + min:0
@@ -643,6 +650,62 @@ product.deleteMany.mutate()
 6. **Handle numeric fields:** Convert string to number before submitting (Input type="number" returns string)
 7. **Remove id from form values:** Use `const { id, ...dataValues } = values` to exclude id
 8. **Make optional strings nullable:** Use `.nullable().optional()` for update schemas
+9. **Module names:** Only lowercase letters, numbers, and hyphens (e.g., `coupon-template`)
+10. **Reserved names:** Cannot use: admin, auth, user, role, permission, upload, payment, wechat, agents, config, system
+11. **Duplicate prevention:** The script will refuse to regenerate an existing module — use `/deleteModule` first
+
+---
+
+### Error 10: Module Already Exists
+
+**Symptom:**
+```
+❌ 模块 "Product" 已存在！
+  已存在的部分：
+    - Prisma schema (model Product)
+    - tRPC router (...)
+```
+
+**Solution:**
+Either use a different module name, or delete the existing module first:
+```bash
+/deleteModule product
+```
+
+---
+
+### Error 11: Invalid Module Name
+
+**Symptom:**
+```
+模块名 "123product" 不合法：只能包含小写字母、数字和连字符，且以字母开头
+```
+
+**Solution:**
+Module names must start with a letter and contain only lowercase letters, numbers, and hyphens:
+```bash
+# ❌ WRONG
+generate-module 123product
+generate-module Product
+generate-module product_name
+
+# ✅ CORRECT
+generate-module product
+generate-module coupon-template
+```
+
+---
+
+### Error 12: Project Structure Incomplete
+
+**Symptom:**
+```
+项目结构不完整，缺少以下文件：
+  - apps/admin/src/App.tsx
+```
+
+**Solution:**
+Make sure you're running the script from the correct project root directory. The script expects the standard scaffold directory structure.
 
 ---
 

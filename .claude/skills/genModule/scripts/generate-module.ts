@@ -438,17 +438,54 @@ function selectUIPattern(fields: Field[], moduleName: string): UIPatternConfig {
 // ============================================
 
 function toPascalCase(str: string): string {
-  return str.charAt(0).toUpperCase() + str.slice(1);
+  return str
+    .split(/[-_\s]+/)
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join('');
 }
 
 function toCamelCase(str: string): string {
-  return str.charAt(0).toLowerCase() + str.slice(1);
+  const pascal = toPascalCase(str);
+  return pascal.charAt(0).toLowerCase() + pascal.slice(1);
 }
 
+const IRREGULAR_PLURALS: Record<string, string> = {
+  person: 'people',
+  child: 'children',
+  man: 'men',
+  woman: 'women',
+  tooth: 'teeth',
+  foot: 'feet',
+  goose: 'geese',
+  mouse: 'mice',
+  louse: 'lice',
+  ox: 'oxen',
+  datum: 'data',
+  medium: 'media',
+  criterion: 'criteria',
+  phenomenon: 'phenomena',
+  axis: 'axes',
+  analysis: 'analyses',
+  basis: 'bases',
+  crisis: 'crises',
+  diagnosis: 'diagnoses',
+  hypothesis: 'hypotheses',
+  oasis: 'oases',
+  parenthesis: 'parentheses',
+  thesis: 'theses',
+};
+
 function toPlural(str: string): string {
-  if (str.endsWith('y')) {
-    return str.slice(0, -1) + 'ies';
+  const lower = str.toLowerCase();
+  if (IRREGULAR_PLURALS[lower]) {
+    const plural = IRREGULAR_PLURALS[lower];
+    return str[0] === str[0].toUpperCase() ? plural.charAt(0).toUpperCase() + plural.slice(1) : plural;
   }
+  if (str.endsWith('fe')) return str.slice(0, -2) + 'ves';
+  if (str.endsWith('f')) return str.slice(0, -1) + 'ves';
+  if (str.endsWith('is') && str.length > 2) return str.slice(0, -2) + 'es';
+  if (str.endsWith('on') && !str.endsWith('ion')) return str.slice(0, -2) + 'a';
+  if (str.endsWith('y') && !/[aeiou]y$/i.test(str)) return str.slice(0, -1) + 'ies';
   if (str.endsWith('s') || str.endsWith('x') || str.endsWith('z') || str.endsWith('ch') || str.endsWith('sh')) {
     return str + 'es';
   }
@@ -992,10 +1029,91 @@ function generateRelationDataFetching(relations: RelationField[]): string {
 }
 
 // ============================================
-// File Operations
+// Validation & Idempotency
+// ============================================
+
+const RESERVED_NAMES = ['admin', 'auth', 'user', 'role', 'permission', 'upload', 'payment', 'wechat', 'agents', 'config', 'system', 'common', 'shared', 'base', 'prisma', 'trpc', 'health'];
+
+function validateModuleName(name: string): void {
+  if (!name || name.trim().length === 0) {
+    throw new Error('模块名不能为空');
+  }
+  if (!/^[a-z][a-z0-9-]*$/.test(name)) {
+    throw new Error(`模块名 "${name}" 不合法：只能包含小写字母、数字和连字符，且以字母开头`);
+  }
+  if (name.length > 50) {
+    throw new Error(`模块名过长（最多 50 字符）`);
+  }
+  if (RESERVED_NAMES.includes(name.toLowerCase())) {
+    throw new Error(`模块名 "${name}" 是系统保留名，请使用其他名称`);
+  }
+}
+
+function checkModuleExists(moduleName: string): { exists: boolean; locations: string[] } {
+  const pascalName = toPascalCase(moduleName);
+  const camelName = toCamelCase(moduleName);
+  const locations: string[] = [];
+
+  // Check Prisma schema
+  const schemaPath = getFilePath('infra/database/prisma/schema.prisma');
+  if (fs.existsSync(schemaPath)) {
+    const schemaContent = fs.readFileSync(schemaPath, 'utf-8');
+    if (schemaContent.includes(`model ${pascalName}`)) {
+      locations.push(`Prisma schema (model ${pascalName})`);
+    }
+  }
+
+  // Check tRPC router
+  const routerPath = getFilePath(`apps/api/src/modules/${moduleName}/trpc/${camelName}.router.ts`);
+  if (fs.existsSync(routerPath)) {
+    locations.push(`tRPC router (${routerPath})`);
+  }
+
+  // Check frontend page
+  const listPagePath = getFilePath(`apps/admin/src/modules/${moduleName}/pages/${pascalName}ListPage.tsx`);
+  if (fs.existsSync(listPagePath)) {
+    locations.push(`Frontend list page (${listPagePath})`);
+  }
+
+  // Check Zod schema
+  const sharedIndexPath = getFilePath('infra/shared/src/index.ts');
+  if (fs.existsSync(sharedIndexPath)) {
+    const sharedContent = fs.readFileSync(sharedIndexPath, 'utf-8');
+    if (sharedContent.includes(`${pascalName}Schema`)) {
+      locations.push(`Zod schema (${pascalName}Schema)`);
+    }
+  }
+
+  return { exists: locations.length > 0, locations };
+}
+
+function validateProjectStructure(): void {
+  const requiredPaths = [
+    'infra/database/prisma/schema.prisma',
+    'infra/shared/src/index.ts',
+    'apps/api/src/trpc/app.router.ts',
+    'apps/admin/src/App.tsx',
+    'apps/admin/src/shared/layouts/AdminLayout.tsx',
+  ];
+  const missing = requiredPaths.filter(p => !fs.existsSync(getFilePath(p)));
+  if (missing.length > 0) {
+    throw new Error(`项目结构不完整，缺少以下文件：\n${missing.map(p => `  - ${p}`).join('\n')}\n请确认在正确的项目根目录运行此脚本`);
+  }
+}
+
+// ============================================
+// File Operations (with rollback support)
 // ============================================
 
 const PROJECT_ROOT = path.join(__dirname, '../../../..');
+
+interface FileOperation {
+  type: 'create' | 'append' | 'modify';
+  path: string;
+  originalContent?: string; // for rollback
+}
+
+const fileOperations: FileOperation[] = [];
 
 function getFilePath(relativePath: string): string {
   return path.join(PROJECT_ROOT, relativePath);
@@ -1008,8 +1126,11 @@ function appendToFile(filePath: string, content: string): void {
   }
 
   if (fs.existsSync(filePath)) {
+    const original = fs.readFileSync(filePath, 'utf-8');
+    fileOperations.push({ type: 'append', path: filePath, originalContent: original });
     fs.appendFileSync(filePath, content);
   } else {
+    fileOperations.push({ type: 'create', path: filePath });
     fs.writeFileSync(filePath, content);
   }
 }
@@ -1019,7 +1140,52 @@ function createFile(filePath: string, content: string): void {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
+  fileOperations.push({ type: 'create', path: filePath });
   fs.writeFileSync(filePath, content);
+}
+
+function modifyFile(filePath: string, modifier: (content: string) => string): void {
+  const original = fs.readFileSync(filePath, 'utf-8');
+  const modified = modifier(original);
+  fileOperations.push({ type: 'modify', path: filePath, originalContent: original });
+  fs.writeFileSync(filePath, modified);
+}
+
+function rollback(): void {
+  console.error('\x1b[33m%s\x1b[0m', '\n⏪ Rolling back generated files...');
+  // Roll back in reverse order
+  for (let i = fileOperations.length - 1; i >= 0; i--) {
+    const op = fileOperations[i];
+    try {
+      if (op.type === 'create') {
+        if (fs.existsSync(op.path)) {
+          fs.unlinkSync(op.path);
+        }
+      } else if (op.type === 'append' || op.type === 'modify') {
+        if (op.originalContent !== undefined) {
+          fs.writeFileSync(op.path, op.originalContent);
+        }
+      }
+    } catch (e) {
+      console.error(`  ⚠️ Failed to rollback ${op.path}: ${e}`);
+    }
+  }
+  // Clean up empty directories created during generation
+  const createdDirs = new Set<string>();
+  for (const op of fileOperations) {
+    if (op.type === 'create') {
+      const dir = path.dirname(op.path);
+      createdDirs.add(dir);
+    }
+  }
+  for (const dir of createdDirs) {
+    try {
+      if (fs.existsSync(dir) && fs.readdirSync(dir).length === 0) {
+        fs.rmdirSync(dir);
+      }
+    } catch { /* ignore */ }
+  }
+  console.error('\x1b[33m%s\x1b[0m', '⏪ Rollback complete.');
 }
 
 function updateAppTsx(moduleName: string): void {
@@ -1028,31 +1194,42 @@ function updateAppTsx(moduleName: string): void {
   const pluralName = toPlural(camelName);
   const appPath = getFilePath('apps/admin/src/App.tsx');
 
-  let content = fs.readFileSync(appPath, 'utf-8');
+  modifyFile(appPath, (content) => {
+    // Add import — find last import line and append after it
+    const importLine = `import { ${pascalName}ListPage } from "./modules/${moduleName}";`;
+    if (!content.includes(importLine)) {
+      const importMatch = content.match(/^import .+$/gm);
+      if (!importMatch) throw new Error('Cannot find import statements in App.tsx');
+      const lastImportText = importMatch[importMatch.length - 1];
+      const lastImportIdx = content.lastIndexOf(lastImportText);
+      const insertIdx = content.indexOf('\n', lastImportIdx) + 1;
+      content = content.slice(0, insertIdx) + importLine + '\n' + content.slice(insertIdx);
+    }
 
-  // Add import
-  const importLine = `import { ${pascalName}ListPage } from "./modules/${moduleName}";`;
-  if (!content.includes(importLine)) {
-    const lastImport = content.lastIndexOf('import {');
-    const importEnd = content.indexOf('\n', lastImport);
-    content = content.slice(0, importEnd + 1) + importLine + '\n' + content.slice(importEnd + 1);
-  }
+    // Add resource — find resources=[...] and insert before the closing ]}
+    const resource = `              {\n                name: "${camelName}",\n                list: "/${pluralName}",\n              },`;
+    if (!content.includes(`name: "${camelName}"`)) {
+      const resourcesMatch = content.match(/resources=\{(\[[\s\S]*?\])\}/);
+      if (!resourcesMatch) throw new Error('Cannot find resources={[...]} in App.tsx');
+      const resourcesStart = content.indexOf(resourcesMatch[0]);
+      const bracketEnd = content.indexOf(']}', resourcesStart);
+      if (bracketEnd === -1) throw new Error('Cannot find resources closing ]} in App.tsx');
+      content = content.slice(0, bracketEnd) + resource + '\n' + content.slice(bracketEnd);
+    }
 
-  // Add resource
-  const resource = `              {\n                name: "${camelName}",\n                list: "/${pluralName}",\n              },`;
-  if (!content.includes(`name: "${camelName}"`)) {
-    const resourcesEnd = content.indexOf(']}', content.indexOf('resources='));
-    content = content.slice(0, resourcesEnd) + resource + '\n' + content.slice(resourcesEnd);
-  }
+    // Add route — find the AdminLayout Route group and insert before its closing </Route>
+    const route = `                  <Route path="${pluralName}" element={<${pascalName}ListPage />} />\n`;
+    if (!content.includes(`<${pascalName}ListPage`)) {
+      const layoutRouteMatch = content.match(/<Route\s+path="\/"\s+element=\{<AdminLayout[^>]*>[\s\S]*?<\/Route>/);
+      if (!layoutRouteMatch) throw new Error('Cannot find AdminLayout Route in App.tsx');
+      const layoutRouteStart = content.indexOf(layoutRouteMatch[0]);
+      const closingRouteIdx = content.lastIndexOf('</Route>', layoutRouteStart + layoutRouteMatch[0].length);
+      if (closingRouteIdx === -1) throw new Error('Cannot find closing </Route> for AdminLayout in App.tsx');
+      content = content.slice(0, closingRouteIdx) + route + content.slice(closingRouteIdx);
+    }
 
-  // Add route - Must be inside AdminLayout
-  const adminLayoutEnd = content.indexOf('</Route>', content.indexOf('<Route path="/" element={<AdminLayout'));
-  const route = `                  <Route path="${pluralName}" element={<${pascalName}ListPage />} />\n`;
-  if (!content.includes(`<${pascalName}ListPage`)) {
-    content = content.slice(0, adminLayoutEnd) + route + content.slice(adminLayoutEnd);
-  }
-
-  fs.writeFileSync(appPath, content);
+    return content;
+  });
 }
 
 function updateAppRouter(moduleName: string): void {
@@ -1060,22 +1237,39 @@ function updateAppRouter(moduleName: string): void {
   const camelName = toCamelCase(moduleName);
   const routerPath = getFilePath('apps/api/src/trpc/app.router.ts');
 
-  let content = fs.readFileSync(routerPath, 'utf-8');
+  modifyFile(routerPath, (content) => {
+    // Add import — find last import line
+    const importLine = `import { ${camelName}Router } from "../modules/${moduleName}/trpc/${camelName}.router";`;
+    if (!content.includes(importLine)) {
+      const importMatch = content.match(/^import .+$/gm);
+      if (!importMatch) throw new Error('Cannot find import statements in app.router.ts');
+      const lastImportText = importMatch[importMatch.length - 1];
+      const lastImportIdx = content.lastIndexOf(lastImportText);
+      const insertIdx = content.indexOf('\n', lastImportIdx) + 1;
+      content = content.slice(0, insertIdx) + importLine + '\n' + content.slice(insertIdx);
+    }
 
-  const importLine = `import { ${camelName}Router } from "../modules/${moduleName}/trpc/${camelName}.router";`;
-  if (!content.includes(importLine)) {
-    const lastImport = content.lastIndexOf('import {');
-    const importEnd = content.indexOf('\n', lastImport);
-    content = content.slice(0, importEnd + 1) + importLine + '\n' + content.slice(importEnd + 1);
-  }
+    // Add router entry — find export const appRouter = mergeRouters(...) and insert before closing }
+    const routerLine = `  ${camelName}: ${camelName}Router,`;
+    if (!content.includes(`${camelName}:`)) {
+      const routerMatch = content.match(/export const appRouter\s*=\s*mergeRouters\([\s\S]*?\)/);
+      if (!routerMatch) throw new Error('Cannot find appRouter definition in app.router.ts');
+      // Find the object literal inside the merged router
+      const objEndMatch = content.match(/export const appRouter[\s\S]*?(\n\};)/);
+      if (objEndMatch) {
+        const objEndIdx = content.indexOf(objEndMatch[1]);
+        content = content.slice(0, objEndIdx) + routerLine + '\n' + content.slice(objEndIdx);
+      } else {
+        // Fallback: find the last } after appRouter
+        const appRouterIdx = content.indexOf('export const appRouter');
+        const lastBrace = content.lastIndexOf('}', content.indexOf('\n\n', appRouterIdx) || content.length);
+        if (lastBrace === -1) throw new Error('Cannot find router object closing } in app.router.ts');
+        content = content.slice(0, lastBrace) + routerLine + '\n' + content.slice(lastBrace);
+      }
+    }
 
-  const routerLine = `  ${camelName}: ${camelName}Router,`;
-  if (!content.includes(`${camelName}:`)) {
-    const routerObjEnd = content.indexOf('}', content.indexOf('export const appRouter'));
-    content = content.slice(0, routerObjEnd) + routerLine + '\n' + content.slice(routerObjEnd);
-  }
-
-  fs.writeFileSync(routerPath, content);
+    return content;
+  });
 }
 
 function updateAdminLayout(moduleName: string): void {
@@ -1083,23 +1277,30 @@ function updateAdminLayout(moduleName: string): void {
   const pluralName = toPlural(camelName);
   const layoutPath = getFilePath('apps/admin/src/shared/layouts/AdminLayout.tsx');
 
-  let content = fs.readFileSync(layoutPath, 'utf-8');
+  modifyFile(layoutPath, (content) => {
+    const menuItem = `    { key: "/${pluralName}", label: "${toLabel(moduleName)}管理", icon: "FolderOutlined" },`;
 
-  const menuItem = `    { key: "/${pluralName}", label: "${toLabel(moduleName)}管理", icon: "FolderOutlined" },`;
+    if (!content.includes(`key: "/${pluralName}"`)) {
+      // Find the menuConfig array and append to the last children group
+      const menuConfigMatch = content.match(/const menuConfig\s*=\s*\[([\s\S]*?)\];/);
+      if (!menuConfigMatch) throw new Error('Cannot find menuConfig in AdminLayout.tsx');
 
-  if (!content.includes(`key: "/${pluralName}"`)) {
-    // Find the menuConfig array and append to the appropriate group
-    const menuConfigMatch = content.match(/const menuConfig = \[([\s\S]*?)\];/);
-    if (menuConfigMatch) {
-      // Find the "demo" group children and append there
-      const childrenEndIdx = content.lastIndexOf('];', content.indexOf('menuConfig'));
-      if (childrenEndIdx !== -1) {
-        content = content.slice(0, childrenEndIdx - 4) + '\n' + menuItem + '\n    ' + content.slice(childrenEndIdx - 4);
-      }
+      // Find the last children: [...] array within menuConfig and append there
+      const menuConfigStart = content.indexOf(menuConfigMatch[0]);
+      const menuConfigEnd = menuConfigStart + menuConfigMatch[0].length;
+
+      // Find the last children array end (]);) within menuConfig
+      const menuConfigBlock = content.slice(menuConfigStart, menuConfigEnd);
+      const childrenEndMatch = [...menuConfigBlock.matchAll(/\];/g)];
+      if (childrenEndMatch.length === 0) throw new Error('Cannot find children array in menuConfig');
+
+      const lastChildrenEnd = childrenEndMatch[childrenEndMatch.length - 1];
+      const insertOffset = menuConfigStart + lastChildrenEnd.index!;
+      content = content.slice(0, insertOffset) + '\n' + menuItem + content.slice(insertOffset);
     }
-  }
 
-  fs.writeFileSync(layoutPath, content);
+    return content;
+  });
 }
 
 function createModuleIndex(moduleName: string): void {
@@ -1121,6 +1322,22 @@ export async function generateModule(options: GenerateOptions): Promise<void> {
   const pascalName = toPascalCase(moduleName);
   const camelName = toCamelCase(moduleName);
   const pluralName = toPlural(camelName);
+
+  // Validate module name
+  validateModuleName(moduleName);
+
+  // Validate project structure
+  validateProjectStructure();
+
+  // Idempotency check
+  const existing = checkModuleExists(moduleName);
+  if (existing.exists) {
+    console.error('\x1b[31m%s\x1b[0m', `\n❌ 模块 "${pascalName}" 已存在！`);
+    console.error('  已存在的部分：');
+    existing.locations.forEach(loc => console.error(`    - ${loc}`));
+    console.error('\n  请先使用 /deleteModule 删除旧模块，或使用不同的模块名。');
+    process.exit(1);
+  }
 
   console.log('\x1b[35m%s\x1b[0m', `\n🚀 Generating module: ${pascalName}\n`);
   console.log('%s', '━'.repeat(50));
@@ -1153,6 +1370,7 @@ export async function generateModule(options: GenerateOptions): Promise<void> {
     return;
   }
 
+  try {
   // Step 4: Generate Prisma Schema
   console.log('\x1b[32m%s\x1b[0m', '✓ Generating Prisma schema...');
   const prismaSchema = generatePrismaSchema(moduleName, fields, relations);
@@ -1209,6 +1427,11 @@ export async function generateModule(options: GenerateOptions): Promise<void> {
   console.log(`   2. Run migration: cd infra/database && npx prisma migrate dev --name add_${camelName}`);
   console.log(`   3. Generate Prisma client: npx prisma generate`);
   console.log(`   4. Start servers: pnpm dev\n`);
+  } catch (error) {
+    console.error('\x1b[31m%s\x1b[0m', `\n❌ Generation failed: ${error}`);
+    rollback();
+    process.exit(1);
+  }
 }
 
 // ============================================
