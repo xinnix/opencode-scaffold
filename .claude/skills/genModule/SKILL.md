@@ -734,3 +734,29 @@ Make sure you're running the script from the correct project root directory. The
 - [ ] App.tsx updated with import, resource, and route (inside AdminLayout)
 - [ ] AdminLayout.tsx updated with sidebar menu item
 - [ ] Resource name matches between Refine and tRPC
+
+---
+
+## Agent 协作
+
+genModule 自动生成标准 CRUD 模块（覆盖 80% 工作量）。对于复杂业务需求，建议使用专业 Agent 精修定制部分。
+
+### 工作流
+
+```
+1. /genModule <name>          → 生成基础 CRUD 模块
+2. 用专业 Agent 精修定制部分   → 添加自定义业务逻辑
+```
+
+### 可用 Agent
+
+| Agent | 适用场景 |
+|-------|---------|
+| `nestjs-refine-trpc-expert` | 后端定制：自定义 tRPC procedure、复杂查询、Service 业务逻辑、REST Controller |
+| `antdesign-crud-designer` | 前端定制：复杂 UI 页面、自定义表单组件、详情页设计 |
+
+### 典型场景
+
+- **genModule 生成后需要自定义 procedure**：用 `nestjs-refine-trpc-expert` 在 `createCrudRouter` 基础上添加自定义 procedure
+- **需要复杂前端页面（看板、图表、向导表单）**：用 `antdesign-crud-designer` 替换或增强生成的列表页
+- **完全定制模块（非标准 CRUD）**：直接用 `nestjs-refine-trpc-expert` 从零构建，跳过 genModule

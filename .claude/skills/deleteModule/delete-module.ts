@@ -47,9 +47,36 @@ function getFilePath(relativePath: string): string {
   return path.join(PROJECT_ROOT, relativePath);
 }
 
-// Debug: Print paths to help troubleshoot
-// console.log('DEBUG: __dirname =', __dirname);
-// console.log('DEBUG: PROJECT_ROOT =', PROJECT_ROOT);
+// Memory registry path (user-level, not in git)
+function getMemoryRegistryPath(): string {
+  const home = process.env.HOME || process.env.USERPROFILE || '';
+  return path.join(home, '.claude/projects/-Users-xinnix-code-opencode-scaffold/memory/module-registry.md');
+}
+
+function removeMemoryRegistryEntry(moduleName: string): void {
+  const memoryPath = getMemoryRegistryPath();
+  if (!fs.existsSync(memoryPath)) return;
+
+  try {
+    let content = fs.readFileSync(memoryPath, 'utf-8');
+
+    // Remove rows matching | moduleName | in both tables
+    const lines = content.split('\n');
+    const filtered = lines.filter(line => {
+      const trimmed = line.trim();
+      return !trimmed.startsWith(`| ${moduleName} `);
+    });
+
+    // Remove from Prisma Models list
+    const pascalName = moduleName.charAt(0).toUpperCase() + moduleName.slice(1);
+    content = filtered.join('\n').replace(new RegExp(`\\b${pascalName},\\s*`, 'g'), '');
+
+    fs.writeFileSync(memoryPath, content);
+    console.log('  ℹ Memory registry updated');
+  } catch (err) {
+    console.warn('  ⚠ Failed to update memory registry:', (err as Error).message);
+  }
+}
 
 // ============================================
 // 文件操作
@@ -253,6 +280,11 @@ function deleteModule(moduleName: string, dryRun: boolean): void {
   removeZodSchema(moduleName, dryRun);
 
   console.log('\n✅ 模块删除完成!\n');
+
+  // Update memory registry
+  if (!dryRun) {
+    removeMemoryRegistryEntry(moduleName);
+  }
 
   if (!dryRun) {
     console.log('📋 后续步骤:');

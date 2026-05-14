@@ -6,6 +6,24 @@
 
 由于 Prisma 7.x 和某些 adapter 配置存在兼容性问题，本项目使用纯 SQL 脚本创建假数据，确保稳定性和可靠性。
 
+## 智能生成（推荐）
+
+基于 Prisma schema 自动生成 INSERT SQL：
+
+```bash
+# 生成所有可用模型的假数据
+node .claude/skills/seed-data/scripts/seed-data.ts
+
+# 指定模块（如 Agent）
+node .claude/skills/seed-data/scripts/seed-data.ts agent
+
+# 指定数量
+node .claude/skills/seed-data/scripts/seed-data.ts --count 20
+
+# 预览模式（不执行）
+node .claude/skills/seed-data/scripts/seed-data.ts --dry-run
+```
+
 ## 执行命令
 
 ```bash

@@ -2,6 +2,8 @@
 name: analyze
 description: Analyze existing modules to extract reusable patterns, identify refactoring opportunities, and provide standardization recommendations. Use when you want to understand module structure, find code duplication, or plan a refactor to use scaffold abstractions (BaseService, createCrudRouter, StandardListPage).
 allowed-tools:
+  - Bash(node:*)
+  - Bash(tsx:*)
   - Bash(cat:*)
   - Bash(find:*)
   - Bash(grep:*)
@@ -13,6 +15,23 @@ allowed-tools:
 
 Analyze an existing module to identify refactoring opportunities and reusable patterns.
 
+## Quick Analysis (Script)
+
+For fast standardized analysis, use the script:
+
+```bash
+# Analyze single module
+node .claude/skills/analyze/scripts/analyze-module.ts <module-name>
+
+# Analyze all modules
+node .claude/skills/analyze/scripts/analyze-module.ts --all
+
+# JSON output (for /refactor consumption)
+node .claude/skills/analyze/scripts/analyze-module.ts <module-name> --json
+```
+
+The script provides standardized detection of BaseService/createCrudRouter/StandardListPage usage patterns.
+
 ## Usage
 
 ```
@@ -20,6 +39,8 @@ Analyze an existing module to identify refactoring opportunities and reusable pa
 ```
 
 Example: `/analyze merchant`
+
+After running the script, Claude can continue with deeper analysis (architecture issues, business logic review, custom pattern recommendations).
 
 ---
 

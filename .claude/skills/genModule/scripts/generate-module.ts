@@ -1191,6 +1191,52 @@ function getFilePath(relativePath: string): string {
   return path.join(PROJECT_ROOT, relativePath);
 }
 
+// Memory registry path (user-level, not in git)
+function getMemoryRegistryPath(): string {
+  const home = process.env.HOME || process.env.USERPROFILE || '';
+  return path.join(home, '.claude/projects/-Users-xinnix-code-opencode-scaffold/memory/module-registry.md');
+}
+
+function updateMemoryRegistry(moduleName: string): void {
+  const memoryPath = getMemoryRegistryPath();
+  if (!fs.existsSync(memoryPath)) return; // Memory not initialized, skip silently
+
+  try {
+    const pascalName = toPascalCase(moduleName);
+    const camelName = toCamelCase(moduleName);
+    let content = fs.readFileSync(memoryPath, 'utf-8');
+
+    // Check if module already registered
+    if (content.includes(`| ${moduleName} |`)) return;
+
+    // Add to backend modules table (after wechat row)
+    const backendRow = `| ${moduleName} | ${pascalName} | ${camelName}Router | genModule | |`;
+    content = content.replace(
+      /(\| wechat\s+\|.*\|\n)/,
+      `$1${backendRow}\n`
+    );
+
+    // Add to frontend modules table (after user row)
+    const frontendRow = `| ${moduleName} | ${pascalName}ListPage | genModule |`;
+    content = content.replace(
+      /(\| user\s+\|.*\|\n)/,
+      `$1${frontendRow}\n`
+    );
+
+    // Add to Prisma Models list
+    content = content.replace(
+      /(Prisma Models\n\n)/,
+      `$1${content.includes(pascalName + ',') ? '' : pascalName + ', '}`
+    );
+
+    fs.writeFileSync(memoryPath, content);
+    console.log('\x1b[36m%s\x1b[0m', '  ℹ Memory registry updated');
+  } catch (err) {
+    // Memory update failure should not block generation
+    console.warn('  ⚠ Failed to update memory registry:', (err as Error).message);
+  }
+}
+
 function appendToFile(filePath: string, content: string): void {
   const dir = path.dirname(filePath);
   if (!fs.existsSync(dir)) {
@@ -1505,6 +1551,9 @@ export async function generateModule(options: GenerateOptions): Promise<void> {
   console.log(`   2. Run migration: cd infra/database && npx prisma migrate dev --name add_${camelName}`);
   console.log(`   3. Generate Prisma client: npx prisma generate`);
   console.log(`   4. Start servers: pnpm dev\n`);
+
+  // Update memory registry
+  updateMemoryRegistry(moduleName);
   } catch (error) {
     console.error('\x1b[31m%s\x1b[0m', `\n❌ Generation failed: ${error}`);
     rollback();

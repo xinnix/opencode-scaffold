@@ -2,6 +2,9 @@
 name: refactor
 description: Refactor existing modules to use scaffold abstractions (BaseService, createCrudRouter, StandardListPage, StandardForm). Automatically transforms manual CRUD code into standardized patterns while preserving custom business logic. Use after /analyze to apply refactoring recommendations.
 allowed-tools:
+  - Bash(node:*)
+  - Bash(tsx:*)
+  - Bash(npx:*)
   - Bash(cat:*)
   - Bash(find:*)
   - Bash(grep:*)
@@ -13,6 +16,24 @@ allowed-tools:
 
 Refactor an existing module to use scaffold abstraction layers. This skill reads the module code, identifies manual CRUD patterns, and replaces them with standardized abstractions.
 
+## Automated Refactoring (Script)
+
+For fast standardized refactoring:
+
+```bash
+# Preview refactoring plan
+node .claude/skills/refactor/scripts/refactor-module.ts <module-name> --dry-run
+
+# Apply refactoring
+node .claude/skills/refactor/scripts/refactor-module.ts <module-name>
+
+# Backend or frontend only
+node .claude/skills/refactor/scripts/refactor-module.ts <module-name> --backend-only
+node .claude/skills/refactor/scripts/refactor-module.ts <module-name> --frontend-only
+```
+
+The script uses analyze-module.ts output to plan and execute the refactoring while preserving custom business logic.
+
 ## Usage
 
 ```
@@ -21,6 +42,8 @@ Refactor an existing module to use scaffold abstraction layers. This skill reads
 /refactor <module-name> --frontend-only
 /refactor <module-name> --dry-run
 ```
+
+After running the script, Claude can continue with additional manual adjustments for complex cases.
 
 ---
 
