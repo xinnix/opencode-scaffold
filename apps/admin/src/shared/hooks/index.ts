@@ -1,1 +1,1 @@
-export * from "./useTrpcQuery";
+export * from './useTrpcQuery';

@@ -86,7 +86,9 @@ function updateAppRouter(moduleName: string, dryRun: boolean): void {
   let modified = false;
 
   // Remove import line
-  const importPattern = new RegExp(`import \\{ ${camelName}Router \\} from ["']../modules/${moduleName}/trpc/${camelName}\\.router["'];\\n`);
+  const importPattern = new RegExp(
+    `import \\{ ${camelName}Router \\} from ["']../modules/${moduleName}/trpc/${camelName}\\.router["'];\\n`,
+  );
   if (importPattern.test(content)) {
     content = content.replace(importPattern, '');
     modified = true;
@@ -123,7 +125,9 @@ function updateAppTsx(moduleName: string, dryRun: boolean): void {
   let modified = false;
 
   // Remove import
-  const importPattern = new RegExp(`import \\{ ${pascalName}ListPage \\} from ["']./modules/${moduleName}["'];\\n`);
+  const importPattern = new RegExp(
+    `import \\{ ${pascalName}ListPage \\} from ["']./modules/${moduleName}["'];\\n`,
+  );
   if (importPattern.test(content)) {
     content = content.replace(importPattern, '');
     modified = true;
@@ -131,7 +135,9 @@ function updateAppTsx(moduleName: string, dryRun: boolean): void {
   }
 
   // Remove resource
-  const resourcePattern = new RegExp(`\\{\\s*name: ["']${camelName}["'],[\\s\\S]*?list: ["']/${pluralName}["'],[\\s\\S]*?\\},\\n`);
+  const resourcePattern = new RegExp(
+    `\\{\\s*name: ["']${camelName}["'],[\\s\\S]*?list: ["']/${pluralName}["'],[\\s\\S]*?\\},\\n`,
+  );
   if (resourcePattern.test(content)) {
     content = content.replace(resourcePattern, '');
     modified = true;
@@ -139,7 +145,9 @@ function updateAppTsx(moduleName: string, dryRun: boolean): void {
   }
 
   // Remove route
-  const routePattern = new RegExp(`\\s*<Route path=["']${pluralName}["']\\s+element=\\{<${pascalName}ListPage\\s*/>\\}\\s*/>\\n`);
+  const routePattern = new RegExp(
+    `\\s*<Route path=["']${pluralName}["']\\s+element=\\{<${pascalName}ListPage\\s*/>\\}\\s*/>\\n`,
+  );
   if (routePattern.test(content)) {
     content = content.replace(routePattern, '\n');
     modified = true;
@@ -167,7 +175,9 @@ function updateAdminLayout(moduleName: string, dryRun: boolean): void {
   let modified = false;
 
   // Remove menu item
-  const menuPattern = new RegExp(`\\{\\s*key: ["']/${pluralName}["'],[\\s\\S]*?onClick: \\(\\) => navigate\\(["']/${pluralName}["']\\),[\\s\\S]*?\\},\\n`);
+  const menuPattern = new RegExp(
+    `\\{\\s*key: ["']/${pluralName}["'],[\\s\\S]*?onClick: \\(\\) => navigate\\(["']/${pluralName}["']\\),[\\s\\S]*?\\},\\n`,
+  );
   if (menuPattern.test(content)) {
     content = content.replace(menuPattern, '');
     modified = true;
@@ -194,7 +204,9 @@ function removeZodSchema(moduleName: string, dryRun: boolean): void {
   let modified = false;
 
   // Remove the schema export block
-  const schemaPattern = new RegExp(`// ${pascalName} Schemas[\\s\\S]*?export const ${pascalName}Schema = \\{[\\s\\S]*?\\};\\n`);
+  const schemaPattern = new RegExp(
+    `// ${pascalName} Schemas[\\s\\S]*?export const ${pascalName}Schema = \\{[\\s\\S]*?\\};\\n`,
+  );
 
   if (schemaPattern.test(content)) {
     content = content.replace(schemaPattern, '');
@@ -257,7 +269,9 @@ function deleteModule(moduleName: string, dryRun: boolean): void {
   if (!dryRun) {
     console.log('📋 后续步骤:');
     console.log('   1. 检查并删除相关的 Prisma migration 文件');
-    console.log('   2. 运行: cd infra/database && npx prisma migrate dev --name drop_' + moduleName);
+    console.log(
+      '   2. 运行: cd infra/database && npx prisma migrate dev --name drop_' + moduleName,
+    );
     console.log('   3. 重启后端和前端服务\n');
   }
 }

@@ -1,10 +1,10 @@
-import { Modal, Form, Input, Avatar, Space, Typography, App } from "antd";
-import { UserOutlined } from "@ant-design/icons";
-import { useEffect } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { getTrpcClient } from "../trpc/trpcClient";
-import { OSSUpload } from "./OSSUpload";
-import { useAuth } from "../auth";
+import { Modal, Form, Input, Avatar, Space, Typography, App } from 'antd';
+import { UserOutlined } from '@ant-design/icons';
+import { useEffect } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { getTrpcClient } from '../trpc/trpcClient';
+import { OSSUpload } from './OSSUpload';
+import { useAuth } from '../auth';
 
 interface ProfileModalProps {
   visible: boolean;
@@ -43,25 +43,19 @@ export const ProfileModal = ({ visible, onCancel, onSuccess }: ProfileModalProps
       const updatedUser = await updateProfileMutation.mutateAsync(avatarUrl);
 
       // Update localStorage user info
-      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+      const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
       const newUser = { ...storedUser, avatar: updatedUser.avatar };
-      localStorage.setItem("user", JSON.stringify(newUser));
+      localStorage.setItem('user', JSON.stringify(newUser));
 
-      message.success("头像更新成功");
+      message.success('头像更新成功');
       onSuccess();
     } catch (error: any) {
-      message.error(error.message || "头像更新失败");
+      message.error(error.message || '头像更新失败');
     }
   };
 
   return (
-    <Modal
-      title="个人信息"
-      open={visible}
-      onCancel={onCancel}
-      footer={null}
-      width={500}
-    >
+    <Modal title="个人信息" open={visible} onCancel={onCancel} footer={null} width={500}>
       <Form form={form} layout="vertical">
         <Form.Item label="用户名" name="username">
           <Input disabled />
@@ -72,15 +66,9 @@ export const ProfileModal = ({ visible, onCancel, onSuccess }: ProfileModalProps
         </Form.Item>
 
         <Form.Item label="头像">
-          <Space direction="vertical" align="center" style={{ width: "100%" }}>
-            <Avatar
-              size={80}
-              icon={<UserOutlined />}
-              src={user?.avatar}
-            />
-            <Typography.Text type="secondary">
-              当前头像
-            </Typography.Text>
+          <Space direction="vertical" align="center" style={{ width: '100%' }}>
+            <Avatar size={80} icon={<UserOutlined />} src={user?.avatar} />
+            <Typography.Text type="secondary">当前头像</Typography.Text>
           </Space>
         </Form.Item>
 

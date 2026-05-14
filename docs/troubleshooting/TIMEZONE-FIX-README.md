@@ -3,11 +3,13 @@
 ## 🔍 问题确认
 
 运行验证脚本确认问题：
+
 ```bash
 bash scripts/check-timezone.sh
 ```
 
 **验证结果：**
+
 ```
 📱 本地系统时间：Fri Apr 10 19:09:22 CST 2026
 🗄️ 数据库当前时间：2026-04-10 11:09:22 UTC
@@ -24,6 +26,7 @@ bash scripts/check-timezone.sh
 Claude 已自动修复以下配置：
 
 #### 1. Dockerfile.api
+
 ```dockerfile
 # --- Stage 5: Runner (最终运行镜像) ---
 FROM node:22-alpine AS runner
@@ -38,6 +41,7 @@ RUN apk add --no-cache tzdata && \
 ```
 
 #### 2. Dockerfile.admin
+
 ```dockerfile
 # Stage 4: Production (Nginx)
 FROM nginx:alpine AS production
@@ -51,6 +55,7 @@ RUN apk add --no-cache tzdata && \
 ```
 
 #### 3. docker-compose.prod.yml
+
 ```yaml
 services:
   api:
@@ -62,12 +67,14 @@ services:
 ```
 
 #### 4. .env
+
 ```bash
 # ===== 时区配置（关键修复）=====
 TZ=Asia/Shanghai
 ```
 
 #### 5. 1panel.env.example
+
 ```bash
 # ===== 时区配置（关键修复）=====
 TZ=Asia/Shanghai
@@ -90,6 +97,7 @@ bash scripts/verify-timezone.sh
 ### 方式二：手动部署
 
 #### 开发环境
+
 ```bash
 # 重启开发服务（.env 中的 TZ 立即生效）
 pkill -f 'nest start'
@@ -97,6 +105,7 @@ pnpm --filter @opencode/api dev
 ```
 
 #### 生产环境
+
 ```bash
 # 步骤 1: 重新构建镜像（包含时区修复）
 docker build -f Dockerfile.api -t couponhub-api:latest .
@@ -119,12 +128,14 @@ docker logs -f couponHub-api-prod
 ## ✅ 验证修复
 
 ### 快速验证
+
 ```bash
 # 运行验证脚本
 bash scripts/check-timezone.sh
 ```
 
 **预期结果：**
+
 ```
 📱 本地系统时间：Fri Apr 10 19:09:22 CST 2026
 🗄️ 数据库当前时间：2026-04-10 19:09:22  # 应为北京时间
@@ -132,6 +143,7 @@ bash scripts/check-timezone.sh
 ```
 
 ### 详细验证
+
 ```bash
 # 完整验证脚本
 bash scripts/verify-timezone.sh
@@ -153,10 +165,12 @@ docker exec postgres psql -U xinnix -d couponHub -c "SHOW timezone;"
 所有 DateTime 字段都将使用北京时间：
 
 ### 用户相关
+
 - ✅ `users.createdAt` - 用户注册时间
 - ✅ `users.lastLoginAt` - 最后登录时间
 
 ### 订单相关
+
 - ✅ `orders.createdAt` - 订单创建时间
 - ✅ `orders.paidAt` - 支付时间
 - ✅ `orders.redeemedAt` - 核销时间
@@ -164,10 +178,12 @@ docker exec postgres psql -U xinnix -d couponHub -c "SHOW timezone;"
 - ✅ `orders.expireAt` - 过期时间
 
 ### 券模板相关
+
 - ✅ `coupon_templates.validFrom` - 有效期开始
 - ✅ `coupon_templates.validUntil` - 有效期结束
 
 ### 管理相关
+
 - ✅ `admins.createdAt` - 管理员创建时间
 - ✅ `admins.lastLoginAt` - 最后登录时间
 - ✅ 所有表的 `createdAt` 和 `updatedAt`
@@ -179,16 +195,19 @@ docker exec postgres psql -U xinnix -d couponHub -c "SHOW timezone;"
 ### 方案选择
 
 **已有数据吗？**
+
 - ❌ 否 → 无需迁移，修复后新数据自动使用北京时间
 - ✅ 是 → 选择以下方案：
 
 ### 方案 A：保持历史数据（推荐）
 
 **优点：**
+
 - ✅ 无风险，无需操作
 - ✅ 新数据使用北京时间
 
 **缺点：**
+
 - ⚠️ 历史数据仍是 UTC
 - ⚠️ 前端可能需要区分处理
 
@@ -197,10 +216,12 @@ docker exec postgres psql -U xinnix -d couponHub -c "SHOW timezone;"
 ### 方案 B：批量转换历史数据
 
 **优点：**
+
 - ✅ 所有数据统一为北京时间
 - ✅ 前端无需特殊处理
 
 **缺点：**
+
 - ⚠️ 需要执行迁移脚本
 - ⚠️ 需要备份数据库
 
@@ -221,6 +242,7 @@ psql $DATABASE_URL < scripts/migrate-timezone-data.sql
 ```
 
 **迁移脚本说明：**
+
 - 位置：`scripts/migrate-timezone-data.sql`
 - 作用：将所有 DateTime 字段加 8 小时（UTC → 北京时间）
 - 影响表：admins, users, orders, payments, settlements 等
@@ -230,11 +252,13 @@ psql $DATABASE_URL < scripts/migrate-timezone-data.sql
 ## 📝 部署检查清单
 
 ### 开发环境
+
 - [ ] .env 文件包含 `TZ=Asia/Shanghai`
 - [ ] 重启开发服务
 - [ ] 验证时间显示正确
 
 ### 生产环境
+
 - [ ] Dockerfile.api 包含时区配置
 - [ ] Dockerfile.admin 包含时区配置
 - [ ] docker-compose.prod.yml 包含 TZ 环境变量
@@ -252,11 +276,13 @@ psql $DATABASE_URL < scripts/migrate-timezone-data.sql
 ### 问题 1: 容器时间仍为 UTC
 
 **检查：**
+
 ```bash
 docker exec couponHub-api-prod date
 ```
 
 **解决：**
+
 ```bash
 # 确认镜像已重新构建
 docker images | grep couponhub-api
@@ -271,23 +297,27 @@ docker-compose -f docker-compose.prod.yml restart api
 ### 问题 2: 数据库时间不对
 
 **检查：**
+
 ```bash
 docker exec postgres psql -U xinnix -d couponHub -c "SHOW timezone;"
 ```
 
 **说明：**
+
 - 数据库可以保持 UTC（这是标准做法）
 - 应用层设置 `TZ=Asia/Shanghai` 会自动处理转换
 
 ### 问题 3: 历史数据时间不对
 
 **解决方案 A：** 保持不变，前端根据创建时间判断
+
 ```javascript
 const createTime = new Date(order.createdAt);
 const cutoffTime = new Date('2026-04-10T00:00:00Z'); // 修复部署时间
-const displayTime = createTime < cutoffTime
-  ? new Date(createTime.getTime() + 8 * 60 * 60 * 1000) // 旧数据 +8 小时
-  : createTime; // 新数据直接显示
+const displayTime =
+  createTime < cutoffTime
+    ? new Date(createTime.getTime() + 8 * 60 * 60 * 1000) // 旧数据 +8 小时
+    : createTime; // 新数据直接显示
 ```
 
 **解决方案 B：** 执行数据迁移（见上方）
@@ -295,6 +325,7 @@ const displayTime = createTime < cutoffTime
 ### 问题 4: 验证脚本报错
 
 **检查：**
+
 ```bash
 # 容器是否运行
 docker ps
@@ -350,6 +381,7 @@ docker exec postgres psql -U xinnix -d couponHub -c "SELECT NOW();"
 **状态：** ✅ 配置已完成，等待部署验证
 
 **下一步：**
+
 1. 运行 `bash scripts/fix-timezone.sh` 一键修复
 2. 或按照手动部署步骤操作
 3. 运行 `bash scripts/check-timezone.sh` 验证效果

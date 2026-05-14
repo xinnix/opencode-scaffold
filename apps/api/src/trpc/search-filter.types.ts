@@ -13,12 +13,20 @@ export const SearchSchema = z.object({
 
 // --- Filter ---
 export type FilterOperator =
-  | 'eq' | 'ne'
-  | 'gt' | 'gte' | 'lt' | 'lte'
-  | 'contains' | 'startsWith' | 'endsWith'
-  | 'in' | 'notIn'
+  | 'eq'
+  | 'ne'
+  | 'gt'
+  | 'gte'
+  | 'lt'
+  | 'lte'
+  | 'contains'
+  | 'startsWith'
+  | 'endsWith'
+  | 'in'
+  | 'notIn'
   | 'between'
-  | 'isNull' | 'isNotNull';
+  | 'isNull'
+  | 'isNotNull';
 
 export interface FilterCondition {
   field: string;
@@ -29,12 +37,20 @@ export interface FilterCondition {
 export const FilterConditionSchema = z.object({
   field: z.string(),
   operator: z.enum([
-    'eq', 'ne',
-    'gt', 'gte', 'lt', 'lte',
-    'contains', 'startsWith', 'endsWith',
-    'in', 'notIn',
+    'eq',
+    'ne',
+    'gt',
+    'gte',
+    'lt',
+    'lte',
+    'contains',
+    'startsWith',
+    'endsWith',
+    'in',
+    'notIn',
     'between',
-    'isNull', 'isNotNull',
+    'isNull',
+    'isNotNull',
   ]),
   value: z.any(),
 });

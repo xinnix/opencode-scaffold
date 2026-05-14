@@ -132,16 +132,19 @@ export class FileStorageService implements IFileStorage {
       ],
       video: ['video/mp4', 'video/mpeg', 'video/quicktime'],
       all: [
-        'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
-        'application/pdf', 'video/mp4',
+        'image/jpeg',
+        'image/png',
+        'image/gif',
+        'image/webp',
+        'image/svg+xml',
+        'application/pdf',
+        'video/mp4',
       ],
     };
 
     // Check file size
     if (file.size > maxFileSize) {
-      throw new Error(
-        `File size exceeds maximum allowed size of ${maxFileSize / 1024 / 1024}MB`,
-      );
+      throw new Error(`File size exceeds maximum allowed size of ${maxFileSize / 1024 / 1024}MB`);
     }
 
     // Check MIME type
@@ -155,9 +158,7 @@ export class FileStorageService implements IFileStorage {
     // Check extension consistency
     const ext = pathModule.extname(file.originalname).toLowerCase();
     if (ext && !this.isExtensionConsistent(ext, file.mimetype)) {
-      throw new Error(
-        `File extension "${ext}" does not match MIME type "${file.mimetype}"`,
-      );
+      throw new Error(`File extension "${ext}" does not match MIME type "${file.mimetype}"`);
     }
   }
 

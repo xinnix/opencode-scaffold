@@ -34,11 +34,7 @@ interface RoleGuardProps {
   children: ReactNode;
 }
 
-export const RoleGuard: React.FC<RoleGuardProps> = ({
-  roles,
-  fallback = null,
-  children,
-}) => {
+export const RoleGuard: React.FC<RoleGuardProps> = ({ roles, fallback = null, children }) => {
   const { user } = useAuth();
 
   const hasRole = (roleName: string) => {

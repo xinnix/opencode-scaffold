@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
-import { authProvider } from "./authProvider";
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { authProvider } from './authProvider';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -46,14 +46,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Check if login failed
     if (!result.success) {
-      const errorMessage = result.error?.message || "登录失败";
-      console.error("AuthContext: 登录失败 -", errorMessage);
+      const errorMessage = result.error?.message || '登录失败';
+      console.error('AuthContext: 登录失败 -', errorMessage);
       throw new Error(errorMessage);
     }
 
     // Wait a brief moment to ensure localStorage is fully updated
     // This prevents race conditions when fetching identity immediately after login
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     // Update state directly
     const identity = await authProvider.getIdentity?.();
@@ -64,7 +64,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = useCallback(async () => {
     try {
       // Get refresh token from localStorage
-      const refreshToken = localStorage.getItem("refreshToken");
+      const refreshToken = localStorage.getItem('refreshToken');
 
       // Call backend logout API to revoke refresh token
       if (refreshToken) {
@@ -74,7 +74,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         await authProvider.logout?.({});
       }
     } catch (error) {
-      console.error("Logout error:", error);
+      console.error('Logout error:', error);
       // Still clear local state even if API call fails
     } finally {
       // Clear local state
@@ -82,9 +82,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(null);
       isInitialized.current = false;
       // Clear localStorage
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
-      localStorage.removeItem("user");
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
     }
   }, []);
 
@@ -97,20 +97,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       login,
       logout,
     }),
-    [isAuthenticated, isLoading, user, login, logout]
+    [isAuthenticated, isLoading, user, login, logout],
   );
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };

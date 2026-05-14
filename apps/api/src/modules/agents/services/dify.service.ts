@@ -133,12 +133,7 @@ export class DifyService {
     return response.json();
   }
 
-  async deleteConversation(
-    apiUrl: string,
-    apiKey: string,
-    conversationId: string,
-    user: string,
-  ) {
+  async deleteConversation(apiUrl: string, apiKey: string, conversationId: string, user: string) {
     const response = await fetch(`${apiUrl}/conversations/${conversationId}`, {
       method: 'DELETE',
       headers: {
@@ -161,17 +156,14 @@ export class DifyService {
     name: string,
     user: string,
   ) {
-    const response = await fetch(
-      `${apiUrl}/conversations/${conversationId}/name`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name, auto_generate: false, user }),
+    const response = await fetch(`${apiUrl}/conversations/${conversationId}/name`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
       },
-    );
+      body: JSON.stringify({ name, auto_generate: false, user }),
+    });
 
     if (!response.ok) {
       throw new Error(`Dify API error: ${response.status}`);
@@ -179,12 +171,7 @@ export class DifyService {
     return response.json();
   }
 
-  async stopGeneration(
-    apiUrl: string,
-    apiKey: string,
-    taskId: string,
-    user: string,
-  ) {
+  async stopGeneration(apiUrl: string, apiKey: string, taskId: string, user: string) {
     const response = await fetch(`${apiUrl}/chat-messages/${taskId}/stop`, {
       method: 'POST',
       headers: {

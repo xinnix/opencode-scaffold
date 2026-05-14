@@ -35,14 +35,18 @@ export const OSSUpload: React.FC<OSSUploadProps> = ({
 }) => {
   const { message } = App.useApp();
   const [loading, setLoading] = useState(false);
-  const [fileList, setFileList] = useState<UploadFile[]>((
-    value ? [{
-      uid: '-1',
-      name: 'image',
-      status: 'done',
-      url: value,
-    }] : []
-  ));
+  const [fileList, setFileList] = useState<UploadFile[]>(
+    value
+      ? [
+          {
+            uid: '-1',
+            name: 'image',
+            status: 'done',
+            url: value,
+          },
+        ]
+      : [],
+  );
 
   /**
    * 自定义上传处理
@@ -68,12 +72,14 @@ export const OSSUpload: React.FC<OSSUploadProps> = ({
       const result = await OSSUploader.upload(file, type);
 
       // 更新文件列表
-      setFileList([{
-        uid: file.uid,
-        name: file.name,
-        status: 'done',
-        url: result.url,
-      }]);
+      setFileList([
+        {
+          uid: file.uid,
+          name: file.name,
+          status: 'done',
+          url: result.url,
+        },
+      ]);
 
       // 触发 onChange
       onChange?.(result.url);
@@ -108,12 +114,7 @@ export const OSSUpload: React.FC<OSSUploadProps> = ({
             style={{ objectFit: 'cover', borderRadius: '4px' }}
           />
           {!disabled && (
-            <Button
-              danger
-              icon={<DeleteOutlined />}
-              onClick={handleRemove}
-              loading={loading}
-            >
+            <Button danger icon={<DeleteOutlined />} onClick={handleRemove} loading={loading}>
               删除
             </Button>
           )}

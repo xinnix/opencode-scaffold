@@ -13,6 +13,7 @@
 3. 上传完成后获得文件 URL
 
 **优势:**
+
 - 不暴露 AccessKeySecret
 - 可限制上传路径、文件大小
 - 可设置过期时间
@@ -57,10 +58,11 @@ import { OSSUpload } from '@/shared/components/OSSUpload';
     maxFileSize={5 * 1024 * 1024} // 5MB
     accept="image/jpeg,image/png,image/gif,image/webp"
   />
-</Form.Item>
+</Form.Item>;
 ```
 
 **Props:**
+
 - `type`: 上传类型 (`'merchant_logo' | 'news_banner' | 'merchant_gallery'`)
 - `maxFileSize`: 最大文件大小(字节),默认 5MB
 - `accept`: 接受的文件类型,默认图片格式
@@ -91,8 +93,9 @@ const handleBatchUpload = async (files: File[]) => {
 };
 
 // 验证文件
-const isValid = OSSUploader.validateFileType(file, ['image/jpeg', 'image/png'])
-  && OSSUploader.validateFileSize(file, 5 * 1024 * 1024);
+const isValid =
+  OSSUploader.validateFileType(file, ['image/jpeg', 'image/png']) &&
+  OSSUploader.validateFileSize(file, 5 * 1024 * 1024);
 ```
 
 ## 后端 API
@@ -104,18 +107,18 @@ const isValid = OSSUploader.validateFileType(file, ['image/jpeg', 'image/png'])
 ```typescript
 // tRPC 调用
 const credentials = await trpc.upload.getUploadCredentials.query({
-  type: 'merchant_logo'
+  type: 'merchant_logo',
 });
 
 // 返回数据
 {
   accessKeyId: string;
-  policy: string;          // Post Policy (base64)
-  signature: string;       // 签名
+  policy: string; // Post Policy (base64)
+  signature: string; // 签名
   bucket: string;
   region: string;
   endpoint: string;
-  expiration: string;      // 过期时间
+  expiration: string; // 过期时间
 }
 ```
 

@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Post,
-  Body,
-  Get,
-  UseGuards,
-  HttpCode,
-  HttpStatus,
-} from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { z } from 'zod';
 import { AuthService } from '../services/auth.service';
@@ -14,18 +6,12 @@ import { Public, CurrentUser } from '../decorators/decorators';
 import { JwtAuthGuard } from '../../../core/guards/jwt.guard';
 
 // 🔥 关键：直接使用 @opencode/shared 的 Zod schema
-import {
-  LoginSchema,
-  RegisterSchema,
-  RefreshTokenSchema,
-} from '@opencode/shared';
+import { LoginSchema, RegisterSchema, RefreshTokenSchema } from '@opencode/shared';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Public()
   @Post('register')
@@ -141,12 +127,8 @@ export class AuthController {
     status: 200,
     description: '登出成功',
   })
-  async logout(
-    @CurrentUser() user: any,
-    @Body() body: z.infer<typeof RefreshTokenSchema>,
-  ) {
+  async logout(@CurrentUser() user: any, @Body() body: z.infer<typeof RefreshTokenSchema>) {
     const validatedData = RefreshTokenSchema.parse(body);
     return this.authService.logout(user.id, validatedData.refreshToken);
   }
-
 }

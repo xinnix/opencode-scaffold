@@ -3,9 +3,11 @@
 ## ✅ 已完成任务
 
 ### 1. 数据库模型更新
+
 **文件：** `infra/database/prisma/schema.prisma`
 
 **新增模型：**
+
 - ✅ `Merchant` - 商户模型
 - ✅ `MerchantHandler` - 商户核销员模型
 - ✅ `News` - 新闻资讯模型
@@ -14,16 +16,20 @@
 - ✅ `Settlement` - 结算单模型
 
 **修改模型：**
+
 - ✅ 更新 `User` 模型，添加关联关系
 
 **数据库迁移：**
+
 - ✅ 创建迁移文件：`20260325171034_add_business_models`
 - ✅ 成功应用到数据库
 
 ### 2. Shared Schema 定义
+
 **文件：** `infra/shared/src/index.ts`
 
 **新增 Schemas：**
+
 - ✅ `MerchantSchemas` - Create, Update, ListQuery
 - ✅ `MerchantHandlerSchemas` - Create, Update
 - ✅ `NewsSchemas` - Create, Update, ListQuery
@@ -32,6 +38,7 @@
 - ✅ `SettlementSchemas` - Generate, ListQuery, Confirm
 
 **更新权限常量：**
+
 - ✅ 添加 `MERCHANT` 权限
 - ✅ 添加 `NEWS` 权限
 - ✅ 添加 `COUPON_TEMPLATE` 权限
@@ -39,12 +46,15 @@
 - ✅ 添加 `SETTLEMENT` 权限
 
 **构建状态：**
+
 - ✅ Shared 包成功构建
 
 ### 3. 基础 Service 创建
+
 **目录：** `apps/api/src/modules/`
 
 **新增 Services：**
+
 - ✅ `merchant/services/merchant.service.ts`
 - ✅ `news/services/news.service.ts`
 - ✅ `coupon/services/template.service.ts`
@@ -52,12 +62,15 @@
 - ✅ `settlement/services/settlement.service.ts`
 
 **特性：**
+
 - 所有 Service 继承 `BaseService`
 - 提供标准 CRUD 操作
 - 支持钩子函数扩展
 
 ### 4. tRPC Router 创建
+
 **新增 Routers：**
+
 - ✅ `merchant/trpc/merchant.router.ts`
 - ✅ `news/trpc/news.router.ts`
 - ✅ `coupon/trpc/template.router.ts`
@@ -65,14 +78,17 @@
 - ✅ `settlement/trpc/settlement.router.ts`
 
 **特性：**
+
 - 使用 `createCrudRouter` 工厂函数
 - 自动生成标准 CRUD 接口
 - 配置了认证保护
 
 ### 5. AppRouter 更新
+
 **文件：** `apps/api/src/trpc/app.router.ts`
 
 **注册路由：**
+
 - ✅ `merchant` - 商户管理
 - ✅ `news` - 新闻资讯
 - ✅ `couponTemplate` - 券模板
@@ -80,6 +96,7 @@
 - ✅ `settlement` - 结算管理
 
 **构建状态：**
+
 - ✅ API 项目成功构建
 
 ---
@@ -88,18 +105,19 @@
 
 ### 核心表
 
-| 表名 | 说明 | 关键字段 |
-|------|------|---------|
-| `merchants` | 商户信息 | id, name, category, floor, status |
-| `merchant_handlers` | 商户核销员 | id, merchantId, userId, name, phone |
-| `news` | 新闻资讯 | id, title, content, linkedCouponId, status |
-| `coupon_templates` | 券模板 | id, title, buyPrice, faceValue, stock, merchantScope |
-| `orders` | 订单（核心） | id, orderNo, userId, templateId, status, price, faceValue |
-| `settlements` | 结算单 | id, merchantId, period, totalAmount, orderCount |
+| 表名                | 说明         | 关键字段                                                  |
+| ------------------- | ------------ | --------------------------------------------------------- |
+| `merchants`         | 商户信息     | id, name, category, floor, status                         |
+| `merchant_handlers` | 商户核销员   | id, merchantId, userId, name, phone                       |
+| `news`              | 新闻资讯     | id, title, content, linkedCouponId, status                |
+| `coupon_templates`  | 券模板       | id, title, buyPrice, faceValue, stock, merchantScope      |
+| `orders`            | 订单（核心） | id, orderNo, userId, templateId, status, price, faceValue |
+| `settlements`       | 结算单       | id, merchantId, period, totalAmount, orderCount           |
 
 ### 索引
 
 **性能优化索引：**
+
 - 商户表：category, status
 - 订单表：userId, status, templateId, orderNo, redeemMerchantId
 - 结算表：merchantId, period, status
@@ -117,7 +135,7 @@
 const merchants = await trpc.merchant.getMany.query({
   page: 1,
   pageSize: 10,
-  category: '餐饮'
+  category: '餐饮',
 });
 
 // 创建商户
@@ -126,19 +144,19 @@ const merchant = await trpc.merchant.createOne.mutate({
     name: '星巴克',
     category: '餐饮',
     floor: '1F',
-    phone: '400-xxx-xxxx'
-  }
+    phone: '400-xxx-xxxx',
+  },
 });
 
 // 更新商户
 await trpc.merchant.updateOne.mutate({
   where: { id: 'merchant-id' },
-  data: { status: 'INACTIVE' }
+  data: { status: 'INACTIVE' },
 });
 
 // 删除商户
 await trpc.merchant.deleteOne.mutate({
-  where: { id: 'merchant-id' }
+  where: { id: 'merchant-id' },
 });
 ```
 
@@ -147,6 +165,7 @@ await trpc.merchant.deleteOne.mutate({
 ## 📁 文件清单
 
 ### 数据库
+
 ```
 infra/database/
 ├── prisma/
@@ -158,6 +177,7 @@ infra/database/
 ```
 
 ### 共享类型
+
 ```
 infra/shared/
 ├── src/
@@ -166,6 +186,7 @@ infra/shared/
 ```
 
 ### 后端模块
+
 ```
 apps/api/src/modules/
 ├── merchant/
@@ -186,6 +207,7 @@ apps/api/src/modules/
 ```
 
 ### 路由注册
+
 ```
 apps/api/src/trpc/
 └── app.router.ts (已更新)
@@ -222,6 +244,7 @@ apps/api/src/trpc/
 ### Week 2-3: 核心交易引擎
 
 **待实现：**
+
 1. **微信支付集成**
    - 创建 PaymentService
    - 集成 wechatpay-node-v3
@@ -238,6 +261,7 @@ apps/api/src/trpc/
    - 实现退款逻辑
 
 **环境准备：**
+
 - [ ] 配置微信支付参数
 - [ ] 安装 Redis
 - [ ] 配置 OSS 文件存储
@@ -247,6 +271,7 @@ apps/api/src/trpc/
 ## 📝 验证方法
 
 ### 1. 数据库验证
+
 ```bash
 # 查看新增的表
 psql -U postgres -d couponHub -c "\dt"
@@ -255,7 +280,9 @@ psql -U postgres -d couponHub -c "\dt"
 ```
 
 ### 2. tRPC 接口测试
+
 在 Admin 前端调用：
+
 ```typescript
 // 测试商户接口
 const result = await trpc.merchant.getMany.query({});
@@ -263,6 +290,7 @@ console.log(result); // { data: [], total: 0, page: 1, pageSize: 10 }
 ```
 
 ### 3. 构建验证
+
 ```bash
 # 验证项目构建
 pnpm build
@@ -277,6 +305,7 @@ pnpm build
 第一阶段（Week 1）数据建模工作已全部完成，所有核心业务模型、Schema 定义和基础 Service/Router 都已就绪。项目已成功构建，数据库迁移已应用。
 
 **关键成就：**
+
 - ✅ 6 个核心数据模型
 - ✅ 完整的 Zod Schema 定义
 - ✅ 5 个基础 Service

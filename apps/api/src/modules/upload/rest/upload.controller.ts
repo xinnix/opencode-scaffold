@@ -1,11 +1,4 @@
-import {
-  Controller,
-  Post,
-  UseInterceptors,
-  UploadedFile,
-  Body,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Post, UseInterceptors, UploadedFile, Body, UseGuards } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../../../core/guards/jwt.guard';
 import { UploadService } from '../services/upload.service';
@@ -20,10 +13,7 @@ export class UploadController {
    */
   @Post('avatar')
   @UseInterceptors(FileInterceptor('file'))
-  async uploadAvatar(
-    @UploadedFile() file: any,
-    @Body('userId') userId: string,
-  ) {
+  async uploadAvatar(@UploadedFile() file: any, @Body('userId') userId: string) {
     const result = await this.uploadService.uploadFile(file, 'avatars');
     return {
       success: true,
@@ -36,10 +26,7 @@ export class UploadController {
    */
   @Post('image')
   @UseInterceptors(FileInterceptor('file'))
-  async uploadImage(
-    @UploadedFile() file: any,
-    @Body('type') type: string = 'general',
-  ) {
+  async uploadImage(@UploadedFile() file: any, @Body('type') type: string = 'general') {
     const result = await this.uploadService.uploadFile(file, type);
     return {
       success: true,

@@ -56,7 +56,12 @@ const BUSINESS_PATTERNS: BusinessPattern[] = [
       { name: 'stock', type: 'number', required: true },
       { name: 'minStock', type: 'number', required: false },
       { name: 'images', type: 'string', required: false },
-      { name: 'status', type: 'enum', required: true, enum: ['active', 'inactive', 'discontinued'] },
+      {
+        name: 'status',
+        type: 'enum',
+        required: true,
+        enum: ['active', 'inactive', 'discontinued'],
+      },
     ],
   },
   {
@@ -93,7 +98,12 @@ const BUSINESS_PATTERNS: BusinessPattern[] = [
       { name: 'orderNumber', type: 'string', required: true },
       { name: 'customerId', type: 'string', required: true },
       { name: 'total', type: 'float', required: true },
-      { name: 'status', type: 'enum', required: true, enum: ['pending', 'paid', 'shipped', 'delivered', 'cancelled'] },
+      {
+        name: 'status',
+        type: 'enum',
+        required: true,
+        enum: ['pending', 'paid', 'shipped', 'delivered', 'cancelled'],
+      },
       { name: 'notes', type: 'text', required: false },
       { name: 'shippingAddress', type: 'text', required: false },
     ],
@@ -142,7 +152,12 @@ const BUSINESS_PATTERNS: BusinessPattern[] = [
       { name: 'startAt', type: 'date', required: true },
       { name: 'endAt', type: 'date', required: true },
       { name: 'location', type: 'string', required: false },
-      { name: 'status', type: 'enum', required: true, enum: ['scheduled', 'ongoing', 'completed', 'cancelled'] },
+      {
+        name: 'status',
+        type: 'enum',
+        required: true,
+        enum: ['scheduled', 'ongoing', 'completed', 'cancelled'],
+      },
     ],
   },
 ];
@@ -191,7 +206,13 @@ function toPlural(str: string): string {
   if (str.endsWith('y')) {
     return str.slice(0, -1) + 'ies';
   }
-  if (str.endsWith('s') || str.endsWith('x') || str.endsWith('z') || str.endsWith('ch') || str.endsWith('sh')) {
+  if (
+    str.endsWith('s') ||
+    str.endsWith('x') ||
+    str.endsWith('z') ||
+    str.endsWith('ch') ||
+    str.endsWith('sh')
+  ) {
     return str + 'es';
   }
   return str + 's';
@@ -209,7 +230,7 @@ function toLabel(str: string): string {
 function detectPattern(moduleName: string): BusinessPattern | null {
   const lowerName = moduleName.toLowerCase();
   for (const pattern of BUSINESS_PATTERNS) {
-    if (pattern.keywords.some(keyword => lowerName.includes(keyword) || lowerName === keyword)) {
+    if (pattern.keywords.some((keyword) => lowerName.includes(keyword) || lowerName === keyword)) {
       return pattern;
     }
   }
@@ -273,7 +294,7 @@ function generateZodSchemas(moduleName: string, fields: Field[]): string {
   for (const field of fields) {
     if (field.name === 'id') continue;
     let zodType = field.enum
-      ? `z.enum([${field.enum.map(e => `"${e}"`).join(', ')}])`
+      ? `z.enum([${field.enum.map((e) => `"${e}"`).join(', ')}])`
       : ZOD_TYPE_MAP[field.type];
     if (!field.required) zodType += '.optional()';
     output += `    ${field.name}: ${zodType},\n`;
@@ -286,7 +307,7 @@ function generateZodSchemas(moduleName: string, fields: Field[]): string {
   for (const field of fields) {
     if (field.name === 'id') continue;
     let zodType = field.enum
-      ? `z.enum([${field.enum.map(e => `"${e}"`).join(', ')}])`
+      ? `z.enum([${field.enum.map((e) => `"${e}"`).join(', ')}])`
       : ZOD_TYPE_MAP[field.type];
     // For optional string/text fields, make them nullable to handle form null values
     if (!field.required && (field.type === 'string' || field.type === 'text')) {
@@ -368,7 +389,9 @@ function generateFrontendListPage(moduleName: string, fields: Field[]): string {
   let formFields = '';
   for (const field of fields) {
     if (field.name === 'id') continue;
-    const required = field.required ? ` rules={[{ required: true, message: "请输入${toLabel(field.name)}" }]}` : '';
+    const required = field.required
+      ? ` rules={[{ required: true, message: "请输入${toLabel(field.name)}" }]}`
+      : '';
     const label = toLabel(field.name);
 
     if (field.type === 'boolean') {
@@ -432,7 +455,10 @@ ${columns}  const handleCreate = () => {
       const { id, ...dataValues } = values;
 
       // Convert string to number for numeric fields (Ant Design Input type="number" returns string)
-      const numericFields = [${fields.filter(f => f.type === 'number' || f.type === 'float').map(f => `'${f.name}'`).join(', ')}];
+      const numericFields = [${fields
+        .filter((f) => f.type === 'number' || f.type === 'float')
+        .map((f) => `'${f.name}'`)
+        .join(', ')}];
       const processedValues = { ...dataValues };
       numericFields.forEach((field: string) => {
         if (processedValues[field]) {
@@ -579,7 +605,10 @@ function updateAppTsx(moduleName: string): void {
 
   // Add route - Must be inside AdminLayout
   // Find the closing </Route> for the last route inside AdminLayout
-  const adminLayoutEnd = content.indexOf('</Route>', content.indexOf('<Route path="/" element={<AdminLayout'));
+  const adminLayoutEnd = content.indexOf(
+    '</Route>',
+    content.indexOf('<Route path="/" element={<AdminLayout'),
+  );
   const route = `                  <Route path="${pluralName}" element={<${pascalName}ListPage />} />\n`;
   if (!content.includes(`<${pascalName}ListPage`)) {
     content = content.slice(0, adminLayoutEnd) + route + content.slice(adminLayoutEnd);
@@ -623,7 +652,7 @@ function updateAdminLayout(moduleName: string): void {
   if (!content.includes('FolderOutlined')) {
     content = content.replace(
       'import {\n  DashboardOutlined,',
-      'import {\n  DashboardOutlined,\n  FolderOutlined,'
+      'import {\n  DashboardOutlined,\n  FolderOutlined,',
     );
   }
 
@@ -674,7 +703,9 @@ export async function generateModule(options: GenerateOptions): Promise<void> {
   // Step 1: Get fields
   const fields = getFieldsForModule(moduleName, customFields);
   console.log('\x1b[36m%s\x1b[0m', `\n📋 Fields (${fields.length}):`);
-  fields.forEach(f => console.log(`   - ${f.name}: ${f.type}${f.required ? ' (required)' : ' (optional)'}`));
+  fields.forEach((f) =>
+    console.log(`   - ${f.name}: ${f.type}${f.required ? ' (required)' : ' (optional)'}`),
+  );
 
   if (dryRun) {
     console.log('\n\x1b[33m%s\x1b[0m', '⚠️  Dry run mode - no files will be created');
@@ -702,7 +733,9 @@ export async function generateModule(options: GenerateOptions): Promise<void> {
   // Step 5: Generate Frontend List Page (with Modal for create/edit)
   console.log('\x1b[32m%s\x1b[0m', '✓ Generating frontend list page...');
   const listPage = generateFrontendListPage(moduleName, fields);
-  const listPagePath = getFilePath(`apps/admin/src/modules/${moduleName}/pages/${pascalName}ListPage.tsx`);
+  const listPagePath = getFilePath(
+    `apps/admin/src/modules/${moduleName}/pages/${pascalName}ListPage.tsx`,
+  );
   createFile(listPagePath, listPage);
 
   // Step 5.5: Create module index.ts
@@ -725,7 +758,9 @@ export async function generateModule(options: GenerateOptions): Promise<void> {
   console.log('%s', '━'.repeat(50));
   console.log('\n📝 Next steps:');
   console.log(`   1. Review generated files`);
-  console.log(`   2. Run migration: cd infra/database && npx prisma migrate dev --name add_${camelName}`);
+  console.log(
+    `   2. Run migration: cd infra/database && npx prisma migrate dev --name add_${camelName}`,
+  );
   console.log(`   3. Generate Prisma client: npx prisma generate`);
   console.log(`   4. Start servers: pnpm dev\n`);
 }

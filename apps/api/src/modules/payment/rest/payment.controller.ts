@@ -9,11 +9,7 @@ import {
   Logger,
   BadRequestException,
 } from '@nestjs/common';
-import {
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { WechatPayService } from '../services/wechat-pay.service';
 
@@ -22,9 +18,7 @@ import { WechatPayService } from '../services/wechat-pay.service';
 export class PaymentController {
   private readonly logger = new Logger(PaymentController.name);
 
-  constructor(
-    private readonly wechatPayService: WechatPayService,
-  ) {}
+  constructor(private readonly wechatPayService: WechatPayService) {}
 
   /**
    * 微信支付回调通知
@@ -46,15 +40,12 @@ export class PaymentController {
     }
 
     try {
-      const payment = await this.wechatPayService.handleCallback(
-        rawBody,
-        {
-          'wechatpay-timestamp': headers['wechatpay-timestamp'],
-          'wechatpay-nonce': headers['wechatpay-nonce'],
-          'wechatpay-signature': headers['wechatpay-signature'],
-          'wechatpay-serial': headers['wechatpay-serial'],
-        },
-      );
+      const payment = await this.wechatPayService.handleCallback(rawBody, {
+        'wechatpay-timestamp': headers['wechatpay-timestamp'],
+        'wechatpay-nonce': headers['wechatpay-nonce'],
+        'wechatpay-signature': headers['wechatpay-signature'],
+        'wechatpay-serial': headers['wechatpay-serial'],
+      });
 
       res.status(200).send();
 
@@ -86,15 +77,12 @@ export class PaymentController {
     }
 
     try {
-      const refund = await this.wechatPayService.handleRefundCallback(
-        rawBody,
-        {
-          'wechatpay-timestamp': headers['wechatpay-timestamp'],
-          'wechatpay-nonce': headers['wechatpay-nonce'],
-          'wechatpay-signature': headers['wechatpay-signature'],
-          'wechatpay-serial': headers['wechatpay-serial'],
-        },
-      );
+      const refund = await this.wechatPayService.handleRefundCallback(rawBody, {
+        'wechatpay-timestamp': headers['wechatpay-timestamp'],
+        'wechatpay-nonce': headers['wechatpay-nonce'],
+        'wechatpay-signature': headers['wechatpay-signature'],
+        'wechatpay-serial': headers['wechatpay-serial'],
+      });
 
       res.status(200).send();
 

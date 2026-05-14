@@ -3,6 +3,7 @@
 ## ⚠️ 重要警告
 
 **这是一个高风险操作，请务必：**
+
 1. 在低峰时段执行（建议凌晨）
 2. 先在测试环境验证
 3. 做好完整备份
@@ -21,6 +22,7 @@ docker exec <postgres-container-name> psql -U <db-user> -d couponHub -c "SELECT 
 ```
 
 **预期结果：**
+
 - 如果显示 `UTC` → 需要修改
 - 如果显示 `Asia/Shanghai` → 已正确配置
 
@@ -40,6 +42,7 @@ EOF
 ```
 
 **评估：**
+
 - < 1000 条 → 可以考虑修复旧数据
 - > 1000 条 → 建议**只修改配置，不修复旧数据**
 
@@ -85,6 +88,7 @@ docker exec <postgres-container-name> psql -U <db-user> -d couponHub -c "SELECT 
 ```
 
 **预期结果：**
+
 ```
    TimeZone
 ---------------
@@ -104,6 +108,7 @@ docker exec <postgres-container-name> psql -U <db-user> -d couponHub -c "SELECT 
 #### ⚠️ 警告：此操作会修改所有历史数据
 
 **仅在以下情况执行：**
+
 - 数据量 < 1000 条
 - 已完整备份
 - 有停机窗口（建议暂停服务）
@@ -355,16 +360,19 @@ this.logger.log(`订单创建：${order.orderNo}, createdAt: ${order.createdAt},
 ### 1. 只修改配置，不修复旧数据（推荐）
 
 **优点：**
+
 - 零风险，不影响现有数据
 - 不需要停机
 - 新数据立即使用正确时间
 
 **缺点：**
+
 - 旧数据时间仍为 UTC（需要前端显示时 +8 小时）
 
 ### 2. 完整修复（仅适用于新系统）
 
 **条件：**
+
 - 数据量 < 1000 条
 - 系统刚上线，历史数据不重要
 - 有完整备份和停机窗口
@@ -372,6 +380,7 @@ this.logger.log(`订单创建：${order.orderNo}, createdAt: ${order.createdAt},
 ### 3. 分阶段修复（大型系统）
 
 **步骤：**
+
 1. 先修改配置（立即生效）
 2. 每天凌晨批量修复前一天的数据
 3. 逐步修复历史数据
@@ -387,6 +396,7 @@ this.logger.log(`订单创建：${order.orderNo}, createdAt: ${order.createdAt},
 ### Q2: 旧订单的时间会在前端显示错误吗？
 
 **A:** 是的。如果前端直接显示数据库时间，旧订单会显示 UTC 时间。解决方案：
+
 - **方案 1：** 前端根据订单号判断（订单号包含正确时间）
 - **方案 2：** 前端显示时统一 +8 小时
 - **方案 3：** 执行旧数据修复脚本
@@ -398,6 +408,7 @@ this.logger.log(`订单创建：${order.orderNo}, createdAt: ${order.createdAt},
 ### Q4: 如何确保 Docker 容器也使用正确时区？
 
 **A:** 在 `docker-compose.prod.yml` 中添加：
+
 ```yaml
 environment:
   - TZ=Asia/Shanghai

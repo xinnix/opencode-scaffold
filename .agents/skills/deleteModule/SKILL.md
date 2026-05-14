@@ -27,6 +27,7 @@ node .Codex/skills/deleteModule/delete-module.ts product --force
 自动删除以下内容：
 
 ### 后端文件
+
 - `apps/api/src/modules/<moduleName>/` - 整个模块目录
 - `apps/api/src/modules/<moduleName>/rest/<moduleName>.controller.ts`
 - `apps/api/src/modules/<moduleName>/rest/index.ts`
@@ -38,16 +39,19 @@ node .Codex/skills/deleteModule/delete-module.ts product --force
 - `apps/api/src/modules/<moduleName>/index.ts`
 
 ### 前端文件
+
 - `apps/admin/src/modules/<moduleName>/` - 整个模块目录
 - `apps/admin/src/modules/<moduleName>/pages/<ModuleName>ListPage.tsx`
 - `apps/admin/src/modules/<moduleName>/index.ts`
 
 ### 配置文件更新
+
 - `apps/api/src/trpc/app.router.ts` - 移除 router 导入和注册
 - `apps/admin/src/App.tsx` - 移除页面导入、路由和资源配置
 - `apps/admin/src/shared/layouts/AdminLayout.tsx` - 移除菜单项
 
 ### 数据库
+
 - Prisma schema 中的模型（需要手动执行迁移）
 - 相关的 Zod schemas（从 `infra/shared/src/index.ts`）
 
@@ -86,6 +90,7 @@ node .Codex/skills/deleteModule/delete-module.ts product --force
 ### 问题：Prisma 迁移失败
 
 **解决**：
+
 ```bash
 cd infra/database
 npx prisma migrate dev --name drop_<module>

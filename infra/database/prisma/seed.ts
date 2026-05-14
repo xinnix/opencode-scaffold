@@ -386,7 +386,7 @@ async function main() {
 
   // Admin gets most permissions
   const adminPermissions = permissions.filter(
-    (p) => !p.action.includes('delete') || p.resource === 'todo'
+    (p) => !p.action.includes('delete') || p.resource === 'todo',
   );
   for (const permission of adminPermissions) {
     await prisma.rolePermission.upsert({
@@ -609,9 +609,9 @@ async function main() {
     }),
   ]);
 
-  const restaurantCategory = categories.find(c => c.slug === 'restaurant')!;
-  const retailCategory = categories.find(c => c.slug === 'retail')!;
-  const entertainmentCategory = categories.find(c => c.slug === 'entertainment')!;
+  const restaurantCategory = categories.find((c) => c.slug === 'restaurant')!;
+  const retailCategory = categories.find((c) => c.slug === 'retail')!;
+  const entertainmentCategory = categories.find((c) => c.slug === 'entertainment')!;
 
   console.log(`✅ Created ${categories.length} merchant categories`);
 
@@ -766,7 +766,9 @@ async function main() {
   // 获取刚创建的券模板
   const allTemplates = await prisma.couponTemplate.findMany();
   const template1 = allTemplates.find((t) => t.title.includes('火锅'))!;
-  const template2 = allTemplates.find((t) => t.title.includes('星巴克') || t.title.includes('饮品'))!;
+  const template2 = allTemplates.find(
+    (t) => t.title.includes('星巴克') || t.title.includes('饮品'),
+  )!;
   const template3 = allTemplates.find((t) => t.title.includes('观影') || t.title.includes('9.9'))!;
   const template4 = allTemplates.find((t) => t.title.includes('通用'))!;
 
@@ -850,7 +852,8 @@ async function main() {
       {
         title: '春季美食节盛大开幕',
         bannerUrl: 'https://example.com/news1.jpg',
-        content: '<p>春季美食节活动火热进行中！</p><p>参与商户：海底捞、星巴克、肯德基等</p><p>活动时间：2024年3月1日-3月31日</p>',
+        content:
+          '<p>春季美食节活动火热进行中！</p><p>参与商户：海底捞、星巴克、肯德基等</p><p>活动时间：2024年3月1日-3月31日</p>',
         viewCount: 1523,
         status: 'PUBLISHED',
       },

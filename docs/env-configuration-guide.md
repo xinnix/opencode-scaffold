@@ -208,6 +208,7 @@ SERVER_URL=http://localhost:3000
 ### Q: OSS 上传失败?
 
 检查:
+
 1. CORS 配置是否正确
 2. Bucket 权限是否允许写入
 3. AccessKey 是否有效
@@ -216,6 +217,7 @@ SERVER_URL=http://localhost:3000
 ### Q: 微信支付回调失败?
 
 检查:
+
 1. `WX_PAY_NOTIFY_URL` 是否为 HTTPS
 2. 服务器是否可以从外网访问
 3. 证书文件路径是否正确
@@ -224,6 +226,7 @@ SERVER_URL=http://localhost:3000
 ### Q: JWT 认证失败?
 
 检查:
+
 1. `JWT_SECRET` 是否一致
 2. Token 是否过期
 3. 前后端时间是否同步

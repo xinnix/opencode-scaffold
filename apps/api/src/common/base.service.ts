@@ -351,9 +351,7 @@ export abstract class BaseService<T extends string> {
     }
 
     if ((record as any)[field] !== userId) {
-      throw new ForbiddenException(
-        `You do not have permission to access this ${this.modelName}`,
-      );
+      throw new ForbiddenException(`You do not have permission to access this ${this.modelName}`);
     }
 
     return record;

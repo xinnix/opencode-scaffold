@@ -89,7 +89,12 @@ const BUSINESS_PATTERNS: BusinessPattern[] = [
       { name: 'stock', type: 'number', required: true },
       { name: 'minStock', type: 'number', required: false },
       { name: 'images', type: 'string', required: false },
-      { name: 'status', type: 'enum', required: true, enum: ['active', 'inactive', 'discontinued'] },
+      {
+        name: 'status',
+        type: 'enum',
+        required: true,
+        enum: ['active', 'inactive', 'discontinued'],
+      },
     ],
   },
   {
@@ -126,7 +131,12 @@ const BUSINESS_PATTERNS: BusinessPattern[] = [
       { name: 'orderNumber', type: 'string', required: true },
       { name: 'customerId', type: 'string', required: true },
       { name: 'total', type: 'float', required: true },
-      { name: 'status', type: 'enum', required: true, enum: ['pending', 'paid', 'shipped', 'delivered', 'cancelled'] },
+      {
+        name: 'status',
+        type: 'enum',
+        required: true,
+        enum: ['pending', 'paid', 'shipped', 'delivered', 'cancelled'],
+      },
       { name: 'notes', type: 'text', required: false },
       { name: 'shippingAddress', type: 'text', required: false },
     ],
@@ -175,7 +185,12 @@ const BUSINESS_PATTERNS: BusinessPattern[] = [
       { name: 'startAt', type: 'date', required: true },
       { name: 'endAt', type: 'date', required: true },
       { name: 'location', type: 'string', required: false },
-      { name: 'status', type: 'enum', required: true, enum: ['scheduled', 'ongoing', 'completed', 'cancelled'] },
+      {
+        name: 'status',
+        type: 'enum',
+        required: true,
+        enum: ['scheduled', 'ongoing', 'completed', 'cancelled'],
+      },
     ],
   },
 ];
@@ -200,27 +215,36 @@ const PRISMA_TYPE_MAP: Record<string, string> = {
 // Phase 2: Smart Field Inference Rules
 // ============================================
 
-const FIELD_INFERENCE_RULES: Record<string, {
-  patterns: string[];
-  uiComponent: string;
-  uiProps: (fieldName: string) => string;
-  zodRule: (required: boolean) => string;
-  zodUpdateRule: () => string;
-  columnRender: (fieldName: string) => string;
-}> = {
+const FIELD_INFERENCE_RULES: Record<
+  string,
+  {
+    patterns: string[];
+    uiComponent: string;
+    uiProps: (fieldName: string) => string;
+    zodRule: (required: boolean) => string;
+    zodUpdateRule: () => string;
+    columnRender: (fieldName: string) => string;
+  }
+> = {
   currency: {
     patterns: ['price', 'amount', 'cost', 'fee', 'total', 'payment', 'salary', 'discount'],
     uiComponent: 'InputNumber',
-    uiProps: () => `formatter={(value) => \`¥ \${value}\`.replace(/\\B(?=(\\d{3})+(?!\\d))/g, ",")} parser={(value) => Number(value!.replace(/¥\\s?|(,*)/g, "")) as 0} precision={2} min={0} style={{ width: "100%" }}`,
-    zodRule: (required) => required ? 'z.number().min(0, "不能小于0")' : 'z.number().min(0, "不能小于0").optional()',
+    uiProps: () =>
+      `formatter={(value) => \`¥ \${value}\`.replace(/\\B(?=(\\d{3})+(?!\\d))/g, ",")} parser={(value) => Number(value!.replace(/¥\\s?|(,*)/g, "")) as 0} precision={2} min={0} style={{ width: "100%" }}`,
+    zodRule: (required) =>
+      required ? 'z.number().min(0, "不能小于0")' : 'z.number().min(0, "不能小于0").optional()',
     zodUpdateRule: () => 'z.number().min(0, "不能小于0").optional()',
-    columnRender: (fieldName) => `render: (${fieldName}: number) => ${fieldName} !== undefined ? \`¥\${${fieldName}.toFixed(2)}\` : "-"`,
+    columnRender: (fieldName) =>
+      `render: (${fieldName}: number) => ${fieldName} !== undefined ? \`¥\${${fieldName}.toFixed(2)}\` : "-"`,
   },
   email: {
     patterns: ['email', 'mail'],
     uiComponent: 'Input',
     uiProps: () => `type="email" placeholder="请输入邮箱"`,
-    zodRule: (required) => required ? 'z.string().email("邮箱格式不正确")' : 'z.string().email("邮箱格式不正确").optional().or(z.literal(""))',
+    zodRule: (required) =>
+      required
+        ? 'z.string().email("邮箱格式不正确")'
+        : 'z.string().email("邮箱格式不正确").optional().or(z.literal(""))',
     zodUpdateRule: () => 'z.string().email("邮箱格式不正确").optional().nullable()',
     columnRender: () => '',
   },
@@ -228,55 +252,89 @@ const FIELD_INFERENCE_RULES: Record<string, {
     patterns: ['phone', 'mobile', 'telephone', 'cellphone'],
     uiComponent: 'Input',
     uiProps: () => `type="tel" placeholder="请输入手机号" maxLength={11}`,
-    zodRule: (required) => required ? 'z.string().regex(/^1[3-9]\\d{9}$/, "手机号格式不正确")' : 'z.string().regex(/^1[3-9]\\d{9}$/, "手机号格式不正确").optional().or(z.literal(""))',
-    zodUpdateRule: () => 'z.string().regex(/^1[3-9]\\d{9}$/, "手机号格式不正确").optional().nullable()',
+    zodRule: (required) =>
+      required
+        ? 'z.string().regex(/^1[3-9]\\d{9}$/, "手机号格式不正确")'
+        : 'z.string().regex(/^1[3-9]\\d{9}$/, "手机号格式不正确").optional().or(z.literal(""))',
+    zodUpdateRule: () =>
+      'z.string().regex(/^1[3-9]\\d{9}$/, "手机号格式不正确").optional().nullable()',
     columnRender: () => '',
   },
   url: {
     patterns: ['url', 'website', 'link', 'homepage'],
     uiComponent: 'Input',
     uiProps: () => `type="url" placeholder="请输入URL（https://...）"`,
-    zodRule: (required) => required ? 'z.string().url("URL格式不正确")' : 'z.string().url("URL格式不正确").optional().or(z.literal(""))',
+    zodRule: (required) =>
+      required
+        ? 'z.string().url("URL格式不正确")'
+        : 'z.string().url("URL格式不正确").optional().or(z.literal(""))',
     zodUpdateRule: () => 'z.string().url("URL格式不正确").optional().nullable()',
-    columnRender: () => `render: (url: string) => url ? <a href={url} target="_blank" rel="noreferrer">{url}</a> : "-"`,
+    columnRender: () =>
+      `render: (url: string) => url ? <a href={url} target="_blank" rel="noreferrer">{url}</a> : "-"`,
   },
   slug: {
     patterns: ['slug', 'alias'],
     uiComponent: 'Input',
-    uiProps: () => `placeholder="自动生成或手动输入" addonAfter={<Button size="small" type="link">生成</Button>}`,
-    zodRule: (required) => required ? 'z.string().regex(/^[a-z0-9-]+$/, "只能包含小写字母、数字和连字符")' : 'z.string().regex(/^[a-z0-9-]+$/, "只能包含小写字母、数字和连字符").optional()',
-    zodUpdateRule: () => 'z.string().regex(/^[a-z0-9-]+$/, "只能包含小写字母、数字和连字符").optional()',
+    uiProps: () =>
+      `placeholder="自动生成或手动输入" addonAfter={<Button size="small" type="link">生成</Button>}`,
+    zodRule: (required) =>
+      required
+        ? 'z.string().regex(/^[a-z0-9-]+$/, "只能包含小写字母、数字和连字符")'
+        : 'z.string().regex(/^[a-z0-9-]+$/, "只能包含小写字母、数字和连字符").optional()',
+    zodUpdateRule: () =>
+      'z.string().regex(/^[a-z0-9-]+$/, "只能包含小写字母、数字和连字符").optional()',
     columnRender: () => `render: (val: string) => val ? <Tag>{val}</Tag> : "-"`,
   },
   image: {
     patterns: ['avatar', 'logo', 'icon', 'cover', 'thumbnail', 'image', 'picture', 'photo'],
     uiComponent: 'OSSUpload',
-    uiProps: (fieldName) => `type="${fieldName}" accept="image/jpeg,image/png,image/webp" maxFileSize={5 * 1024 * 1024}`,
+    uiProps: (fieldName) =>
+      `type="${fieldName}" accept="image/jpeg,image/png,image/webp" maxFileSize={5 * 1024 * 1024}`,
     zodRule: () => 'z.string().optional()',
     zodUpdateRule: () => 'z.string().nullable().optional()',
-    columnRender: (fieldName) => `render: (${fieldName}: string) => ${fieldName} ? <img src={${fieldName}} alt="" style={{ width: 40, height: 40, objectFit: "cover", borderRadius: 4 }} /> : "-"`,
+    columnRender: (fieldName) =>
+      `render: (${fieldName}: string) => ${fieldName} ? <img src={${fieldName}} alt="" style={{ width: 40, height: 40, objectFit: "cover", borderRadius: 4 }} /> : "-"`,
   },
   date: {
-    patterns: ['date', 'At', 'Time', 'deadline', 'expiredAt', 'startAt', 'endAt', 'beginAt', 'finishAt', 'createdAt', 'updatedAt', 'publishedAt', 'dueDate'],
+    patterns: [
+      'date',
+      'At',
+      'Time',
+      'deadline',
+      'expiredAt',
+      'startAt',
+      'endAt',
+      'beginAt',
+      'finishAt',
+      'createdAt',
+      'updatedAt',
+      'publishedAt',
+      'dueDate',
+    ],
     uiComponent: 'DatePicker',
     uiProps: () => `showTime style={{ width: "100%" }} format="YYYY-MM-DD HH:mm:ss"`,
-    zodRule: (required) => required ? 'z.date()' : 'z.date().optional()',
+    zodRule: (required) => (required ? 'z.date()' : 'z.date().optional()'),
     zodUpdateRule: () => 'z.date().optional().nullable()',
-    columnRender: (fieldName) => `render: (${fieldName}: string) => ${fieldName} ? new Date(${fieldName}).toLocaleString("zh-CN") : "-"`,
+    columnRender: (fieldName) =>
+      `render: (${fieldName}: string) => ${fieldName} ? new Date(${fieldName}).toLocaleString("zh-CN") : "-"`,
   },
   percent: {
     patterns: ['rate', 'percent', 'ratio', 'discount'],
     uiComponent: 'InputNumber',
-    uiProps: () => `min={0} max={100} precision={2} formatter={(value) => \`\${value}%\`} parser={(value) => Number(value!.replace("%", "")) as 0} style={{ width: "100%" }}`,
-    zodRule: (required) => required ? 'z.number().min(0).max(100)' : 'z.number().min(0).max(100).optional()',
+    uiProps: () =>
+      `min={0} max={100} precision={2} formatter={(value) => \`\${value}%\`} parser={(value) => Number(value!.replace("%", "")) as 0} style={{ width: "100%" }}`,
+    zodRule: (required) =>
+      required ? 'z.number().min(0).max(100)' : 'z.number().min(0).max(100).optional()',
     zodUpdateRule: () => 'z.number().min(0).max(100).optional()',
-    columnRender: (fieldName) => `render: (${fieldName}: number) => ${fieldName} !== undefined ? \`\${${fieldName}}%\` : "-"`,
+    columnRender: (fieldName) =>
+      `render: (${fieldName}: number) => ${fieldName} !== undefined ? \`\${${fieldName}}%\` : "-"`,
   },
   sort: {
     patterns: ['sortOrder', 'priority', 'order', 'sort', 'weight', 'sequence'],
     uiComponent: 'InputNumber',
     uiProps: () => `min={0} style={{ width: "100%" }}`,
-    zodRule: (required) => required ? 'z.number().int().min(0)' : 'z.number().int().min(0).optional()',
+    zodRule: (required) =>
+      required ? 'z.number().int().min(0)' : 'z.number().int().min(0).optional()',
     zodUpdateRule: () => 'z.number().int().min(0).optional()',
     columnRender: () => '',
   },
@@ -297,24 +355,28 @@ function inferFieldConfig(field: Field): InferredFieldConfig | null {
   const lowerName = field.name.toLowerCase();
 
   for (const [ruleName, rule] of Object.entries(FIELD_INFERENCE_RULES)) {
-    const matched = rule.patterns.some(pattern => {
+    const matched = rule.patterns.some((pattern) => {
       const lowerPattern = pattern.toLowerCase();
       // Exact match (highest priority)
       if (lowerName === lowerPattern) return true;
 
       // Suffix match for specific patterns (e.g., "startAt" matches "At")
-      if ((ruleName === 'date') && lowerName.endsWith(lowerPattern) && pattern.length > 2) return true;
+      if (ruleName === 'date' && lowerName.endsWith(lowerPattern) && pattern.length > 2)
+        return true;
 
       // Word boundary match: field name contains pattern as a distinct word
       // Use regex to ensure we match whole words, not substrings
-      const regex = new RegExp(`(^|_|)${lowerPattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}($|[A-Z]|_)`, 'i');
+      const regex = new RegExp(
+        `(^|_|)${lowerPattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}($|[A-Z]|_)`,
+        'i',
+      );
       if (regex.test(field.name)) return true;
 
       return false;
     });
 
     if (matched) {
-      const isAudit = rule.patterns.some(p => field.name === p);
+      const isAudit = rule.patterns.some((p) => field.name === p);
 
       return {
         uiComponent: rule.uiComponent,
@@ -336,7 +398,11 @@ function inferFieldConfig(field: Field): InferredFieldConfig | null {
 // Phase 2: Relation Field Detection
 // ============================================
 
-const RELATION_PATTERNS: { suffix: string; getModel: (base: string) => string; ui: RelationField['uiComponent'] }[] = [
+const RELATION_PATTERNS: {
+  suffix: string;
+  getModel: (base: string) => string;
+  ui: RelationField['uiComponent'];
+}[] = [
   // More specific patterns FIRST (before generic *Id)
   { suffix: 'CategoryId', getModel: () => 'Category', ui: 'Select' },
   { suffix: 'ParentId', getModel: () => 'SELF', ui: 'TreeSelect' },
@@ -359,7 +425,10 @@ function detectRelationFields(fields: Field[], moduleName: string): RelationFiel
 
     for (const pattern of RELATION_PATTERNS) {
       // Exact match (e.g., field.name === 'categoryId' matches pattern.suffix 'CategoryId')
-      if (field.name === pattern.suffix || field.name === pattern.suffix.charAt(0).toLowerCase() + pattern.suffix.slice(1)) {
+      if (
+        field.name === pattern.suffix ||
+        field.name === pattern.suffix.charAt(0).toLowerCase() + pattern.suffix.slice(1)
+      ) {
         const isSelfRelation = pattern.getModel(field.name) === 'SELF';
         const model = isSelfRelation ? toPascalCase(moduleName) : pattern.getModel(field.name);
 
@@ -383,15 +452,15 @@ function detectRelationFields(fields: Field[], moduleName: string): RelationFiel
 // ============================================
 
 function selectUIPattern(fields: Field[], moduleName: string): UIPatternConfig {
-  const hasRichText = fields.some(f =>
-    f.type === 'text' && ['content', 'body', 'description', 'detail'].includes(f.name.toLowerCase())
+  const hasRichText = fields.some(
+    (f) =>
+      f.type === 'text' &&
+      ['content', 'body', 'description', 'detail'].includes(f.name.toLowerCase()),
   );
-  const hasStateMachine = fields.some(f =>
-    f.type === 'enum' && f.enum && f.enum.length >= 4
-  );
-  const hasTreeStructure = fields.some(f => f.name === 'parentId');
-  const hasMultipleImages = fields.some(f =>
-    f.name === 'images' || f.name === 'gallery' || f.name === 'photos'
+  const hasStateMachine = fields.some((f) => f.type === 'enum' && f.enum && f.enum.length >= 4);
+  const hasTreeStructure = fields.some((f) => f.name === 'parentId');
+  const hasMultipleImages = fields.some(
+    (f) => f.name === 'images' || f.name === 'gallery' || f.name === 'photos',
   );
 
   if (hasRichText) {
@@ -440,7 +509,7 @@ function selectUIPattern(fields: Field[], moduleName: string): UIPatternConfig {
 function toPascalCase(str: string): string {
   return str
     .split(/[-_\s]+/)
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join('');
 }
 
@@ -479,14 +548,22 @@ function toPlural(str: string): string {
   const lower = str.toLowerCase();
   if (IRREGULAR_PLURALS[lower]) {
     const plural = IRREGULAR_PLURALS[lower];
-    return str[0] === str[0].toUpperCase() ? plural.charAt(0).toUpperCase() + plural.slice(1) : plural;
+    return str[0] === str[0].toUpperCase()
+      ? plural.charAt(0).toUpperCase() + plural.slice(1)
+      : plural;
   }
   if (str.endsWith('fe')) return str.slice(0, -2) + 'ves';
   if (str.endsWith('f')) return str.slice(0, -1) + 'ves';
   if (str.endsWith('is') && str.length > 2) return str.slice(0, -2) + 'es';
   if (str.endsWith('on') && !str.endsWith('ion')) return str.slice(0, -2) + 'a';
   if (str.endsWith('y') && !/[aeiou]y$/i.test(str)) return str.slice(0, -1) + 'ies';
-  if (str.endsWith('s') || str.endsWith('x') || str.endsWith('z') || str.endsWith('ch') || str.endsWith('sh')) {
+  if (
+    str.endsWith('s') ||
+    str.endsWith('x') ||
+    str.endsWith('z') ||
+    str.endsWith('ch') ||
+    str.endsWith('sh')
+  ) {
     return str + 'es';
   }
   return str + 's';
@@ -504,7 +581,7 @@ function toLabel(str: string): string {
 function detectPattern(moduleName: string): BusinessPattern | null {
   const lowerName = moduleName.toLowerCase();
   for (const pattern of BUSINESS_PATTERNS) {
-    if (pattern.keywords.some(keyword => lowerName.includes(keyword) || lowerName === keyword)) {
+    if (pattern.keywords.some((keyword) => lowerName.includes(keyword) || lowerName === keyword)) {
       return pattern;
     }
   }
@@ -533,14 +610,18 @@ function getFieldsForModule(moduleName: string, customFields?: Field[]): Field[]
 // Code Generators
 // ============================================
 
-function generatePrismaSchema(moduleName: string, fields: Field[], relations: RelationField[]): string {
+function generatePrismaSchema(
+  moduleName: string,
+  fields: Field[],
+  relations: RelationField[],
+): string {
   const pascalName = toPascalCase(moduleName);
 
   let schema = `\nmodel ${pascalName} {\n`;
   schema += `  id        String   @id @default(cuid())\n`;
 
   for (const field of fields) {
-    const isRelation = relations.some(r => r.field === field.name);
+    const isRelation = relations.some((r) => r.field === field.name);
     const prismaType = field.enum ? 'String' : PRISMA_TYPE_MAP[field.type];
     const optional = field.required ? '' : '?';
     const comment = field.enum ? ` // ${field.enum.join(', ')}` : '';
@@ -580,7 +661,7 @@ function generateZodSchemas(moduleName: string, fields: Field[]): string {
     if (inferred && inferred.zodValidation) {
       zodType = inferred.zodValidation;
     } else if (field.enum) {
-      zodType = `z.enum([${field.enum.map(e => `"${e}"`).join(', ')}])`;
+      zodType = `z.enum([${field.enum.map((e) => `"${e}"`).join(', ')}])`;
       if (!field.required) zodType += '.optional()';
     } else {
       zodType = getBaseZodType(field.type);
@@ -600,7 +681,7 @@ function generateZodSchemas(moduleName: string, fields: Field[]): string {
     let zodType: string;
 
     if (field.type === 'enum') {
-      zodType = `z.enum([${field.enum!.map(e => `"${e}"`).join(', ')}]).optional()`;
+      zodType = `z.enum([${field.enum!.map((e) => `"${e}"`).join(', ')}]).optional()`;
     } else {
       const inferred = inferFieldConfig(field);
       if (inferred) {
@@ -609,7 +690,10 @@ function generateZodSchemas(moduleName: string, fields: Field[]): string {
         let matched = false;
         for (const [, rule] of Object.entries(FIELD_INFERENCE_RULES)) {
           const lowerPattern = rule.patterns[0].toLowerCase();
-          const regex = new RegExp(`(^|_|)${lowerPattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}($|[A-Z]|_)`, 'i');
+          const regex = new RegExp(
+            `(^|_|)${lowerPattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}($|[A-Z]|_)`,
+            'i',
+          );
           if (regex.test(field.name) || lowerName === lowerPattern) {
             zodType = rule.zodUpdateRule();
             matched = true;
@@ -780,15 +864,17 @@ function generateFrontendListPage(
   const formFields = generateSmartFormFields(fields, relations, moduleName);
   // Numeric fields list for value conversion
   const numericFields = fields
-    .filter(f => f.type === 'number' || f.type === 'float')
-    .map(f => `'${f.name}'`)
+    .filter((f) => f.type === 'number' || f.type === 'float')
+    .map((f) => `'${f.name}'`)
     .join(', ');
 
   // Check if we need special imports
-  const needsDatePicker = fields.some(f => f.type === 'date' || inferFieldConfig(f)?.uiComponent === 'DatePicker');
-  const needsInputNumber = fields.some(f => inferFieldConfig(f)?.uiComponent === 'InputNumber');
-  const needsOSSUpload = fields.some(f => inferFieldConfig(f)?.uiComponent === 'OSSUpload');
-  const needsTreeSelect = relations.some(r => r.uiComponent === 'TreeSelect');
+  const needsDatePicker = fields.some(
+    (f) => f.type === 'date' || inferFieldConfig(f)?.uiComponent === 'DatePicker',
+  );
+  const needsInputNumber = fields.some((f) => inferFieldConfig(f)?.uiComponent === 'InputNumber');
+  const needsOSSUpload = fields.some((f) => inferFieldConfig(f)?.uiComponent === 'OSSUpload');
+  const needsTreeSelect = relations.some((r) => r.uiComponent === 'TreeSelect');
   const needsTag = columns.includes('<Tag');
 
   const extraImports: string[] = [];
@@ -796,11 +882,22 @@ function generateFrontendListPage(
   if (needsInputNumber) extraImports.push('InputNumber');
   if (needsTag) extraImports.push('Tag');
   if (needsTreeSelect) extraImports.push('TreeSelect');
-  const antdImports = ['Table', 'Button', 'Modal', 'Form', 'Input', 'Select', 'Space', 'message', ...extraImports];
+  const antdImports = [
+    'Table',
+    'Button',
+    'Modal',
+    'Form',
+    'Input',
+    'Select',
+    'Space',
+    'message',
+    ...extraImports,
+  ];
   if (!antdImports.includes('Tag')) antdImports.push('Tag');
 
   const extraComponentImports: string[] = [];
-  if (needsOSSUpload) extraComponentImports.push(`import { OSSUpload } from "../../shared/components/OSSUpload";`);
+  if (needsOSSUpload)
+    extraComponentImports.push(`import { OSSUpload } from "../../shared/components/OSSUpload";`);
 
   return `import { useList, useCreate, useUpdate } from "@refinedev/core";
 import { List } from "@refinedev/antd";
@@ -981,7 +1078,11 @@ function generateSmartColumns(fields: Field[], moduleName: string): string {
   return columns;
 }
 
-function generateSmartFormFields(fields: Field[], relations: RelationField[], moduleName: string): string {
+function generateSmartFormFields(
+  fields: Field[],
+  relations: RelationField[],
+  moduleName: string,
+): string {
   let formFields = '';
 
   for (const field of fields) {
@@ -989,13 +1090,15 @@ function generateSmartFormFields(fields: Field[], relations: RelationField[], mo
 
     const inferred = inferFieldConfig(field);
     const label = toLabel(field.name);
-    const required = field.required ? ` rules={[{ required: true, message: "请输入${label}" }]}` : '';
+    const required = field.required
+      ? ` rules={[{ required: true, message: "请输入${label}" }]}`
+      : '';
 
     // Skip audit / auto-inject fields
     if (inferred?.hideInForm) continue;
 
     // Check if this is a relation field
-    const relation = relations.find(r => r.field === field.name);
+    const relation = relations.find((r) => r.field === field.name);
     if (relation) {
       formFields += generateRelationFormField(relation, field);
       continue;
@@ -1104,7 +1207,25 @@ function generateRelationDataFetching(relations: RelationField[]): string {
 // Validation & Idempotency
 // ============================================
 
-const RESERVED_NAMES = ['admin', 'auth', 'user', 'role', 'permission', 'upload', 'payment', 'wechat', 'agents', 'config', 'system', 'common', 'shared', 'base', 'prisma', 'trpc', 'health'];
+const RESERVED_NAMES = [
+  'admin',
+  'auth',
+  'user',
+  'role',
+  'permission',
+  'upload',
+  'payment',
+  'wechat',
+  'agents',
+  'config',
+  'system',
+  'common',
+  'shared',
+  'base',
+  'prisma',
+  'trpc',
+  'health',
+];
 
 function validateModuleName(name: string): void {
   if (!name || name.trim().length === 0) {
@@ -1142,7 +1263,9 @@ function checkModuleExists(moduleName: string): { exists: boolean; locations: st
   }
 
   // Check frontend page
-  const listPagePath = getFilePath(`apps/admin/src/modules/${moduleName}/pages/${pascalName}ListPage.tsx`);
+  const listPagePath = getFilePath(
+    `apps/admin/src/modules/${moduleName}/pages/${pascalName}ListPage.tsx`,
+  );
   if (fs.existsSync(listPagePath)) {
     locations.push(`Frontend list page (${listPagePath})`);
   }
@@ -1156,6 +1279,12 @@ function checkModuleExists(moduleName: string): { exists: boolean; locations: st
     }
   }
 
+  // Check NestJS Module
+  const nestModulePath = getFilePath(`apps/api/src/modules/${moduleName}/module.ts`);
+  if (fs.existsSync(nestModulePath)) {
+    locations.push(`NestJS Module (${nestModulePath})`);
+  }
+
   return { exists: locations.length > 0, locations };
 }
 
@@ -1164,12 +1293,15 @@ function validateProjectStructure(): void {
     'infra/database/prisma/schema.prisma',
     'infra/shared/src/index.ts',
     'apps/api/src/trpc/app.router.ts',
+    'apps/api/src/app.module.ts',
     'apps/admin/src/App.tsx',
     'apps/admin/src/shared/layouts/AdminLayout.tsx',
   ];
-  const missing = requiredPaths.filter(p => !fs.existsSync(getFilePath(p)));
+  const missing = requiredPaths.filter((p) => !fs.existsSync(getFilePath(p)));
   if (missing.length > 0) {
-    throw new Error(`项目结构不完整，缺少以下文件：\n${missing.map(p => `  - ${p}`).join('\n')}\n请确认在正确的项目根目录运行此脚本`);
+    throw new Error(
+      `项目结构不完整，缺少以下文件：\n${missing.map((p) => `  - ${p}`).join('\n')}\n请确认在正确的项目根目录运行此脚本`,
+    );
   }
 }
 
@@ -1194,7 +1326,10 @@ function getFilePath(relativePath: string): string {
 // Memory registry path (user-level, not in git)
 function getMemoryRegistryPath(): string {
   const home = process.env.HOME || process.env.USERPROFILE || '';
-  return path.join(home, '.claude/projects/-Users-xinnix-code-opencode-scaffold/memory/module-registry.md');
+  return path.join(
+    home,
+    '.claude/projects/-Users-xinnix-code-opencode-scaffold/memory/module-registry.md',
+  );
 }
 
 function updateMemoryRegistry(moduleName: string): void {
@@ -1211,22 +1346,16 @@ function updateMemoryRegistry(moduleName: string): void {
 
     // Add to backend modules table (after wechat row)
     const backendRow = `| ${moduleName} | ${pascalName} | ${camelName}Router | genModule | |`;
-    content = content.replace(
-      /(\| wechat\s+\|.*\|\n)/,
-      `$1${backendRow}\n`
-    );
+    content = content.replace(/(\| wechat\s+\|.*\|\n)/, `$1${backendRow}\n`);
 
     // Add to frontend modules table (after user row)
     const frontendRow = `| ${moduleName} | ${pascalName}ListPage | genModule |`;
-    content = content.replace(
-      /(\| user\s+\|.*\|\n)/,
-      `$1${frontendRow}\n`
-    );
+    content = content.replace(/(\| user\s+\|.*\|\n)/, `$1${frontendRow}\n`);
 
     // Add to Prisma Models list
     content = content.replace(
       /(Prisma Models\n\n)/,
-      `$1${content.includes(pascalName + ',') ? '' : pascalName + ', '}`
+      `$1${content.includes(pascalName + ',') ? '' : pascalName + ', '}`,
     );
 
     fs.writeFileSync(memoryPath, content);
@@ -1301,7 +1430,9 @@ function rollback(): void {
       if (fs.existsSync(dir) && fs.readdirSync(dir).length === 0) {
         fs.rmdirSync(dir);
       }
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }
   console.error('\x1b[33m%s\x1b[0m', '⏪ Rollback complete.');
 }
@@ -1338,11 +1469,17 @@ function updateAppTsx(moduleName: string): void {
     // Add route — find the AdminLayout Route group and insert before its closing </Route>
     const route = `                  <Route path="${pluralName}" element={<${pascalName}ListPage />} />\n`;
     if (!content.includes(`<${pascalName}ListPage`)) {
-      const layoutRouteMatch = content.match(/<Route\s+path="\/"\s+element=\{<AdminLayout[^>]*>[\s\S]*?<\/Route>/);
+      const layoutRouteMatch = content.match(
+        /<Route\s+path="\/"\s+element=\{<AdminLayout[^>]*>[\s\S]*?<\/Route>/,
+      );
       if (!layoutRouteMatch) throw new Error('Cannot find AdminLayout Route in App.tsx');
       const layoutRouteStart = content.indexOf(layoutRouteMatch[0]);
-      const closingRouteIdx = content.lastIndexOf('</Route>', layoutRouteStart + layoutRouteMatch[0].length);
-      if (closingRouteIdx === -1) throw new Error('Cannot find closing </Route> for AdminLayout in App.tsx');
+      const closingRouteIdx = content.lastIndexOf(
+        '</Route>',
+        layoutRouteStart + layoutRouteMatch[0].length,
+      );
+      if (closingRouteIdx === -1)
+        throw new Error('Cannot find closing </Route> for AdminLayout in App.tsx');
       content = content.slice(0, closingRouteIdx) + route + content.slice(closingRouteIdx);
     }
 
@@ -1380,8 +1517,12 @@ function updateAppRouter(moduleName: string): void {
       } else {
         // Fallback: find the last } after appRouter
         const appRouterIdx = content.indexOf('export const appRouter');
-        const lastBrace = content.lastIndexOf('}', content.indexOf('\n\n', appRouterIdx) || content.length);
-        if (lastBrace === -1) throw new Error('Cannot find router object closing } in app.router.ts');
+        const lastBrace = content.lastIndexOf(
+          '}',
+          content.indexOf('\n\n', appRouterIdx) || content.length,
+        );
+        if (lastBrace === -1)
+          throw new Error('Cannot find router object closing } in app.router.ts');
         content = content.slice(0, lastBrace) + routerLine + '\n' + content.slice(lastBrace);
       }
     }
@@ -1410,7 +1551,8 @@ function updateAdminLayout(moduleName: string): void {
       // Find the last children array end (]);) within menuConfig
       const menuConfigBlock = content.slice(menuConfigStart, menuConfigEnd);
       const childrenEndMatch = [...menuConfigBlock.matchAll(/\];/g)];
-      if (childrenEndMatch.length === 0) throw new Error('Cannot find children array in menuConfig');
+      if (childrenEndMatch.length === 0)
+        throw new Error('Cannot find children array in menuConfig');
 
       const lastChildrenEnd = childrenEndMatch[childrenEndMatch.length - 1];
       const insertOffset = menuConfigStart + lastChildrenEnd.index!;
@@ -1429,6 +1571,55 @@ export { ${pascalName}ListPage } from "./pages/${pascalName}ListPage";
 
   const indexPath = getFilePath(`apps/admin/src/modules/${moduleName}/index.ts`);
   createFile(indexPath, indexContent);
+}
+
+function generateNestModule(moduleName: string): void {
+  const pascalName = toPascalCase(moduleName);
+  const moduleContent = `import { Module } from '@nestjs/common';
+
+@Module({
+  providers: [],
+  exports: [],
+})
+export class ${pascalName}Module {}
+`;
+
+  const modulePath = getFilePath(`apps/api/src/modules/${moduleName}/module.ts`);
+  createFile(modulePath, moduleContent);
+}
+
+function updateAppModule(moduleName: string): void {
+  const pascalName = toPascalCase(moduleName);
+  const modulePath = getFilePath('apps/api/src/app.module.ts');
+
+  modifyFile(modulePath, (content) => {
+    const importLine = `import { ${pascalName}Module } from "./modules/${moduleName}/module";`;
+
+    // Add import after last module import
+    if (!content.includes(importLine)) {
+      const moduleImportMatches = [...content.matchAll(/^import .+from "\.\/modules\/.+";$/gm)];
+      if (moduleImportMatches.length === 0) {
+        throw new Error('Cannot find module imports in app.module.ts');
+      }
+      const lastImport = moduleImportMatches[moduleImportMatches.length - 1];
+      const insertIdx = lastImport.index! + lastImport[0].length;
+      content = content.slice(0, insertIdx) + '\n' + importLine + content.slice(insertIdx);
+    }
+
+    // Add to imports array
+    const moduleLine = `    ${pascalName}Module,`;
+    if (!content.includes(`${pascalName}Module,`)) {
+      const moduleInImportsMatches = [...content.matchAll(/^\s+\w+Module,$/gm)];
+      if (moduleInImportsMatches.length === 0) {
+        throw new Error('Cannot find module entries in imports array');
+      }
+      const lastModule = moduleInImportsMatches[moduleInImportsMatches.length - 1];
+      const insertIdx = lastModule.index! + lastModule[0].length;
+      content = content.slice(0, insertIdx) + '\n' + moduleLine + content.slice(insertIdx);
+    }
+
+    return content;
+  });
 }
 
 // ============================================
@@ -1452,7 +1643,7 @@ export async function generateModule(options: GenerateOptions): Promise<void> {
   if (existing.exists) {
     console.error('\x1b[31m%s\x1b[0m', `\n❌ 模块 "${pascalName}" 已存在！`);
     console.error('  已存在的部分：');
-    existing.locations.forEach(loc => console.error(`    - ${loc}`));
+    existing.locations.forEach((loc) => console.error(`    - ${loc}`));
     console.error('\n  请先使用 /deleteModule 删除旧模块，或使用不同的模块名。');
     process.exit(1);
   }
@@ -1463,7 +1654,7 @@ export async function generateModule(options: GenerateOptions): Promise<void> {
   // Step 1: Get fields
   const fields = getFieldsForModule(moduleName, customFields);
   console.log('\x1b[36m%s\x1b[0m', `\n📋 Fields (${fields.length}):`);
-  fields.forEach(f => {
+  fields.forEach((f) => {
     const inferred = inferFieldConfig(f);
     const badge = inferred ? ` \x1b[32m[${inferred.uiComponent}]\x1b[0m` : '';
     console.log(`   - ${f.name}: ${f.type}${f.required ? ' (required)' : ' (optional)'}${badge}`);
@@ -1473,7 +1664,7 @@ export async function generateModule(options: GenerateOptions): Promise<void> {
   const relations = detectRelationFields(fields, moduleName);
   if (relations.length > 0) {
     console.log('\x1b[36m%s\x1b[0m', `\n🔗 Relations (${relations.length}):`);
-    relations.forEach(r => console.log(`   - ${r.field} → ${r.model} (${r.uiComponent})`));
+    relations.forEach((r) => console.log(`   - ${r.field} → ${r.model} (${r.uiComponent})`));
   }
 
   // Step 3: Select UI pattern
@@ -1489,71 +1680,90 @@ export async function generateModule(options: GenerateOptions): Promise<void> {
   }
 
   try {
-  // Step 4: Generate Prisma Schema
-  console.log('\x1b[32m%s\x1b[0m', '✓ Generating Prisma schema...');
-  const prismaSchema = generatePrismaSchema(moduleName, fields, relations);
-  const schemaPath = getFilePath('infra/database/prisma/schema.prisma');
-  appendToFile(schemaPath, prismaSchema);
+    // Step 4: Generate Prisma Schema
+    console.log('\x1b[32m%s\x1b[0m', '✓ Generating Prisma schema...');
+    const prismaSchema = generatePrismaSchema(moduleName, fields, relations);
+    const schemaPath = getFilePath('infra/database/prisma/schema.prisma');
+    appendToFile(schemaPath, prismaSchema);
 
-  // Step 5: Generate Zod Schemas (with smart validation)
-  console.log('\x1b[32m%s\x1b[0m', '✓ Generating Zod schemas (smart validation)...');
-  const zodSchemas = generateZodSchemas(moduleName, fields);
-  const sharedIndexPath = getFilePath('infra/shared/src/index.ts');
-  appendToFile(sharedIndexPath, zodSchemas);
+    // Step 5: Generate Zod Schemas (with smart validation)
+    console.log('\x1b[32m%s\x1b[0m', '✓ Generating Zod schemas (smart validation)...');
+    const zodSchemas = generateZodSchemas(moduleName, fields);
+    const sharedIndexPath = getFilePath('infra/shared/src/index.ts');
+    appendToFile(sharedIndexPath, zodSchemas);
 
-  // Step 6: Generate tRPC Router
-  console.log('\x1b[32m%s\x1b[0m', '✓ Generating tRPC router...');
-  const trpcRouter = generateTRPCRouter(moduleName);
-  const routerPath = getFilePath(`apps/api/src/modules/${moduleName}/trpc/${camelName}.router.ts`);
-  createFile(routerPath, trpcRouter);
+    // Step 6: Generate tRPC Router
+    console.log('\x1b[32m%s\x1b[0m', '✓ Generating tRPC router...');
+    const trpcRouter = generateTRPCRouter(moduleName);
+    const routerPath = getFilePath(
+      `apps/api/src/modules/${moduleName}/trpc/${camelName}.router.ts`,
+    );
+    createFile(routerPath, trpcRouter);
 
-  // Step 6.5: Generate Router Test
-  console.log('\x1b[32m%s\x1b[0m', '✓ Generating router test...');
-  const routerSpec = generateRouterSpec(moduleName);
-  const specPath = getFilePath(`apps/api/src/modules/${moduleName}/trpc/${camelName}.router.spec.ts`);
-  createFile(specPath, routerSpec);
+    // Step 6.5: Generate Router Test
+    console.log('\x1b[32m%s\x1b[0m', '✓ Generating router test...');
+    const routerSpec = generateRouterSpec(moduleName);
+    const specPath = getFilePath(
+      `apps/api/src/modules/${moduleName}/trpc/${camelName}.router.spec.ts`,
+    );
+    createFile(specPath, routerSpec);
 
-  // Step 7: Generate Frontend List Page (with smart UI)
-  console.log('\x1b[32m%s\x1b[0m', `✓ Generating frontend list page (${uiPattern.pattern} pattern)...`);
-  const listPage = generateFrontendListPage(moduleName, fields, relations, uiPattern);
-  const listPagePath = getFilePath(`apps/admin/src/modules/${moduleName}/pages/${pascalName}ListPage.tsx`);
-  createFile(listPagePath, listPage);
+    // Step 7: Generate Frontend List Page (with smart UI)
+    console.log(
+      '\x1b[32m%s\x1b[0m',
+      `✓ Generating frontend list page (${uiPattern.pattern} pattern)...`,
+    );
+    const listPage = generateFrontendListPage(moduleName, fields, relations, uiPattern);
+    const listPagePath = getFilePath(
+      `apps/admin/src/modules/${moduleName}/pages/${pascalName}ListPage.tsx`,
+    );
+    createFile(listPagePath, listPage);
 
-  // Step 7.5: Create module index.ts
-  console.log('\x1b[32m%s\x1b[0m', '✓ Creating module index.ts...');
-  createModuleIndex(moduleName);
+    // Step 7.5: Create module index.ts
+    console.log('\x1b[32m%s\x1b[0m', '✓ Creating module index.ts...');
+    createModuleIndex(moduleName);
 
-  // Step 8: Update App.tsx
-  console.log('\x1b[32m%s\x1b[0m', '✓ Updating App.tsx...');
-  updateAppTsx(moduleName);
+    // Step 8: Update App.tsx
+    console.log('\x1b[32m%s\x1b[0m', '✓ Updating App.tsx...');
+    updateAppTsx(moduleName);
 
-  // Step 9: Update app.router.ts
-  console.log('\x1b[32m%s\x1b[0m', '✓ Updating app.router.ts...');
-  updateAppRouter(moduleName);
+    // Step 9: Update app.router.ts
+    console.log('\x1b[32m%s\x1b[0m', '✓ Updating app.router.ts...');
+    updateAppRouter(moduleName);
 
-  // Step 10: Update AdminLayout (sidebar)
-  console.log('\x1b[32m%s\x1b[0m', '✓ Updating AdminLayout.tsx (sidebar)...');
-  updateAdminLayout(moduleName);
+    // Step 10: Update AdminLayout (sidebar)
+    console.log('\x1b[32m%s\x1b[0m', '✓ Updating AdminLayout.tsx (sidebar)...');
+    updateAdminLayout(moduleName);
 
-  console.log('\n\x1b[35m%s\x1b[0m', `\n✅ Module "${pascalName}" generated successfully!\n`);
-  console.log('%s', '━'.repeat(50));
+    // Step 11: Generate NestJS Module
+    console.log('\x1b[32m%s\x1b[0m', '✓ Generating NestJS Module...');
+    generateNestModule(moduleName);
 
-  // Print smart inference summary
-  const inferredCount = fields.filter(f => inferFieldConfig(f)).length;
-  const relationCount = relations.length;
-  console.log('\n📊 Smart Generation Summary:');
-  console.log(`   Smart fields inferred: ${inferredCount}/${fields.length}`);
-  console.log(`   Relations detected: ${relationCount}`);
-  console.log(`   UI Pattern: ${uiPattern.pattern}`);
+    // Step 12: Register in app.module.ts
+    console.log('\x1b[32m%s\x1b[0m', '✓ Registering in app.module.ts...');
+    updateAppModule(moduleName);
 
-  console.log('\n📝 Next steps:');
-  console.log(`   1. Review generated files`);
-  console.log(`   2. Run migration: cd infra/database && npx prisma migrate dev --name add_${camelName}`);
-  console.log(`   3. Generate Prisma client: npx prisma generate`);
-  console.log(`   4. Start servers: pnpm dev\n`);
+    console.log('\n\x1b[35m%s\x1b[0m', `\n✅ Module "${pascalName}" generated successfully!\n`);
+    console.log('%s', '━'.repeat(50));
 
-  // Update memory registry
-  updateMemoryRegistry(moduleName);
+    // Print smart inference summary
+    const inferredCount = fields.filter((f) => inferFieldConfig(f)).length;
+    const relationCount = relations.length;
+    console.log('\n📊 Smart Generation Summary:');
+    console.log(`   Smart fields inferred: ${inferredCount}/${fields.length}`);
+    console.log(`   Relations detected: ${relationCount}`);
+    console.log(`   UI Pattern: ${uiPattern.pattern}`);
+
+    console.log('\n📝 Next steps:');
+    console.log(`   1. Review generated files`);
+    console.log(
+      `   2. Run migration: cd infra/database && npx prisma migrate dev --name add_${camelName}`,
+    );
+    console.log(`   3. Generate Prisma client: npx prisma generate`);
+    console.log(`   4. Start servers: pnpm dev\n`);
+
+    // Update memory registry
+    updateMemoryRegistry(moduleName);
   } catch (error) {
     console.error('\x1b[31m%s\x1b[0m', `\n❌ Generation failed: ${error}`);
     rollback();

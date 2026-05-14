@@ -80,7 +80,10 @@ function getFilePath(relativePath: string): string {
 }
 
 function toPascalCase(str: string): string {
-  return str.split(/[-_\s]+/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join('');
+  return str
+    .split(/[-_\s]+/)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join('');
 }
 
 function toCamelCase(str: string): string {
@@ -146,7 +149,7 @@ function refactorService(moduleName: string, analysis: AnalysisResult, dryRun: b
     getFilePath(`apps/api/src/modules/${moduleName}/services/${moduleName}.service.ts`),
     getFilePath(`apps/api/src/modules/${moduleName}/${moduleName}.service.ts`),
   ];
-  const filePath = possiblePaths.find(p => fs.existsSync(p));
+  const filePath = possiblePaths.find((p) => fs.existsSync(p));
   if (!filePath) {
     console.log(`  ⚠ Service file not found, skipping`);
     return;
@@ -160,7 +163,9 @@ function refactorService(moduleName: string, analysis: AnalysisResult, dryRun: b
     console.log(`    File: ${path.relative(PROJECT_ROOT, filePath)}`);
     console.log(`    - Replace with BaseService<${pascalName}> inheritance`);
     if (service.customMethods.length > 0) {
-      console.log(`    - Preserve: ${service.customMethods.join(', ')} (${service.customMethods.length} custom methods)`);
+      console.log(
+        `    - Preserve: ${service.customMethods.join(', ')} (${service.customMethods.length} custom methods)`,
+      );
     }
     return;
   }
@@ -182,7 +187,9 @@ function refactorService(moduleName: string, analysis: AnalysisResult, dryRun: b
   const className = classMatch[1];
 
   // Find constructor for PrismaService injection
-  const constructorMatch = content.match(/constructor\s*\(\s*(?:private\s+|readonly\s+)?(\w+)\s*:\s*PrismaService\s*\)/);
+  const constructorMatch = content.match(
+    /constructor\s*\(\s*(?:private\s+|readonly\s+)?(\w+)\s*:\s*PrismaService\s*\)/,
+  );
 
   let newContent = content;
 
@@ -193,7 +200,8 @@ function refactorService(moduleName: string, analysis: AnalysisResult, dryRun: b
     const lastImportIdx = newContent.lastIndexOf('\nimport ');
     if (lastImportIdx !== -1) {
       const nextNewline = newContent.indexOf('\n', lastImportIdx + 1);
-      newContent = newContent.slice(0, nextNewline) + '\n' + importLine + newContent.slice(nextNewline);
+      newContent =
+        newContent.slice(0, nextNewline) + '\n' + importLine + newContent.slice(nextNewline);
     } else {
       newContent = importLine + '\n' + newContent;
     }
@@ -206,7 +214,10 @@ function refactorService(moduleName: string, analysis: AnalysisResult, dryRun: b
   // Replace constructor
   if (constructorMatch) {
     const newConstructor = `  constructor(prisma: PrismaService) {\n    super(prisma, '${moduleName}');\n  }`;
-    newContent = newContent.replace(/constructor\s*\(\s*(?:private\s+|readonly\s+)?\w+\s*:\s*PrismaService\s*\)\s*\{[^}]*\}/, newConstructor);
+    newContent = newContent.replace(
+      /constructor\s*\(\s*(?:private\s+|readonly\s+)?\w+\s*:\s*PrismaService\s*\)\s*\{[^}]*\}/,
+      newConstructor,
+    );
   }
 
   // Remove manual CRUD methods (findMany, findUnique, create, update, delete)
@@ -226,7 +237,9 @@ function refactorService(moduleName: string, analysis: AnalysisResult, dryRun: b
 
   fs.writeFileSync(filePath, newContent);
   const locDiff = countLines(content) - countLines(newContent);
-  console.log(`  \x1b[32m✓\x1b[0m Service refactored: ${path.relative(PROJECT_ROOT, filePath)} (${locDiff > 0 ? '-' : '+'}${Math.abs(locDiff)} lines)`);
+  console.log(
+    `  \x1b[32m✓\x1b[0m Service refactored: ${path.relative(PROJECT_ROOT, filePath)} (${locDiff > 0 ? '-' : '+'}${Math.abs(locDiff)} lines)`,
+  );
 }
 
 // ============================================
@@ -242,7 +255,7 @@ function refactorRouter(moduleName: string, analysis: AnalysisResult, dryRun: bo
     getFilePath(`apps/api/src/modules/${moduleName}/trpc/${moduleName}.router.ts`),
     getFilePath(`apps/api/src/modules/${moduleName}/${moduleName}.router.ts`),
   ];
-  const filePath = possiblePaths.find(p => fs.existsSync(p));
+  const filePath = possiblePaths.find((p) => fs.existsSync(p));
   if (!filePath) {
     console.log(`  ⚠ Router file not found, skipping`);
     return;
@@ -259,7 +272,9 @@ function refactorRouter(moduleName: string, analysis: AnalysisResult, dryRun: bo
     console.log(`    File: ${path.relative(PROJECT_ROOT, filePath)}`);
     console.log(`    - Replace manual CRUD procedures with ${crudFunction}`);
     if (hasCustomProcs) {
-      console.log(`    - Preserve: ${router.customProcedures.join(', ')} (${router.customProcedures.length} custom procedures)`);
+      console.log(
+        `    - Preserve: ${router.customProcedures.join(', ')} (${router.customProcedures.length} custom procedures)`,
+      );
     }
     return;
   }
@@ -277,7 +292,7 @@ function refactorRouter(moduleName: string, analysis: AnalysisResult, dryRun: bo
     // Match the full procedure definition: name: procedureType.xxx(...)
     const procRegex = new RegExp(
       `(\\s*${procName}\\s*:\\s*(?:permissionProcedure|publicProcedure|protectedProcedure)[\\s\\S]*?(?=\\n\\s*\\w+\\s*:|\\n\\};?\\s*$))`,
-      'm'
+      'm',
     );
     const procMatch = procRegex.exec(content);
     if (procMatch) {
@@ -294,7 +309,7 @@ function refactorRouter(moduleName: string, analysis: AnalysisResult, dryRun: bo
   let customCallback = '';
   if (hasCustomProcs) {
     customCallback = `, (t, baseRouter) => ({
-${customProcBlocks.map(b => '  ' + b).join(',\n')}
+${customProcBlocks.map((b) => '  ' + b).join(',\n')}
 })`;
   }
 
@@ -311,7 +326,9 @@ export const ${moduleName}Router = ${crudFunction}('${pascalName}', {
 
   fs.writeFileSync(filePath, newRouterContent);
   const locDiff = countLines(content) - countLines(newRouterContent);
-  console.log(`  \x1b[32m✓\x1b[0m Router refactored: ${path.relative(PROJECT_ROOT, filePath)} (${locDiff > 0 ? '-' : '+'}${Math.abs(locDiff)} lines)`);
+  console.log(
+    `  \x1b[32m✓\x1b[0m Router refactored: ${path.relative(PROJECT_ROOT, filePath)} (${locDiff > 0 ? '-' : '+'}${Math.abs(locDiff)} lines)`,
+  );
 }
 
 // ============================================
@@ -325,7 +342,7 @@ function refactorFrontend(moduleName: string, analysis: AnalysisResult, dryRun: 
   const pascalName = toPascalCase(moduleName);
 
   // Find the list page
-  const listPageFile = frontend.pages.find(f => f.includes('ListPage'));
+  const listPageFile = frontend.pages.find((f) => f.includes('ListPage'));
   if (!listPageFile) return;
 
   const filePath = getFilePath(`apps/admin/src/modules/${moduleName}/pages/${listPageFile}`);
@@ -375,7 +392,9 @@ export default ${pascalName}ListPage;
 
   fs.writeFileSync(filePath, newContent);
   const locDiff = countLines(content) - countLines(newContent);
-  console.log(`  \x1b[32m✓\x1b[0m Frontend refactored: apps/admin/src/modules/${moduleName}/pages/${listPageFile} (${locDiff > 0 ? '-' : '+'}${Math.abs(locDiff)} lines)`);
+  console.log(
+    `  \x1b[32m✓\x1b[0m Frontend refactored: apps/admin/src/modules/${moduleName}/pages/${listPageFile} (${locDiff > 0 ? '-' : '+'}${Math.abs(locDiff)} lines)`,
+  );
 }
 
 // ============================================

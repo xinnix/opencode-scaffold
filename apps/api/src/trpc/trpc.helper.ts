@@ -1,7 +1,7 @@
-import { z } from "zod";
-import { router, publicProcedure, protectedProcedure } from "./trpc";
-import { SearchSchema, FilterSchema, FilterCondition } from "./search-filter.types";
-import { buildWhereClause } from "./search-filter.builder";
+import { z } from 'zod';
+import { router, publicProcedure, protectedProcedure } from './trpc';
+import { SearchSchema, FilterSchema, FilterCondition } from './search-filter.types';
+import { buildWhereClause } from './search-filter.builder';
 
 // Re-export protectedProcedure for use in routers
 export { protectedProcedure };
@@ -148,9 +148,15 @@ export const createCrudRouter = <TModelName extends string>(
    * Does NOT transform audit fields like createdById, updatedById.
    * Handles null/undefined/empty string by preserving the value for proper Prisma handling.
    */
-  const transformRelationFields = (data: any): any => {
-    // Whitelist of foreign key fields that should be converted to relation connect syntax
-    const relationFields = ['parentId', 'departmentId', 'areaId', 'categoryId'];
+  const transformRelationFields = (data: any, prisma: any): any => {
+    // Read relation fields from Prisma DMMF for dynamic detection
+    const dmmf = prisma?._dmmf;
+    const modelInfo = dmmf?.modelMap?.[modelName];
+    const relationFieldNames: string[] =
+      modelInfo?.fields
+        ?.filter((f: any) => f.relationName && f.kind === 'object')
+        ?.map((f: any) => f.name) || [];
+    const relationForeignKeyFields = new Set(relationFieldNames.map((name: string) => name + 'Id'));
 
     const result: any = {};
     for (const [key, value] of Object.entries(data)) {
@@ -159,8 +165,8 @@ export const createCrudRouter = <TModelName extends string>(
         result[key] = value;
         continue;
       }
-      // Only transform whitelisted relation fields with valid values
-      if (relationFields.includes(key)) {
+      // Only transform relation FK fields with valid values
+      if (relationForeignKeyFields.has(key)) {
         // Convert parentId -> parent, departmentId -> department, etc.
         const relationName = key.charAt(0).toLowerCase() + key.slice(1, -2);
         result[relationName] = { connect: { id: value } };
@@ -179,15 +185,21 @@ export const createCrudRouter = <TModelName extends string>(
     procedures.getMany = procedure
       .input(schemas.getMany || getManySchema)
       .query(async ({ ctx, input }) => {
-        const parsedInput = (schemas.getMany || getManySchema).safeParse(
-          input,
-        );
+        const parsedInput = (schemas.getMany || getManySchema).safeParse(input);
         if (!parsedInput.success) {
           throw parsedInput.error;
         }
         const data = parsedInput.data as any;
 
         const model = (ctx.prisma as any)[modelName.charAt(0).toLowerCase() + modelName.slice(1)];
+
+        // Determine default orderBy: prefer createdAt desc, fallback to id desc
+        const dmmfInfo = (ctx.prisma as any)?._dmmf;
+        const modelDmmf = dmmfInfo?.modelMap?.[modelName];
+        const hasCreatedAt = modelDmmf?.fields?.some((f: any) => f.name === 'createdAt');
+        const defaultOrderBy = hasCreatedAt
+          ? { createdAt: 'desc' as const }
+          : { id: 'desc' as const };
 
         // Build where clause with search + filter support
         let where = data.where;
@@ -210,12 +222,10 @@ export const createCrudRouter = <TModelName extends string>(
 
         const [items, total] = await Promise.all([
           model.findMany({
-            skip:
-              data.skip ??
-              (data.page ? (data.page - 1) * (data.limit || 10) : 0),
+            skip: data.skip ?? (data.page ? (data.page - 1) * (data.limit || 10) : 0),
             take: data.take ?? data.limit,
             where,
-            orderBy: data.orderBy ?? { id: 'desc' },
+            orderBy: data.orderBy ?? defaultOrderBy,
             include: data.include,
             select: data.select,
           }),
@@ -238,9 +248,7 @@ export const createCrudRouter = <TModelName extends string>(
     procedures.getOne = procedure
       .input(schemas.getOne || defaultGetOneSchema)
       .query(async ({ ctx, input }) => {
-        const parsedInput = (schemas.getOne || defaultGetOneSchema).safeParse(
-          input,
-        );
+        const parsedInput = (schemas.getOne || defaultGetOneSchema).safeParse(input);
         if (!parsedInput.success) {
           throw parsedInput.error;
         }
@@ -264,30 +272,28 @@ export const createCrudRouter = <TModelName extends string>(
       select: z.any().optional(),
     });
 
-    procedures.create = procedure
-      .input(createInputSchema)
-      .mutation(async ({ ctx, input }) => {
-        const parsedInput = createInputSchema.safeParse(input);
-        if (!parsedInput.success) {
-          throw parsedInput.error;
-        }
-        const data = parsedInput.data as any;
+    procedures.create = procedure.input(createInputSchema).mutation(async ({ ctx, input }) => {
+      const parsedInput = createInputSchema.safeParse(input);
+      if (!parsedInput.success) {
+        throw parsedInput.error;
+      }
+      const data = parsedInput.data as any;
 
-        const model = (ctx.prisma as any)[modelName.charAt(0).toLowerCase() + modelName.slice(1)];
-        // Transform foreign key fields to relation connect syntax
-        const createData = transformRelationFields(data.data);
-        // Inject userId if available in context (these are plain FK fields, not relations)
-        if ((ctx as any).user?.id) {
-          createData.createdById = (ctx as any).user.id;
-          createData.updatedById = (ctx as any).user.id;
-        }
+      const model = (ctx.prisma as any)[modelName.charAt(0).toLowerCase() + modelName.slice(1)];
+      // Transform foreign key fields to relation connect syntax
+      const createData = transformRelationFields(data.data, ctx.prisma);
+      // Inject userId if available in context (these are plain FK fields, not relations)
+      if ((ctx as any).user?.id) {
+        createData.createdById = (ctx as any).user.id;
+        createData.updatedById = (ctx as any).user.id;
+      }
 
-        return model.create({
-          data: createData,
-          include: data.include,
-          select: data.select,
-        });
+      return model.create({
+        data: createData,
+        include: data.include,
+        select: data.select,
       });
+    });
   }
 
   // update - Update an existing record
@@ -300,52 +306,48 @@ export const createCrudRouter = <TModelName extends string>(
       select: z.any().optional(),
     });
 
-    procedures.update = procedure
-      .input(updateInputSchema)
-      .mutation(async ({ ctx, input }) => {
-        const parsedInput = updateInputSchema.safeParse(input);
-        if (!parsedInput.success) {
-          throw parsedInput.error;
-        }
-        const data = parsedInput.data as any;
+    procedures.update = procedure.input(updateInputSchema).mutation(async ({ ctx, input }) => {
+      const parsedInput = updateInputSchema.safeParse(input);
+      if (!parsedInput.success) {
+        throw parsedInput.error;
+      }
+      const data = parsedInput.data as any;
 
-        const model = (ctx.prisma as any)[modelName.charAt(0).toLowerCase() + modelName.slice(1)];
-        // Transform foreign key fields to relation connect syntax
-        const updateData = transformRelationFields(data.data);
-        // Inject userId if available in context (these are plain FK fields, not relations)
-        // Only add updatedById if the model has this field
-        if ((ctx as any).user?.id) {
-          // Check if model has updatedById field before adding it
-          // Models like Department don't have this field
-          const dmmf = (ctx.prisma as any)._dmmf;
-          if (dmmf && dmmf.modelMap) {
-            const modelInfo = dmmf.modelMap[modelName];
-            if (modelInfo && modelInfo.fields && modelInfo.fields.updatedById) {
-              updateData.updatedById = (ctx as any).user.id;
-            }
+      const model = (ctx.prisma as any)[modelName.charAt(0).toLowerCase() + modelName.slice(1)];
+      // Transform foreign key fields to relation connect syntax
+      const updateData = transformRelationFields(data.data, ctx.prisma);
+      // Inject userId if available in context (these are plain FK fields, not relations)
+      // Only add updatedById if the model has this field
+      if ((ctx as any).user?.id) {
+        // Check if model has updatedById field before adding it
+        // Models like Department don't have this field
+        const dmmf = (ctx.prisma as any)._dmmf;
+        if (dmmf && dmmf.modelMap) {
+          const modelInfo = dmmf.modelMap[modelName];
+          if (modelInfo && modelInfo.fields && modelInfo.fields.updatedById) {
+            updateData.updatedById = (ctx as any).user.id;
           }
         }
+      }
 
-        return model.update({
-          where: { id: data.id },
-          data: updateData,
-          include: data.include,
-          select: data.select,
-        });
+      return model.update({
+        where: { id: data.id },
+        data: updateData,
+        include: data.include,
+        select: data.select,
       });
+    });
   }
 
   // delete - Delete a single record
   if (includeDelete) {
     const procedure = protectedDelete ? protectedProcedure : publicProcedure;
-    procedures.delete = procedure
-      .input(defaultDeleteOneSchema)
-      .mutation(async ({ ctx, input }) => {
-        const model = (ctx.prisma as any)[modelName.charAt(0).toLowerCase() + modelName.slice(1)];
-        return model.delete({
-          where: { id: input.id },
-        });
+    procedures.delete = procedure.input(defaultDeleteOneSchema).mutation(async ({ ctx, input }) => {
+      const model = (ctx.prisma as any)[modelName.charAt(0).toLowerCase() + modelName.slice(1)];
+      return model.delete({
+        where: { id: input.id },
       });
+    });
   }
 
   // deleteMany - Delete multiple records

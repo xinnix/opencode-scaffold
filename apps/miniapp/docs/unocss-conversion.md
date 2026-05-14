@@ -20,14 +20,16 @@
 ### 1. 透明度处理
 
 **问题类名**:
+
 ```html
 <!-- ❌ 不支持 -->
 <view class="bg-surface/90">
-<view class="text-white/80">
-<view class="border-primary-container/30">
+  <view class="text-white/80"> <view class="border-primary-container/30"></view></view
+></view>
 ```
 
 **解决方案**:
+
 ```scss
 /* ✅ 自定义 SCSS 类 */
 .top-bar-bg {
@@ -46,13 +48,14 @@
 ### 2. 纵横比处理
 
 **问题类名**:
+
 ```html
 <!-- ❌ 不支持 -->
-<view class="aspect-16/9">
-<view class="aspect-4/3">
+<view class="aspect-16/9"> <view class="aspect-4/3"></view></view>
 ```
 
 **解决方案**:
+
 ```scss
 /* ✅ 自定义 SCSS */
 .banner-aspect {
@@ -67,12 +70,14 @@
 ### 3. 渐变处理
 
 **问题类名**:
+
 ```html
 <!-- ❌ 不支持 -->
-<view class="bg-gradient-to-t from-on-surface/40 to-transparent">
+<view class="bg-gradient-to-t from-on-surface/40 to-transparent"></view>
 ```
 
 **解决方案**:
+
 ```scss
 /* ✅ 自定义 SCSS */
 .banner-overlay-bg {
@@ -83,12 +88,14 @@
 ### 4. Ring 边框处理
 
 **问题类名**:
+
 ```html
 <!-- ❌ 不支持 -->
-<view class="ring-1 ring-primary-container/10">
+<view class="ring-1 ring-primary-container/10"></view>
 ```
 
 **解决方案**:
+
 ```scss
 /* ✅ 使用 box-shadow 模拟 */
 .ring-primary-container-10 {
@@ -99,12 +106,14 @@
 ### 5. 图标处理
 
 **问题**:
+
 ```html
 <!-- ❌ 不支持图标预设 -->
 <text class="i-material-symbols:search"></text>
 ```
 
 **解决方案**:
+
 ```html
 <!-- ✅ 使用 Emoji -->
 <text class="text-sm">🔍</text>
@@ -116,59 +125,55 @@
 ### 6. 动态类名处理
 
 **问题**:
+
 ```html
 <!-- ❌ 不支持复杂的三元表达式 -->
-<button :class="[
+<button
+  :class="[
   'base-class',
   isActive ? 'active-class' : 'inactive-class'
-]">
+]"
+></button>
 ```
 
 **解决方案**:
+
 ```typescript
 // ✅ 使用方法返回类名
 function getBtnClass(item) {
-  return isActive.value ? 'active-class' : 'inactive-class'
+  return isActive.value ? 'active-class' : 'inactive-class';
 }
 ```
 
 ```html
 <!-- ✅ 模板中使用 -->
-<button :class="['base-class', getBtnClass(item)]">
+<button :class="['base-class', getBtnClass(item)]"></button>
 ```
 
 ## 🎨 设计令牌映射
 
-| Tailwind 类名 | UnoCSS 替代 | 说明 |
-|--------------|-----------|------|
-| `bg-surface` | `bg-surface` | 直接使用 |
-| `text-primary-container` | `text-primary-container` | 直接使用 |
-| `bg-surface/90` | `.top-bar-bg` (自定义) | 需自定义 |
-| `aspect-16/9` | `.banner-aspect` (自定义) | 需自定义 |
+| Tailwind 类名            | UnoCSS 替代               | 说明     |
+| ------------------------ | ------------------------- | -------- |
+| `bg-surface`             | `bg-surface`              | 直接使用 |
+| `text-primary-container` | `text-primary-container`  | 直接使用 |
+| `bg-surface/90`          | `.top-bar-bg` (自定义)    | 需自定义 |
+| `aspect-16/9`            | `.banner-aspect` (自定义) | 需自定义 |
 
 ## 📦 UnoCSS 配置
 
 ### uno.config.ts
 
 ```typescript
-import { presetUni } from '@uni-helper/unocss-preset-uni'
-import {
-  defineConfig,
-  presetUno,
-  transformerDirectives,
-  transformerVariantGroup,
-} from 'unocss'
+import { presetUni } from '@uni-helper/unocss-preset-uni';
+import { defineConfig, presetUno, transformerDirectives, transformerVariantGroup } from 'unocss';
 
 export default defineConfig({
   presets: [
-    presetUni(),    // 小程序预设（必须）
-    presetUno(),    // 基础预设
+    presetUni(), // 小程序预设（必须）
+    presetUno(), // 基础预设
     // 注意：不要使用 presetIcons，小程序不支持
   ],
-  transformers: [
-    transformerDirectives(),
-    transformerVariantGroup(),
-  ],
+  transformers: [transformerDirectives(), transformerVariantGroup()],
   shortcuts: {
     'no-scrollbar': 'overflow-x-auto overflow-y-hidden',
     'active-scale-95': 'transition-transform duration-200',
@@ -178,31 +183,38 @@ export default defineConfig({
     ['shadow-ambient', { 'box-shadow': '0 4px 16px rgba(23, 28, 32, 0.04)' }],
     ['shadow-card', { 'box-shadow': '0 2px 8px rgba(23, 28, 32, 0.03)' }],
     ['mix-blend-multiply', { 'mix-blend-mode': 'multiply' }],
-    ['line-clamp-2', {
-      'display': '-webkit-box',
-      '-webkit-box-orient': 'vertical',
-      '-webkit-line-clamp': '2',
-      'overflow': 'hidden',
-    }],
+    [
+      'line-clamp-2',
+      {
+        display: '-webkit-box',
+        '-webkit-box-orient': 'vertical',
+        '-webkit-line-clamp': '2',
+        overflow: 'hidden',
+      },
+    ],
   ],
-})
+});
 ```
 
 ## 🔧 工作流程
 
 ### 1. 识别问题类名
+
 ```bash
 # 查找所有使用 / 的类名
 grep -n 'class="[^"]*/[0-9]' src/pages/index.vue
 ```
 
 ### 2. 创建自定义类
+
 在 `<style lang="scss" scoped>` 中定义自定义类。
 
 ### 3. 替换模板中的类名
+
 将问题类名替换为自定义类名。
 
 ### 4. 测试验证
+
 ```bash
 pnpm --filter @opencode/miniapp dev:mp-weixin
 ```
@@ -229,18 +241,21 @@ pnpm --filter @opencode/miniapp dev:mp-weixin
 ## 🚫 常见错误
 
 ### 1. 使用了 `/` 透明度语法
+
 ```
 ❌ bg-surface/90
 ✅ 自定义 SCSS 类
 ```
 
 ### 2. 使用了图标预设
+
 ```
 ❌ i-material-symbols:search
 ✅ 使用 Emoji: 🔍
 ```
 
 ### 3. 复杂的动态类名
+
 ```
 ❌ :class="[isActive ? 'a' : 'b']"
 ✅ :class="getClass()"

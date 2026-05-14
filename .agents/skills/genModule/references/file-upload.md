@@ -54,7 +54,7 @@ export class FileUploadController {
     if (!files || files.length === 0) {
       throw new BadRequestException('No files uploaded');
     }
-    return files.map(file => ({
+    return files.map((file) => ({
       url: `/uploads/${file.filename}`,
       filename: file.originalname,
       size: file.size,
@@ -83,8 +83,8 @@ model Article {
 export const ArticleSchema = {
   createInput: z.object({
     title: z.string(),
-    cover: z.string().optional(),  // Image URL
-    attachments: z.string().optional(),  // JSON string
+    cover: z.string().optional(), // Image URL
+    attachments: z.string().optional(), // JSON string
   }),
   // ... other schemas
 };
@@ -164,15 +164,15 @@ import { FileUploadComponent } from '@/shared/components/FileUploadComponent';
 
 ### FileUploadComponent Props
 
-| Prop        | Type    | Default | Description                          |
-| ----------- | ------- | ------- | ------------------------------------ |
-| name        | string  | 'file'  | Form field name                      |
-| multiple    | boolean | false   | Allow multiple files                 |
-| maxCount    | number  | 1       | Maximum number of files              |
-| accept      | string  | -       | Accepted file types (e.g., 'image/*') |
-| value       | string  | -       | Current value                        |
-| onChange    | func    | -       | Callback when value changes          |
-| disabled    | boolean | false   | Disable upload                       |
+| Prop     | Type    | Default | Description                            |
+| -------- | ------- | ------- | -------------------------------------- |
+| name     | string  | 'file'  | Form field name                        |
+| multiple | boolean | false   | Allow multiple files                   |
+| maxCount | number  | 1       | Maximum number of files                |
+| accept   | string  | -       | Accepted file types (e.g., 'image/\*') |
+| value    | string  | -       | Current value                          |
+| onChange | func    | -       | Callback when value changes            |
+| disabled | boolean | false   | Disable upload                         |
 
 ### Common Accept Types
 

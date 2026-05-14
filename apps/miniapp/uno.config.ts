@@ -1,9 +1,5 @@
-import { presetUni } from '@uni-helper/unocss-preset-uni'
-import {
-  defineConfig,
-  transformerDirectives,
-  transformerVariantGroup,
-} from 'unocss'
+import { presetUni } from '@uni-helper/unocss-preset-uni';
+import { defineConfig, transformerDirectives, transformerVariantGroup } from 'unocss';
 
 /**
  * UnoCSS 配置 - 小程序版本
@@ -28,8 +24,8 @@ export default defineConfig({
 
   // 转换器配置
   transformers: [
-    transformerDirectives(),    // 处理 @apply 等指令
-    transformerVariantGroup(),  // 处理变体组语法
+    transformerDirectives(), // 处理 @apply 等指令
+    transformerVariantGroup(), // 处理变体组语法
   ],
   theme: {
     colors: {
@@ -100,11 +96,14 @@ export default defineConfig({
     // mix-blend-mode
     ['mix-blend-multiply', { 'mix-blend-mode': 'multiply' }],
     // 文字截断
-    ['line-clamp-2', {
-      'display': '-webkit-box',
-      '-webkit-box-orient': 'vertical',
-      '-webkit-line-clamp': '2',
-      'overflow': 'hidden',
-    }],
+    [
+      'line-clamp-2',
+      {
+        display: '-webkit-box',
+        '-webkit-box-orient': 'vertical',
+        '-webkit-line-clamp': '2',
+        overflow: 'hidden',
+      },
+    ],
   ],
-})
+});

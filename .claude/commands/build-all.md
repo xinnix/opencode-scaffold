@@ -9,6 +9,7 @@ pnpm build
 ```
 
 或使用 build-all skill:
+
 ```bash
 /skill build-all
 ```

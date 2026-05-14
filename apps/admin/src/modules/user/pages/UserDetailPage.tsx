@@ -1,13 +1,7 @@
 // apps/admin/src/modules/user/pages/UserDetailPage.tsx
-import { useParams, useNavigate } from "react-router-dom";
-import { useOne } from "@refinedev/core";
-import {
-  Card,
-  Descriptions,
-  Button,
-  Space,
-  Tag,
-} from "antd";
+import { useParams, useNavigate } from 'react-router-dom';
+import { useOne } from '@refinedev/core';
+import { Card, Descriptions, Button, Space, Tag } from 'antd';
 import {
   ArrowLeftOutlined,
   CheckCircleOutlined,
@@ -15,7 +9,7 @@ import {
   UserOutlined,
   MailOutlined,
   ClockCircleOutlined,
-} from "@ant-design/icons";
+} from '@ant-design/icons';
 
 interface UserDetail {
   id: string;
@@ -36,8 +30,8 @@ export const UserDetailPage = () => {
   const navigate = useNavigate();
 
   const { result: user, isLoading } = useOne<UserDetail>({
-    resource: "user",
-    id: id || "",
+    resource: 'user',
+    id: id || '',
   });
 
   if (isLoading) {
@@ -48,18 +42,14 @@ export const UserDetailPage = () => {
     return <div>用户不存在</div>;
   }
 
-  const fullName = [user.firstName, user.lastName].filter(Boolean).join(" ");
+  const fullName = [user.firstName, user.lastName].filter(Boolean).join(' ');
 
   return (
-    <div style={{ maxWidth: 1000, margin: "0 auto", padding: "24px" }}>
+    <div style={{ maxWidth: 1000, margin: '0 auto', padding: '24px' }}>
       <Card
         title={
           <Space>
-            <Button
-              type="text"
-              icon={<ArrowLeftOutlined />}
-              onClick={() => navigate("/users")}
-            >
+            <Button type="text" icon={<ArrowLeftOutlined />} onClick={() => navigate('/users')}>
               返回
             </Button>
             <span>用户详情</span>
@@ -79,20 +69,23 @@ export const UserDetailPage = () => {
               {user.email}
             </Space>
           </Descriptions.Item>
-          <Descriptions.Item label="姓名">{fullName || "-"}</Descriptions.Item>
+          <Descriptions.Item label="姓名">{fullName || '-'}</Descriptions.Item>
           <Descriptions.Item label="状态">
-            <Tag color={user.isActive ? "success" : "error"} icon={user.isActive ? <CheckCircleOutlined /> : <StopOutlined />}>
-              {user.isActive ? "激活" : "停用"}
+            <Tag
+              color={user.isActive ? 'success' : 'error'}
+              icon={user.isActive ? <CheckCircleOutlined /> : <StopOutlined />}
+            >
+              {user.isActive ? '激活' : '停用'}
             </Tag>
           </Descriptions.Item>
           <Descriptions.Item label="最后登录">
             <Space>
               <ClockCircleOutlined />
-              {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleString("zh-CN") : "从未登录"}
+              {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleString('zh-CN') : '从未登录'}
             </Space>
           </Descriptions.Item>
           <Descriptions.Item label="创建时间">
-            {new Date(user.createdAt).toLocaleString("zh-CN")}
+            {new Date(user.createdAt).toLocaleString('zh-CN')}
           </Descriptions.Item>
           <Descriptions.Item label="邮箱验证">
             {user.emailVerified ? (
@@ -102,7 +95,7 @@ export const UserDetailPage = () => {
             )}
           </Descriptions.Item>
           <Descriptions.Item label="更新时间">
-            {new Date(user.updatedAt).toLocaleString("zh-CN")}
+            {new Date(user.updatedAt).toLocaleString('zh-CN')}
           </Descriptions.Item>
         </Descriptions>
       </Card>

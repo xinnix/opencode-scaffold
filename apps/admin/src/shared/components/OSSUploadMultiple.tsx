@@ -47,7 +47,7 @@ export const OSSUploadMultiple: React.FC<OSSUploadMultipleProps> = ({
       name: `image-${index}`,
       status: 'done',
       url: url,
-    }))
+    })),
   );
 
   /**
@@ -79,17 +79,20 @@ export const OSSUploadMultiple: React.FC<OSSUploadMultipleProps> = ({
       const result = await OSSUploader.upload(file, type);
 
       // 更新文件列表
-      const newFileList = [...fileList, {
-        uid: file.uid,
-        name: file.name,
-        status: 'done',
-        url: result.url,
-      }];
+      const newFileList = [
+        ...fileList,
+        {
+          uid: file.uid,
+          name: file.name,
+          status: 'done',
+          url: result.url,
+        },
+      ];
 
       setFileList(newFileList);
 
       // 触发 onChange，传递 URL 数组
-      onChange?.(newFileList.map(f => f.url as string));
+      onChange?.(newFileList.map((f) => f.url as string));
 
       onSuccess(result, file);
       message.success('上传成功');
@@ -105,9 +108,9 @@ export const OSSUploadMultiple: React.FC<OSSUploadMultipleProps> = ({
    * 删除单张图片
    */
   const handleRemove = (uid: string) => {
-    const newFileList = fileList.filter(f => f.uid !== uid);
+    const newFileList = fileList.filter((f) => f.uid !== uid);
     setFileList(newFileList);
-    onChange?.(newFileList.map(f => f.url as string));
+    onChange?.(newFileList.map((f) => f.url as string));
   };
 
   /**
@@ -118,7 +121,7 @@ export const OSSUploadMultiple: React.FC<OSSUploadMultipleProps> = ({
     const newFileList = [...fileList];
     [newFileList[index - 1], newFileList[index]] = [newFileList[index], newFileList[index - 1]];
     setFileList(newFileList);
-    onChange?.(newFileList.map(f => f.url as string));
+    onChange?.(newFileList.map((f) => f.url as string));
   };
 
   /**
@@ -129,7 +132,7 @@ export const OSSUploadMultiple: React.FC<OSSUploadMultipleProps> = ({
     const newFileList = [...fileList];
     [newFileList[index], newFileList[index + 1]] = [newFileList[index + 1], newFileList[index]];
     setFileList(newFileList);
-    onChange?.(newFileList.map(f => f.url as string));
+    onChange?.(newFileList.map((f) => f.url as string));
   };
 
   return (
@@ -152,18 +155,12 @@ export const OSSUploadMultiple: React.FC<OSSUploadMultipleProps> = ({
                 </div>
                 <Space size="small">
                   {!disabled && index > 0 && (
-                    <Button
-                      size="small"
-                      onClick={() => moveForward(index)}
-                    >
+                    <Button size="small" onClick={() => moveForward(index)}>
                       向前
                     </Button>
                   )}
                   {!disabled && index < fileList.length - 1 && (
-                    <Button
-                      size="small"
-                      onClick={() => moveBackward(index)}
-                    >
+                    <Button size="small" onClick={() => moveBackward(index)}>
                       向后
                     </Button>
                   )}
@@ -200,8 +197,8 @@ export const OSSUploadMultiple: React.FC<OSSUploadMultipleProps> = ({
       )}
 
       <div style={{ marginTop: '8px', color: '#999', fontSize: '12px' }}>
-        支持 JPG、PNG、GIF、WEBP 格式，最大 {Math.floor(maxFileSize / 1024 / 1024)}MB，最多 {maxCount} 张
-        {fileList.length > 0 && '，第一张为封面图'}
+        支持 JPG、PNG、GIF、WEBP 格式，最大 {Math.floor(maxFileSize / 1024 / 1024)}MB，最多{' '}
+        {maxCount} 张{fileList.length > 0 && '，第一张为封面图'}
       </div>
     </div>
   );

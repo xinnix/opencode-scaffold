@@ -29,27 +29,32 @@
 ### 1. 基础数据（seed-base.sql）
 
 **管理员账户（3个）**
+
 - superadmin@example.com（超级管理员）
 - admin@example.com（管理员）
 - viewer@example.com（访客）
 - 密码：全部为 `password123`
 
 **小程序用户（2个）**
+
 - user@example.com（测试用户，手机号：13800138000）
 - user2@example.com（测试用户2）
 - 密码：全部为 `password123`
 
 **角色系统**
+
 - 3个角色：超级管理员、管理员、访客
 - 16个权限：涵盖 todo、user、admin、resource 的 CRUD 操作
 - 角色权限关联已配置
 
 **示例数据**
+
 - 3个示例 Todos（关联到 user@example.com）
 
 ### 2. 业务数据（seed-data.sql）
 
 **商户（6个）**
+
 - 海底捞火锅（餐饮，3F）
 - 星巴克咖啡（餐饮，1F）
 - 优衣库（购物，2F）
@@ -58,23 +63,27 @@
 - 耐克（购物，3F）
 
 **券模板（4个）**
+
 - 50元代100元火锅券（库存：1000）
 - 星巴克30元饮品券（库存：500）
 - 9.9元观影特惠券（库存：2000）
 - 100元美食通用券（库存：300）
 
 **订单（4个）**
+
 - 已支付并核销的火锅券订单
 - 已支付未核销的饮品券订单
 - 已支付并核销的观影券订单
 - 未支付的火锅券订单
 
 **新闻（3条）**
+
 - 春季美食节盛大开幕（已发布，1523次浏览）
 - 新商户入驻：耐克旗舰店（已发布，856次浏览）
 - 五一劳动节促销活动预告（草稿，342次浏览）
 
 **结算单（4个）**
+
 - 海底捞 2024-02 月度结算（已支付）
 - 星巴克 2024-02 月度结算（已支付）
 - 万达影城 2024-02 月度结算（已确认）
@@ -90,10 +99,12 @@
 ## 测试账号
 
 管理端登录：
+
 - Email: `superadmin@example.com`
 - Password: `password123`
 
 小程序登录：
+
 - Email: `user@example.com`
 - Password: `password123`
 
@@ -125,11 +136,13 @@ docker exec -i postgres psql -U xinnix -d couponHub -c "SELECT '商户: ' || COU
 ## 故障排查
 
 **问题：容器未运行**
+
 ```bash
 docker start postgres
 ```
 
 **问题：数据库连接失败**
+
 ```bash
 # 检查数据库是否存在
 docker exec -i postgres psql -U xinnix -l | grep couponHub
@@ -139,6 +152,7 @@ docker exec -i postgres psql -U xinnix -c "CREATE DATABASE couponHub;"
 ```
 
 **问题：表不存在**
+
 ```bash
 # 运行数据库迁移
 pnpm --filter @opencode/database prisma migrate dev

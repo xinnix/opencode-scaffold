@@ -16,18 +16,20 @@ When you need business logic beyond standard CRUD, use custom router implementat
 **Location:** `apps/api/src/modules/[module]/trpc/[module].router.ts`
 
 ```typescript
-import { router, publicProcedure, protectedProcedure } from "../../trpc";
-import { z } from "zod";
-import { TRPCError } from "@trpc/server";
+import { router, publicProcedure, protectedProcedure } from '../../trpc';
+import { z } from 'zod';
+import { TRPCError } from '@trpc/server';
 
 export const customModuleRouter = router({
   // Standard CRUD with custom logic
   getMany: protectedProcedure
-    .input(z.object({
-      page: z.number().optional(),
-      limit: z.number().optional(),
-      status: z.enum(['active', 'inactive']).optional(),
-    }))
+    .input(
+      z.object({
+        page: z.number().optional(),
+        limit: z.number().optional(),
+        status: z.enum(['active', 'inactive']).optional(),
+      }),
+    )
     .query(async ({ ctx, input }) => {
       const { page = 1, limit = 10, ...where } = input;
 
@@ -58,11 +60,13 @@ export const customModuleRouter = router({
 
   // Custom create with validation
   createOne: protectedProcedure
-    .input(z.object({
-      name: z.string().min(3),
-      email: z.string().email(),
-      customField: z.string().optional(),
-    }))
+    .input(
+      z.object({
+        name: z.string().min(3),
+        email: z.string().email(),
+        customField: z.string().optional(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       // Business logic: Check if email already exists
       const existing = await ctx.prisma.customModule.findUnique({
@@ -88,10 +92,12 @@ export const customModuleRouter = router({
 
   // Custom update with state transition
   updateOne: protectedProcedure
-    .input(z.object({
-      id: z.string(),
-      status: z.enum(['draft', 'pending', 'approved', 'rejected']),
-    }))
+    .input(
+      z.object({
+        id: z.string(),
+        status: z.enum(['draft', 'pending', 'approved', 'rejected']),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       const { id, status } = input;
 
@@ -126,12 +132,14 @@ export const customModuleRouter = router({
 
   // Custom procedure: Bulk operations
   bulkUpdate: protectedProcedure
-    .input(z.object({
-      ids: z.array(z.string()),
-      updates: z.object({
-        status: z.enum(['active', 'inactive']),
+    .input(
+      z.object({
+        ids: z.array(z.string()),
+        updates: z.object({
+          status: z.enum(['active', 'inactive']),
+        }),
       }),
-    }))
+    )
     .mutation(async ({ ctx, input }) => {
       const result = await ctx.prisma.customModule.updateMany({
         where: { id: { in: input.ids } },
@@ -145,16 +153,15 @@ export const customModuleRouter = router({
     }),
 
   // Custom procedure: Statistics/Aggregation
-  getStats: protectedProcedure
-    .query(async ({ ctx }) => {
-      const [total, active, inactive] = await Promise.all([
-        ctx.prisma.customModule.count(),
-        ctx.prisma.customModule.count({ where: { status: 'active' } }),
-        ctx.prisma.customModule.count({ where: { status: 'inactive' } }),
-      ]);
+  getStats: protectedProcedure.query(async ({ ctx }) => {
+    const [total, active, inactive] = await Promise.all([
+      ctx.prisma.customModule.count(),
+      ctx.prisma.customModule.count({ where: { status: 'active' } }),
+      ctx.prisma.customModule.count({ where: { status: 'inactive' } }),
+    ]);
 
-      return { total, active, inactive };
-    }),
+    return { total, active, inactive };
+  }),
 });
 ```
 
@@ -251,29 +258,25 @@ getMany: protectedProcedure
 You can extend the factory function with custom procedures:
 
 ```typescript
-import { createCrudRouterWithCustom } from "@shared/trpc/trpc.helper";
+import { createCrudRouterWithCustom } from '@shared/trpc/trpc.helper';
 
 export const hybridRouter = createCrudRouterWithCustom(
-  "CustomModule",
+  'CustomModule',
   { create: createSchema, update: updateSchema },
   (t) => ({
     // Custom procedures
-    publish: t.procedure
-      .input(z.object({ id: z.string() }))
-      .mutation(async ({ ctx, input }) => {
-        return ctx.prisma.customModule.update({
-          where: { id: input.id },
-          data: { status: 'published' },
-        });
-      }),
-    archive: t.procedure
-      .input(z.object({ id: z.string() }))
-      .mutation(async ({ ctx, input }) => {
-        return ctx.prisma.customModule.update({
-          where: { id: input.id },
-          data: { status: 'archived' },
-        });
-      }),
-  })
+    publish: t.procedure.input(z.object({ id: z.string() })).mutation(async ({ ctx, input }) => {
+      return ctx.prisma.customModule.update({
+        where: { id: input.id },
+        data: { status: 'published' },
+      });
+    }),
+    archive: t.procedure.input(z.object({ id: z.string() })).mutation(async ({ ctx, input }) => {
+      return ctx.prisma.customModule.update({
+        where: { id: input.id },
+        data: { status: 'archived' },
+      });
+    }),
+  }),
 );
 ```

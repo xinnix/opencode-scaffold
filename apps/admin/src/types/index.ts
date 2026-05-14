@@ -15,7 +15,7 @@ export interface Test {
   id: string | number;
   name: string;
   description?: string;
-  status?: "active" | "inactive";
+  status?: 'active' | 'inactive';
   sortOrder?: number;
   createdAt?: string | Date;
   updatedAt?: string | Date;
@@ -31,7 +31,7 @@ export interface Category {
   sortOrder?: number;
   icon?: string;
   cover?: string;
-  status?: "active" | "inactive";
+  status?: 'active' | 'inactive';
   seoTitle?: string;
   seoDescription?: string;
   createdAt?: string | Date;
@@ -53,7 +53,7 @@ export interface Product {
   weight?: number;
   dimensions?: string;
   images?: string;
-  status?: "active" | "inactive" | "discontinued";
+  status?: 'active' | 'inactive' | 'discontinued';
   featured?: boolean;
   createdAt?: string | Date;
   updatedAt?: string | Date;
@@ -67,7 +67,7 @@ export interface Blog {
   cover?: string;
   categoryId?: string | number;
   tags?: string;
-  status?: "draft" | "published" | "archived";
+  status?: 'draft' | 'published' | 'archived';
   authorId: string | number;
   viewCount?: number;
   publishedAt?: string | Date;
@@ -83,7 +83,7 @@ export interface Article {
   cover?: string;
   categoryId?: string | number;
   tags?: string;
-  status?: "draft" | "published" | "archived";
+  status?: 'draft' | 'published' | 'archived';
   authorId: string | number;
   viewCount?: number;
   publishedAt?: string | Date;

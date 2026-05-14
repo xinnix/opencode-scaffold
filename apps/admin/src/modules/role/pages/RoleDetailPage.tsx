@@ -1,29 +1,17 @@
 // apps/admin/src/modules/role/pages/RoleDetailPage.tsx
-import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { useOne, useList, useDelete } from "@refinedev/core";
-import {
-  Card,
-  Descriptions,
-  Button,
-  Space,
-  Tag,
-  Modal,
-  List,
-  Avatar,
-  Tabs,
-  Spin,
-  App,
-} from "antd";
+import { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useOne, useList, useDelete } from '@refinedev/core';
+import { Card, Descriptions, Button, Space, Tag, Modal, List, Avatar, Tabs, Spin, App } from 'antd';
 import {
   ArrowLeftOutlined,
   EditOutlined,
   KeyOutlined,
   TeamOutlined,
   SettingOutlined,
-} from "@ant-design/icons";
-import { PermissionCheckboxGroup } from "../components/PermissionCheckboxGroup";
-import { getTrpcClient } from "../../../shared/trpc/trpcClient";
+} from '@ant-design/icons';
+import { PermissionCheckboxGroup } from '../components/PermissionCheckboxGroup';
+import { getTrpcClient } from '../../../shared/trpc/trpcClient';
 
 const trpcClient = getTrpcClient();
 
@@ -63,27 +51,31 @@ interface RoleDetail {
 export const RoleDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("info");
+  const [activeTab, setActiveTab] = useState('info');
   const [isPermissionModalVisible, setIsPermissionModalVisible] = useState(false);
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const { message } = App.useApp();
 
-  const { result, isLoading, query: roleQuery } = useOne<RoleDetail>({
-    resource: "role",
-    id: id || "",
+  const {
+    result,
+    isLoading,
+    query: roleQuery,
+  } = useOne<RoleDetail>({
+    resource: 'role',
+    id: id || '',
     queryOptions: {
       enabled: !!id,
     },
   });
 
   const { result: usersResult, query: usersQuery } = useList<User>({
-    resource: "role",
-    id: id || "",
-    action: "getUsers",
+    resource: 'role',
+    id: id || '',
+    action: 'getUsers',
     pagination: { pageSize: 10 },
     queryOptions: {
-      enabled: !!id && activeTab === "users",
+      enabled: !!id && activeTab === 'users',
     },
   });
 
@@ -99,7 +91,7 @@ export const RoleDetailPage = () => {
   }, [role]);
 
   useEffect(() => {
-    if (activeTab === "users" && id) {
+    if (activeTab === 'users' && id) {
       usersQuery.refetch();
     }
   }, [activeTab, id, usersQuery]);
@@ -114,19 +106,19 @@ export const RoleDetailPage = () => {
         permissionIds: selectedPermissions,
       });
 
-      message.success("权限更新成功");
+      message.success('权限更新成功');
       setIsPermissionModalVisible(false);
       roleQuery.refetch();
     } catch (error) {
-      console.error("Failed to update permissions:", error);
-      message.error("权限更新失败");
+      console.error('Failed to update permissions:', error);
+      message.error('权限更新失败');
     } finally {
       setLoading(false);
     }
   };
 
   if (isLoading) {
-    return <div style={{ padding: 24, textAlign: "center" }}>加载中...</div>;
+    return <div style={{ padding: 24, textAlign: 'center' }}>加载中...</div>;
   }
 
   if (!role) {
@@ -135,8 +127,8 @@ export const RoleDetailPage = () => {
 
   const tabItems = [
     {
-      key: "info",
-      label: "基本信息",
+      key: 'info',
+      label: '基本信息',
       children: (
         <Descriptions column={2} bordered>
           <Descriptions.Item label="角色名称" labelStyle={{ width: 120 }}>
@@ -148,7 +140,7 @@ export const RoleDetailPage = () => {
           </Descriptions.Item>
           <Descriptions.Item label="标识">{role.slug}</Descriptions.Item>
           <Descriptions.Item label="层级">
-            <Tag color={role.level < 50 ? "red" : role.level < 100 ? "orange" : "default"}>
+            <Tag color={role.level < 50 ? 'red' : role.level < 100 ? 'orange' : 'default'}>
               {role.level}
             </Tag>
           </Descriptions.Item>
@@ -163,23 +155,23 @@ export const RoleDetailPage = () => {
             </Tag>
           </Descriptions.Item>
           <Descriptions.Item label="描述" span={2}>
-            {role.description || "-"}
+            {role.description || '-'}
           </Descriptions.Item>
           <Descriptions.Item label="创建时间">
-            {new Date(role.createdAt).toLocaleString("zh-CN")}
+            {new Date(role.createdAt).toLocaleString('zh-CN')}
           </Descriptions.Item>
           <Descriptions.Item label="更新时间">
-            {new Date(role.updatedAt).toLocaleString("zh-CN")}
+            {new Date(role.updatedAt).toLocaleString('zh-CN')}
           </Descriptions.Item>
         </Descriptions>
       ),
     },
     {
-      key: "permissions",
-      label: "权限管理",
+      key: 'permissions',
+      label: '权限管理',
       children: (
-        <Space direction="vertical" style={{ width: "100%" }} size="large">
-          <div style={{ textAlign: "right" }}>
+        <Space direction="vertical" style={{ width: '100%' }} size="large">
+          <div style={{ textAlign: 'right' }}>
             <Button
               type="primary"
               icon={<KeyOutlined />}
@@ -201,18 +193,20 @@ export const RoleDetailPage = () => {
                       <Tag color="green">{permission.action}</Tag>
                     </Space>
                   }
-                  description={permission.description || `${permission.resource}:${permission.action}`}
+                  description={
+                    permission.description || `${permission.resource}:${permission.action}`
+                  }
                 />
               </List.Item>
             )}
-            locale={{ emptyText: "暂无权限" }}
+            locale={{ emptyText: '暂无权限' }}
           />
         </Space>
       ),
     },
     {
-      key: "users",
-      label: "拥有该角色的用户",
+      key: 'users',
+      label: '拥有该角色的用户',
       children: (
         <List
           dataSource={users}
@@ -236,36 +230,30 @@ export const RoleDetailPage = () => {
                   <Space>
                     <span>{user.email}</span>
                     <span>|</span>
-                    <span>
-                      {[user.firstName, user.lastName].filter(Boolean).join(" ") || "-"}
-                    </span>
+                    <span>{[user.firstName, user.lastName].filter(Boolean).join(' ') || '-'}</span>
                     <span>|</span>
-                    <Tag color={user.isActive ? "success" : "error"}>
-                      {user.isActive ? "激活" : "停用"}
+                    <Tag color={user.isActive ? 'success' : 'error'}>
+                      {user.isActive ? '激活' : '停用'}
                     </Tag>
                     <span>|</span>
-                    <span>分配于: {new Date(user.assignedAt).toLocaleDateString("zh-CN")}</span>
+                    <span>分配于: {new Date(user.assignedAt).toLocaleDateString('zh-CN')}</span>
                   </Space>
                 }
               />
             </List.Item>
           )}
-          locale={{ emptyText: "暂无用户拥有此角色" }}
+          locale={{ emptyText: '暂无用户拥有此角色' }}
         />
       ),
     },
   ];
 
   return (
-    <div style={{ maxWidth: 1000, margin: "0 auto", padding: "24px" }}>
+    <div style={{ maxWidth: 1000, margin: '0 auto', padding: '24px' }}>
       <Card
         title={
           <Space>
-            <Button
-              type="text"
-              icon={<ArrowLeftOutlined />}
-              onClick={() => navigate("/roles")}
-            >
+            <Button type="text" icon={<ArrowLeftOutlined />} onClick={() => navigate('/roles')}>
               返回
             </Button>
             <span>角色详情</span>
@@ -273,10 +261,7 @@ export const RoleDetailPage = () => {
         }
         extra={
           <Space>
-            <Button
-              icon={<EditOutlined />}
-              onClick={() => message.info("请在列表页编辑角色信息")}
-            >
+            <Button icon={<EditOutlined />} onClick={() => message.info('请在列表页编辑角色信息')}>
               编辑
             </Button>
           </Space>

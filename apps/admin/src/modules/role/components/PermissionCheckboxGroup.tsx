@@ -1,7 +1,7 @@
 // apps/admin/src/modules/role/components/PermissionCheckboxGroup.tsx
-import { useEffect, useState } from "react";
-import { Checkbox, Space, Spin, Alert } from "antd";
-import { getTrpcClient } from "../../../shared/trpc/trpcClient";
+import { useEffect, useState } from 'react';
+import { Checkbox, Space, Spin, Alert } from 'antd';
+import { getTrpcClient } from '../../../shared/trpc/trpcClient';
 
 const trpcClient = getTrpcClient();
 
@@ -18,49 +18,52 @@ interface Permission {
 }
 
 const RESOURCE_LABELS: Record<string, string> = {
-  menu: "菜单权限",
-  todo: "待办事项",
-  user: "用户管理",
-  role: "角色管理",
-  handler: "核销员管理",
-  admin: "管理员管理",
-  merchant: "商户管理",
-  merchantCategory: "商户分类管理",
-  news: "新闻管理",
-  couponTemplate: "券模板管理",
-  order: "订单管理",
-  settlement: "结算管理",
-  settings: "系统设置",
+  menu: '菜单权限',
+  todo: '待办事项',
+  user: '用户管理',
+  role: '角色管理',
+  handler: '核销员管理',
+  admin: '管理员管理',
+  merchant: '商户管理',
+  merchantCategory: '商户分类管理',
+  news: '新闻管理',
+  couponTemplate: '券模板管理',
+  order: '订单管理',
+  settlement: '结算管理',
+  settings: '系统设置',
 };
 
 const ACTION_LABELS: Record<string, string> = {
   // 菜单权限 action
-  dashboard: "仪表盘",
-  merchants: "商户管理",
-  merchant_categories: "商户分类管理",
-  coupon_templates: "券模板管理",
-  orders: "订单管理",
-  settlements: "结算管理",
-  redemptions: "核销记录",
-  users: "用户管理",
-  news: "新闻管理",
-  admins: "管理员管理",
-  roles: "角色管理",
+  dashboard: '仪表盘',
+  merchants: '商户管理',
+  merchant_categories: '商户分类管理',
+  coupon_templates: '券模板管理',
+  orders: '订单管理',
+  settlements: '结算管理',
+  redemptions: '核销记录',
+  users: '用户管理',
+  news: '新闻管理',
+  admins: '管理员管理',
+  roles: '角色管理',
   // 标准 CRUD action
-  create: "创建",
-  read: "读取",
-  update: "更新",
-  delete: "删除",
+  create: '创建',
+  read: '读取',
+  update: '更新',
+  delete: '删除',
   // 特殊 action
-  manage_roles: "管理角色",
-  adjust_stock: "调整库存",
-  approve_refund: "审批退款",
-  reject_refund: "拒绝退款",
-  confirm: "确认结算",
-  mark_paid: "标记已支付",
+  manage_roles: '管理角色',
+  adjust_stock: '调整库存',
+  approve_refund: '审批退款',
+  reject_refund: '拒绝退款',
+  confirm: '确认结算',
+  mark_paid: '标记已支付',
 };
 
-export const PermissionCheckboxGroup = ({ selectedIds, onChange }: PermissionCheckboxGroupProps) => {
+export const PermissionCheckboxGroup = ({
+  selectedIds,
+  onChange,
+}: PermissionCheckboxGroupProps) => {
   const [groupedPermissions, setGroupedPermissions] = useState<Record<string, Permission[]>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -79,8 +82,8 @@ export const PermissionCheckboxGroup = ({ selectedIds, onChange }: PermissionChe
           setGroupedPermissions({});
         }
       } catch (err) {
-        console.error("Failed to load permissions:", err);
-        setError("加载权限失败");
+        console.error('Failed to load permissions:', err);
+        setError('加载权限失败');
       } finally {
         setLoading(false);
       }
@@ -93,13 +96,13 @@ export const PermissionCheckboxGroup = ({ selectedIds, onChange }: PermissionChe
     if (checked) {
       onChange([...selectedIds, permissionId]);
     } else {
-      onChange(selectedIds.filter(id => id !== permissionId));
+      onChange(selectedIds.filter((id) => id !== permissionId));
     }
   };
 
   const handleToggleGroup = (resource: string, checked: boolean) => {
     const permissions = groupedPermissions[resource] || [];
-    const permissionIds = permissions.map(p => p.id);
+    const permissionIds = permissions.map((p) => p.id);
 
     if (checked) {
       // Add all permissions from this group
@@ -107,25 +110,25 @@ export const PermissionCheckboxGroup = ({ selectedIds, onChange }: PermissionChe
       onChange(newIds);
     } else {
       // Remove all permissions from this group
-      onChange(selectedIds.filter(id => !permissionIds.includes(id)));
+      onChange(selectedIds.filter((id) => !permissionIds.includes(id)));
     }
   };
 
   const isGroupFullySelected = (resource: string) => {
     const permissions = groupedPermissions[resource] || [];
     if (permissions.length === 0) return false;
-    return permissions.every(p => selectedIds.includes(p.id));
+    return permissions.every((p) => selectedIds.includes(p.id));
   };
 
   const isGroupPartiallySelected = (resource: string) => {
     const permissions = groupedPermissions[resource] || [];
-    const selectedCount = permissions.filter(p => selectedIds.includes(p.id)).length;
+    const selectedCount = permissions.filter((p) => selectedIds.includes(p.id)).length;
     return selectedCount > 0 && selectedCount < permissions.length;
   };
 
   if (loading) {
     return (
-      <div style={{ textAlign: "center", padding: 24 }}>
+      <div style={{ textAlign: 'center', padding: 24 }}>
         <Spin tip="加载权限中..." />
       </div>
     );
@@ -137,14 +140,14 @@ export const PermissionCheckboxGroup = ({ selectedIds, onChange }: PermissionChe
 
   return (
     <div>
-      <Space direction="vertical" style={{ width: "100%" }} size="large">
+      <Space direction="vertical" style={{ width: '100%' }} size="large">
         {Object.entries(groupedPermissions).map(([resource, permissions]) => {
           const fullySelected = isGroupFullySelected(resource);
           const partiallySelected = isGroupPartiallySelected(resource);
 
           return (
             <div key={resource}>
-              <div style={{ marginBottom: 12, fontWeight: "bold" }}>
+              <div style={{ marginBottom: 12, fontWeight: 'bold' }}>
                 <Checkbox
                   indeterminate={partiallySelected}
                   checked={fullySelected}
@@ -162,15 +165,15 @@ export const PermissionCheckboxGroup = ({ selectedIds, onChange }: PermissionChe
                       key={permission.id}
                       checked={selectedIds.includes(permission.id)}
                       onChange={(e) => handleToggle(permission.id, e.target.checked)}
-                      style={{ display: "block", marginBottom: 8 }}
+                      style={{ display: 'block', marginBottom: 8 }}
                     >
                       <Space size="small">
                         <span>{label}</span>
-                        <span style={{ color: "#999" }}>
+                        <span style={{ color: '#999' }}>
                           ({permission.resource}:{permission.action})
                         </span>
                         {permission.description && (
-                          <span style={{ color: "#999", fontSize: 12 }}>
+                          <span style={{ color: '#999', fontSize: 12 }}>
                             - {permission.description}
                           </span>
                         )}

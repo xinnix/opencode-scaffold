@@ -7,36 +7,40 @@ description: 同时启动后端、前端和小程序服务
 启动命令：
 
 **后端 API (NestJS + tRPC)**
+
 ```typescript
 Monitor({
-  command: "cd apps/api && pnpm dev",
-  description: "后端 API 服务监控（NestJS + tRPC）",
+  command: 'cd apps/api && pnpm dev',
+  description: '后端 API 服务监控（NestJS + tRPC）',
   persistent: true,
-  timeout_ms: 3600000
-})
+  timeout_ms: 3600000,
+});
 ```
 
 **前端管理后台 (React + Refine)**
+
 ```typescript
 Monitor({
-  command: "cd apps/admin && pnpm dev",
-  description: "前端管理后台监控（React + Refine）",
+  command: 'cd apps/admin && pnpm dev',
+  description: '前端管理后台监控（React + Refine）',
   persistent: true,
-  timeout_ms: 3600000
-})
+  timeout_ms: 3600000,
+});
 ```
 
 **小程序 (uni-app 微信小程序)**
+
 ```typescript
 Monitor({
-  command: "cd apps/miniapp && pnpm dev:mp-weixin",
-  description: "小程序开发服务监控（微信小程序）",
+  command: 'cd apps/miniapp && pnpm dev:mp-weixin',
+  description: '小程序开发服务监控（微信小程序）',
   persistent: true,
-  timeout_ms: 3600000
-})
+  timeout_ms: 3600000,
+});
 ```
 
 服务地址：
+
 - 后端 tRPC: http://localhost:3000/trpc
 - 后端 Swagger: http://localhost:3000/api/docs
 - 前端管理后台: http://localhost:5173（如果端口被占用会自动切换）

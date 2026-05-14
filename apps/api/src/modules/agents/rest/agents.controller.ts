@@ -59,9 +59,7 @@ export class AgentsController {
       }
     } catch (error: any) {
       this.logger.error(`Chat stream error: ${error.message}`);
-      res.write(
-        `data: ${JSON.stringify({ event: 'error', message: error.message })}\n\n`,
-      );
+      res.write(`data: ${JSON.stringify({ event: 'error', message: error.message })}\n\n`);
     }
 
     res.end();
@@ -106,9 +104,7 @@ export class AgentsController {
       }
     } catch (error: any) {
       this.logger.error(`User chat stream error: ${error.message}`);
-      res.write(
-        `data: ${JSON.stringify({ event: 'error', message: error.message })}\n\n`,
-      );
+      res.write(`data: ${JSON.stringify({ event: 'error', message: error.message })}\n\n`);
     }
 
     res.end();
@@ -117,11 +113,7 @@ export class AgentsController {
   @Post(':id/stop')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: '停止 Agent 生成' })
-  async stop(
-    @Param('id') id: string,
-    @Body() body: { taskId: string },
-    @Req() req: Request,
-  ) {
+  async stop(@Param('id') id: string, @Body() body: { taskId: string }, @Req() req: Request) {
     const agent = await this.agentsService.findOneWithKey(id);
     if (!agent) throw new NotFoundException('Agent not found');
 

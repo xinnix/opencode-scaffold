@@ -110,9 +110,10 @@ describe('User Management Schemas', () => {
 
   describe('BatchAssignRolesSchema', () => {
     it('accepts arrays', () => {
-      expect(
-        BatchAssignRolesSchema.parse({ userIds: ['1', '2'], roleIds: ['3', '4'] }),
-      ).toEqual({ userIds: ['1', '2'], roleIds: ['3', '4'] });
+      expect(BatchAssignRolesSchema.parse({ userIds: ['1', '2'], roleIds: ['3', '4'] })).toEqual({
+        userIds: ['1', '2'],
+        roleIds: ['3', '4'],
+      });
     });
   });
 

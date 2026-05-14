@@ -1,8 +1,8 @@
-import type { AppRouter } from "../../types/api";
-import { TRPCClientError } from "@trpc/client";
-import { QueryClient } from "@tanstack/react-query";
-import { App } from "antd";
-import { getTrpcClient } from "../trpc/trpcClient";
+import type { AppRouter } from '../../types/api';
+import { TRPCClientError } from '@trpc/client';
+import { QueryClient } from '@tanstack/react-query';
+import { App } from 'antd';
+import { getTrpcClient } from '../trpc/trpcClient';
 
 // Create QueryClient for React Query
 export const queryClient = new QueryClient({
@@ -42,9 +42,10 @@ const showError = (msg: string) => {
  */
 function extractBusinessErrorMessage(errorMessage: string): string | null {
   // Foreign key constraint violations
-  if (errorMessage.includes('violates foreign key constraint') ||
-      errorMessage.includes('violates RESTRICT setting')) {
-
+  if (
+    errorMessage.includes('violates foreign key constraint') ||
+    errorMessage.includes('violates RESTRICT setting')
+  ) {
     // Extract table names from error message
     const tableMatch = errorMessage.match(/table "(\w+)"/g);
 
@@ -54,19 +55,19 @@ function extractBusinessErrorMessage(errorMessage: string): string | null {
 
       // Map table names to Chinese
       const tableNames: Record<string, string> = {
-        'orders': '订单',
-        'coupon_templates': '券模板',
-        'merchants': '商户',
-        'users': '用户',
-        'news': '新闻',
-        'settlements': '结算单',
+        orders: '订单',
+        coupon_templates: '券模板',
+        merchants: '商户',
+        users: '用户',
+        news: '新闻',
+        settlements: '结算单',
       };
 
       const childName = tableNames[childTable] || childTable;
       return `该${childName}已有其他数据关联，无法删除`;
     }
 
-    return "该数据已有其他数据关联，无法删除";
+    return '该数据已有其他数据关联，无法删除';
   }
 
   // Unique constraint violations
@@ -75,19 +76,19 @@ function extractBusinessErrorMessage(errorMessage: string): string | null {
     if (fieldMatch) {
       const field = fieldMatch[1];
       const fieldNames: Record<string, string> = {
-        'email': '邮箱',
-        'username': '用户名',
-        'order_no': '订单号',
+        email: '邮箱',
+        username: '用户名',
+        order_no: '订单号',
       };
       const fieldName = fieldNames[field] || field;
       return `${fieldName}已存在，请使用其他值`;
     }
-    return "该数据已存在";
+    return '该数据已存在';
   }
 
   // Check constraint violations
   if (errorMessage.includes('violates check constraint')) {
-    return "数据验证失败，请检查输入内容";
+    return '数据验证失败，请检查输入内容';
   }
 
   // Not null violations
@@ -96,15 +97,15 @@ function extractBusinessErrorMessage(errorMessage: string): string | null {
     if (fieldMatch) {
       const field = fieldMatch[1];
       const fieldNames: Record<string, string> = {
-        'title': '标题',
-        'email': '邮箱',
-        'password': '密码',
-        'status': '状态',
+        title: '标题',
+        email: '邮箱',
+        password: '密码',
+        status: '状态',
       };
       const fieldName = fieldNames[field] || field;
       return `${fieldName}不能为空`;
     }
-    return "必填字段不能为空";
+    return '必填字段不能为空';
   }
 
   return null;
@@ -119,7 +120,7 @@ function extractBusinessErrorMessage(errorMessage: string): string | null {
  */
 async function handleTRPCError(error: unknown): Promise<boolean> {
   if (error instanceof TRPCClientError) {
-    const errorMessage = error.data?.message || error.message || "操作失败，请稍后重试";
+    const errorMessage = error.data?.message || error.message || '操作失败，请稍后重试';
 
     // Try to extract business-friendly message from database error
     const businessMessage = extractBusinessErrorMessage(errorMessage);
@@ -134,29 +135,37 @@ async function handleTRPCError(error: unknown): Promise<boolean> {
     const httpStatus = (error.shape as any)?.data?.httpStatus || (error.data as any)?.httpStatus;
 
     // Resolve effective status for error handling
-    const effectiveStatus = errorCode === "UNAUTHORIZED" ? 401
-      : errorCode === "FORBIDDEN" ? 403
-      : errorCode === "NOT_FOUND" ? 404
-      : errorCode === "CONFLICT" ? 409
-      : errorCode === "BAD_REQUEST" ? 400
-      : errorCode === "INTERNAL_SERVER_ERROR" ? 500
-      : typeof errorCode === "number" ? errorCode
-      : httpStatus;
+    const effectiveStatus =
+      errorCode === 'UNAUTHORIZED'
+        ? 401
+        : errorCode === 'FORBIDDEN'
+          ? 403
+          : errorCode === 'NOT_FOUND'
+            ? 404
+            : errorCode === 'CONFLICT'
+              ? 409
+              : errorCode === 'BAD_REQUEST'
+                ? 400
+                : errorCode === 'INTERNAL_SERVER_ERROR'
+                  ? 500
+                  : typeof errorCode === 'number'
+                    ? errorCode
+                    : httpStatus;
 
     switch (effectiveStatus) {
       case 401:
         // Safety net: 401 is handled by tRPC client, but clear auth if somehow reaching here
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-        localStorage.removeItem("user");
-        showError("登录已过期，请重新登录");
-        window.location.href = "/unauthorized";
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+        showError('登录已过期，请重新登录');
+        window.location.href = '/unauthorized';
         return false;
       case 403:
-        showError("没有权限执行此操作");
+        showError('没有权限执行此操作');
         return false;
       case 404:
-        showError("请求的资源不存在");
+        showError('请求的资源不存在');
         return false;
       case 409:
         showError(errorMessage);
@@ -170,18 +179,18 @@ async function handleTRPCError(error: unknown): Promise<boolean> {
         return false;
       default:
         // Network error check
-        if (error.message.includes("ECONNREFUSED")) {
-          showError("无法连接到服务器，请检查网络连接");
+        if (error.message.includes('ECONNREFUSED')) {
+          showError('无法连接到服务器，请检查网络连接');
         } else {
           showError(errorMessage);
         }
         return false;
     }
   } else if (error instanceof Error) {
-    showError(error.message || "操作失败，请稍后重试");
+    showError(error.message || '操作失败，请稍后重试');
     return false;
   } else {
-    showError("操作失败，请稍后重试");
+    showError('操作失败，请稍后重试');
     return false;
   }
 }
@@ -253,11 +262,16 @@ export const dataProvider = {
         for (const filter of filters) {
           if (filter.field && filter.value !== undefined) {
             // Handle different filter operators
-            if (filter.operator === "contains") {
+            if (filter.operator === 'contains') {
               where[filter.field] = { contains: filter.value };
-            } else if (filter.operator === "eq") {
+            } else if (filter.operator === 'eq') {
               where[filter.field] = filter.value;
-            } else if (filter.operator === "gte" || filter.operator === "lte" || filter.operator === "gt" || filter.operator === "lt") {
+            } else if (
+              filter.operator === 'gte' ||
+              filter.operator === 'lte' ||
+              filter.operator === 'gt' ||
+              filter.operator === 'lt'
+            ) {
               // Support range operators (merge multiple operators on same field)
               if (!where[filter.field]) {
                 where[filter.field] = {};
@@ -274,7 +288,7 @@ export const dataProvider = {
       let orderBy: any = {};
       if (sorters?.length) {
         const sorter = sorters[0];
-        orderBy = { [sorter.field]: sorter.order === "asc" ? "asc" : "desc" };
+        orderBy = { [sorter.field]: sorter.order === 'asc' ? 'asc' : 'desc' };
       }
 
       // Call the getMany procedure with unified format
@@ -363,7 +377,10 @@ export const dataProvider = {
     try {
       // Handle special procedures (non-CRUD)
       if (meta?.method) {
-        const result = await (trpcClient as any)[resource][meta.method].mutate({ id, ...variables });
+        const result = await (trpcClient as any)[resource][meta.method].mutate({
+          id,
+          ...variables,
+        });
         return { data: result };
       }
 
@@ -413,5 +430,5 @@ export const dataProvider = {
   /**
    * Get the API URL
    */
-  getApiUrl: () => import.meta.env.VITE_API_URL || "/trpc",
+  getApiUrl: () => import.meta.env.VITE_API_URL || '/trpc',
 };

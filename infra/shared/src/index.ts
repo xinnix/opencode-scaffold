@@ -1,18 +1,18 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 // ============================================
 // Auth Schemas
 // ============================================
 
 export const LoginSchema = z.object({
-  username: z.string().min(1, "用户名不能为空"),
-  password: z.string().min(1, "密码不能为空"),
+  username: z.string().min(1, '用户名不能为空'),
+  password: z.string().min(1, '密码不能为空'),
 });
 
 export const RegisterSchema = z.object({
-  username: z.string().min(3, "Username must be at least 3 characters"),
-  email: z.string().email("Invalid email format"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  username: z.string().min(3, 'Username must be at least 3 characters'),
+  email: z.string().email('Invalid email format'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
   firstName: z.string().optional(),
   lastName: z.string().optional(),
 });
@@ -112,7 +112,8 @@ export const PERMISSIONS = {
   },
 } as const;
 
-export type PermissionString = typeof PERMISSIONS[keyof typeof PERMISSIONS][keyof typeof PERMISSIONS[keyof typeof PERMISSIONS]];
+export type PermissionString =
+  (typeof PERMISSIONS)[keyof typeof PERMISSIONS][keyof (typeof PERMISSIONS)[keyof typeof PERMISSIONS]];
 
 // ============================================
 // Role Constants
@@ -125,7 +126,7 @@ export const ROLES = {
   VIEWER: 'viewer',
 } as const;
 
-export type RoleSlug = typeof ROLES[keyof typeof ROLES];
+export type RoleSlug = (typeof ROLES)[keyof typeof ROLES];
 
 // ============================================
 // User Management Schemas
@@ -146,9 +147,9 @@ export const UserSchema = z.object({
 });
 
 export const CreateUserSchema = z.object({
-  username: z.string().min(3, "用户名至少3个字符"),
-  email: z.string().email("邮箱格式无效"),
-  password: z.string().min(8, "密码至少8个字符"),
+  username: z.string().min(3, '用户名至少3个字符'),
+  email: z.string().email('邮箱格式无效'),
+  password: z.string().min(8, '密码至少8个字符'),
   firstName: z.string().optional(),
   lastName: z.string().optional(),
 });
@@ -182,7 +183,7 @@ export const BatchAssignRolesSchema = z.object({
 
 export const ResetPasswordSchema = z.object({
   userId: z.string(),
-  newPassword: z.string().min(8, "密码至少8个字符"),
+  newPassword: z.string().min(8, '密码至少8个字符'),
 });
 
 export type UserInput = z.infer<typeof UserSchema>;
@@ -209,8 +210,8 @@ export const RoleSchema = z.object({
 });
 
 export const CreateRoleSchema = z.object({
-  name: z.string().min(1, "角色名称不能为空"),
-  slug: z.string().min(1, "角色标识不能为空"),
+  name: z.string().min(1, '角色名称不能为空'),
+  slug: z.string().min(1, '角色标识不能为空'),
   description: z.string().optional(),
   level: z.number().int().default(100),
 });
@@ -245,23 +246,20 @@ export type UpdateRolePermissionsInput = z.infer<typeof UpdateRolePermissionsSch
 export const AgentConfigSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
-  description: z.string().optional().default(""),
+  description: z.string().optional().default(''),
   tags: z.array(z.string()).optional().default([]),
   dify: z.object({
     app_id: z.string().min(1),
-    api_key: z.string().optional().default(""),
+    api_key: z.string().optional().default(''),
     mode: z
-      .enum(["chat", "completion", "agent-chat", "advanced-chat", "workflow"])
+      .enum(['chat', 'completion', 'agent-chat', 'advanced-chat', 'workflow'])
       .optional()
-      .default("chat"),
-    api_base_url: z.string().optional().default(""),
+      .default('chat'),
+    api_base_url: z.string().optional().default(''),
   }),
   parameters: z
     .object({
-      response_mode: z
-        .enum(["streaming", "blocking"])
-        .optional()
-        .default("blocking"),
+      response_mode: z.enum(['streaming', 'blocking']).optional().default('blocking'),
       inputs: z.record(z.string(), z.any()).optional().default({}),
       temperature: z.number().min(0).max(2).nullable().optional(),
       max_tokens: z.number().int().positive().nullable().optional(),
@@ -282,13 +280,13 @@ export type AgentConfig = z.infer<typeof AgentConfigSchema>;
 // ============================================
 
 export const CreateAgentSchema = z.object({
-  name: z.string().min(1, "名称不能为空"),
-  slug: z.string().min(1, "标识不能为空"),
+  name: z.string().min(1, '名称不能为空'),
+  slug: z.string().min(1, '标识不能为空'),
   description: z.string().optional(),
   icon: z.string().optional(),
-  difyApiUrl: z.string().min(1).optional().default("https://api.dify.ai/v1"),
-  difyApiKey: z.string().min(1, "API Key 不能为空"),
-  difyAppType: z.string().optional().default("agent"),
+  difyApiUrl: z.string().min(1).optional().default('https://api.dify.ai/v1'),
+  difyApiKey: z.string().min(1, 'API Key 不能为空'),
+  difyAppType: z.string().optional().default('agent'),
   isActive: z.boolean().optional().default(true),
   sort: z.number().int().optional().default(0),
 });

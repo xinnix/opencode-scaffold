@@ -66,6 +66,7 @@ volumes:
    - 证书仅存储在服务器本地
 
 2. **限制文件权限**
+
    ```bash
    chmod 600 certs/*.pem
    ```
@@ -99,11 +100,13 @@ docker exec couponHub-api-prod ls -la /app/certs
 ### 微信支付初始化失败
 
 检查日志：
+
 ```bash
 docker logs couponHub-api-prod | grep "微信支付"
 ```
 
 常见原因：
+
 - 证书文件未上传到服务器
 - 环境变量路径配置错误
 - 证书文件权限不足

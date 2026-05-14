@@ -1,11 +1,11 @@
-import { initTRPC, TRPCError } from "@trpc/server";
-import { ZodError } from "zod";
-import { PrismaService } from "../prisma/prisma.service";
-import { FileStorageService } from "../shared/services/file-storage.service";
-import jwt from "jsonwebtoken";
-import { INestApplication } from "@nestjs/common";
-import { BusinessException } from "../core/exceptions";
-import { businessExceptionToTRPCError } from "../core/middleware/trpc-error-formatter";
+import { initTRPC, TRPCError } from '@trpc/server';
+import { ZodError } from 'zod';
+import { PrismaService } from '../prisma/prisma.service';
+import { FileStorageService } from '../shared/services/file-storage.service';
+import jwt from 'jsonwebtoken';
+import { INestApplication } from '@nestjs/common';
+import { BusinessException } from '../core/exceptions';
+import { businessExceptionToTRPCError } from '../core/middleware/trpc-error-formatter';
 
 // Global service references
 let prismaServiceInstance: PrismaService | null = null;
@@ -84,11 +84,10 @@ async function verifyJwtToken(req: any, prisma: PrismaService): Promise<User | n
     }
 
     // Flatten permissions
-    const permissions = admin.roles?.flatMap((ar: any) =>
-      ar.role.permissions?.map((rp: any) =>
-        `${rp.permission.resource}:${rp.permission.action}`,
-      ),
-    ) || [];
+    const permissions =
+      admin.roles?.flatMap((ar: any) =>
+        ar.role.permissions?.map((rp: any) => `${rp.permission.resource}:${rp.permission.action}`),
+      ) || [];
 
     return {
       id: admin.id,
@@ -149,8 +148,7 @@ const t = initTRPC.context<Context>().create({
         ...shape.data,
         errorCode,
         details,
-        zodError:
-          error.cause instanceof ZodError ? error.cause.flatten() : null,
+        zodError: error.cause instanceof ZodError ? error.cause.flatten() : null,
       },
     };
   },
@@ -173,24 +171,28 @@ export const publicProcedure = t.procedure.use(businessErrorMiddleware);
 
 // Rate-limited public procedure for auth endpoints (5 req/min per IP)
 import { authRateLimit } from '../core/middleware/trpc-rate-limit.middleware';
-export const rateLimitedPublicProcedure = t.procedure.use(authRateLimit).use(businessErrorMiddleware);
+export const rateLimitedPublicProcedure = t.procedure
+  .use(authRateLimit)
+  .use(businessErrorMiddleware);
 
 // Protected procedure - requires authentication
-export const protectedProcedure = t.procedure.use(businessErrorMiddleware).use(async ({ ctx, next }) => {
-  if (!ctx.user) {
-    throw new TRPCError({
-      code: 'UNAUTHORIZED',
-      message: 'Authentication required. Please provide a valid JWT token.',
-    });
-  }
+export const protectedProcedure = t.procedure
+  .use(businessErrorMiddleware)
+  .use(async ({ ctx, next }) => {
+    if (!ctx.user) {
+      throw new TRPCError({
+        code: 'UNAUTHORIZED',
+        message: 'Authentication required. Please provide a valid JWT token.',
+      });
+    }
 
-  return next({
-    ctx: {
-      ...ctx,
-      user: ctx.user,
-    },
+    return next({
+      ctx: {
+        ...ctx,
+        user: ctx.user,
+      },
+    });
   });
-});
 
 // Permission procedure - requires specific permission
 export const permissionProcedure = (resource: string, action: string) =>

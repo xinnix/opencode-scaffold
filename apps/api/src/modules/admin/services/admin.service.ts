@@ -1,5 +1,5 @@
-import { BaseService } from "../../../common/base.service";
-import { PrismaService } from "../../../prisma/prisma.service";
+import { BaseService } from '../../../common/base.service';
+import { PrismaService } from '../../../prisma/prisma.service';
 
 /**
  * Admin Service
@@ -9,6 +9,6 @@ import { PrismaService } from "../../../prisma/prisma.service";
  */
 export class AdminService extends BaseService<'Admin'> {
   constructor(prisma: PrismaService) {
-    super(prisma, "Admin");
+    super(prisma, 'Admin');
   }
 }

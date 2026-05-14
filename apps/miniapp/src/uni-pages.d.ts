@@ -27,9 +27,7 @@ interface NavigateToOptions {
 }
 interface RedirectToOptions extends NavigateToOptions {}
 
-interface SwitchTabOptions {
-  
-}
+interface SwitchTabOptions {}
 
 type ReLaunchOptions = NavigateToOptions | SwitchTabOptions;
 
@@ -40,6 +38,6 @@ declare interface Uni {
   reLaunch(options: UniNamespace.ReLaunchOptions & ReLaunchOptions): void;
 }
 
-declare module "virtual:uni-pages" {
+declare module 'virtual:uni-pages' {
   export type LocationUrl = _LocationUrl;
 }

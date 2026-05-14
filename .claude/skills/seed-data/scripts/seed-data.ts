@@ -111,34 +111,113 @@ function cuid(): string {
 
 // 假名字库
 const FIRST_NAMES = [
-  'James', 'Mary', 'Robert', 'Patricia', 'John', 'Jennifer',
-  'Michael', 'Linda', 'David', 'Elizabeth', 'William', 'Barbara',
-  'Richard', 'Susan', 'Joseph', 'Jessica', 'Thomas', 'Sarah',
-  'Charles', 'Karen', 'Christopher', 'Lisa', 'Daniel', 'Nancy',
-  'Wei', 'Li', 'Ming', 'Xiao', 'Jun', 'Hui',
+  'James',
+  'Mary',
+  'Robert',
+  'Patricia',
+  'John',
+  'Jennifer',
+  'Michael',
+  'Linda',
+  'David',
+  'Elizabeth',
+  'William',
+  'Barbara',
+  'Richard',
+  'Susan',
+  'Joseph',
+  'Jessica',
+  'Thomas',
+  'Sarah',
+  'Charles',
+  'Karen',
+  'Christopher',
+  'Lisa',
+  'Daniel',
+  'Nancy',
+  'Wei',
+  'Li',
+  'Ming',
+  'Xiao',
+  'Jun',
+  'Hui',
 ];
 
 const LAST_NAMES = [
-  'Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia',
-  'Miller', 'Davis', 'Rodriguez', 'Martinez', 'Hernandez', 'Lopez',
-  'Gonzalez', 'Wilson', 'Anderson', 'Thomas', 'Taylor', 'Moore',
-  'Zhang', 'Li', 'Wang', 'Chen', 'Liu', 'Yang',
+  'Smith',
+  'Johnson',
+  'Williams',
+  'Brown',
+  'Jones',
+  'Garcia',
+  'Miller',
+  'Davis',
+  'Rodriguez',
+  'Martinez',
+  'Hernandez',
+  'Lopez',
+  'Gonzalez',
+  'Wilson',
+  'Anderson',
+  'Thomas',
+  'Taylor',
+  'Moore',
+  'Zhang',
+  'Li',
+  'Wang',
+  'Chen',
+  'Liu',
+  'Yang',
 ];
 
 const WORDS = [
-  'customer', 'support', 'sales', 'marketing', 'analytics',
-  'helper', 'assistant', 'guide', 'advisor', 'consultant',
-  'smart', 'quick', 'pro', 'elite', 'premium',
-  'chat', 'voice', 'text', 'visual', 'data',
-  'booking', 'order', 'payment', 'delivery', 'service',
+  'customer',
+  'support',
+  'sales',
+  'marketing',
+  'analytics',
+  'helper',
+  'assistant',
+  'guide',
+  'advisor',
+  'consultant',
+  'smart',
+  'quick',
+  'pro',
+  'elite',
+  'premium',
+  'chat',
+  'voice',
+  'text',
+  'visual',
+  'data',
+  'booking',
+  'order',
+  'payment',
+  'delivery',
+  'service',
 ];
 
 const SENTENCE_FRAGMENTS = [
-  'AI-powered', 'automated', 'intelligent', 'smart', 'advanced',
-  'next-gen', 'real-time', 'multi-language', 'contextual', 'adaptive',
-  'customer support', 'sales assistant', 'marketing helper',
-  'data analysis', 'content generation', 'task automation',
-  'question answering', 'recommendation', 'workflow optimization',
+  'AI-powered',
+  'automated',
+  'intelligent',
+  'smart',
+  'advanced',
+  'next-gen',
+  'real-time',
+  'multi-language',
+  'contextual',
+  'adaptive',
+  'customer support',
+  'sales assistant',
+  'marketing helper',
+  'data analysis',
+  'content generation',
+  'task automation',
+  'question answering',
+  'recommendation',
+  'workflow optimization',
 ];
 
 const PARAGRAPH_PARTS = [
@@ -361,8 +440,15 @@ function parseSchema(): ModelDef[] {
       // Skip if it's a relation-only field (not a scalar column)
       // Relation fields reference other models and are not DB columns
       const scalarTypes = [
-        'String', 'Int', 'BigInt', 'Float', 'Decimal',
-        'Boolean', 'DateTime', 'Json', 'Bytes',
+        'String',
+        'Int',
+        'BigInt',
+        'Float',
+        'Decimal',
+        'Boolean',
+        'DateTime',
+        'Json',
+        'Bytes',
       ];
 
       // If type is not a scalar, it's a relation field — skip
@@ -414,7 +500,13 @@ function fieldHasDbDefault(field: FieldDef): boolean {
   if (field.hasDefault) {
     // Check common defaults that DB handles
     const expr = field.defaultExpr || '';
-    if (expr === 'now()' || expr === 'true' || expr === 'false' || expr === '0' || expr.match(/^\d+$/)) {
+    if (
+      expr === 'now()' ||
+      expr === 'true' ||
+      expr === 'false' ||
+      expr === '0' ||
+      expr.match(/^\d+$/)
+    ) {
       return true;
     }
   }
@@ -616,7 +708,9 @@ function generateFieldValue(field: FieldDef, _index: number): string | null {
 
     // ipAddress
     if (name === 'ipaddress' || name === 'ip_address' || name === 'ip') {
-      return sqlEscape(`${randomInt(10, 192)}.${randomInt(0, 255)}.${randomInt(0, 255)}.${randomInt(1, 254)}`);
+      return sqlEscape(
+        `${randomInt(10, 192)}.${randomInt(0, 255)}.${randomInt(0, 255)}.${randomInt(1, 254)}`,
+      );
     }
 
     // userAgent
@@ -655,14 +749,14 @@ function sqlEscape(value: string): string {
 
 // 默认跳过的模型（seed-base.sql 已覆盖 或 是关联表）
 const SKIP_MODELS = new Set([
-  'Admin',          // seed-base.sql
-  'User',           // seed-base.sql
-  'Role',           // seed-base.sql
-  'Permission',     // seed-base.sql
-  'AdminRole',      // junction table
+  'Admin', // seed-base.sql
+  'User', // seed-base.sql
+  'Role', // seed-base.sql
+  'Permission', // seed-base.sql
+  'AdminRole', // junction table
   'RolePermission', // junction table
   'AdminRefreshToken', // depends on admin data
-  'UserRefreshToken',  // depends on user data
+  'UserRefreshToken', // depends on user data
 ]);
 
 const SEEDABLE_MODELS = ['Agent'];
@@ -685,7 +779,7 @@ function generateInsertSQL(model: ModelDef, count: number): string {
       continue;
     }
 
-    if (field.hasDefault && field.type === 'DateTime' && (field.defaultExpr === 'now()')) {
+    if (field.hasDefault && field.type === 'DateTime' && field.defaultExpr === 'now()') {
       // createdAt/updatedAt — include with explicit value
       columns.push({ field, colName: field.dbColumnName || field.name });
       continue;
@@ -697,7 +791,11 @@ function generateInsertSQL(model: ModelDef, count: number): string {
       continue;
     }
 
-    if (field.hasDefault && field.type === 'Int' && (field.defaultExpr === '0' || field.defaultExpr?.match(/^\d+$/))) {
+    if (
+      field.hasDefault &&
+      field.type === 'Int' &&
+      (field.defaultExpr === '0' || field.defaultExpr?.match(/^\d+$/))
+    ) {
       // Int with default — include with explicit value
       columns.push({ field, colName: field.dbColumnName || field.name });
       continue;
@@ -799,9 +897,7 @@ function main(): void {
   if (opts.all) {
     targetModels = models.filter((m) => !SKIP_MODELS.has(m.name));
   } else if (opts.module) {
-    const target = models.find(
-      (m) => m.name.toLowerCase() === opts.module!.toLowerCase()
-    );
+    const target = models.find((m) => m.name.toLowerCase() === opts.module!.toLowerCase());
     if (!target) {
       console.error(`Model "${opts.module}" not found in schema.prisma.`);
       console.error(`Available models: ${models.map((m) => m.name).join(', ')}`);
@@ -823,7 +919,9 @@ function main(): void {
   const sqlParts: string[] = [];
 
   for (const model of targetModels) {
-    console.log(`Generating ${opts.count} records for ${model.name} (table: ${model.tableName})...`);
+    console.log(
+      `Generating ${opts.count} records for ${model.name} (table: ${model.tableName})...`,
+    );
     const sql = generateInsertSQL(model, opts.count);
     sqlParts.push(sql);
   }

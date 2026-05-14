@@ -5,16 +5,18 @@ description: 启动小程序开发服务（uni-app）
 启动小程序开发服务器，使用 Monitor 工具实时监控日志。
 
 微信小程序启动命令：
+
 ```typescript
 Monitor({
-  command: "cd apps/miniapp && pnpm dev:mp-weixin",
-  description: "小程序开发服务监控（微信小程序）",
+  command: 'cd apps/miniapp && pnpm dev:mp-weixin',
+  description: '小程序开发服务监控（微信小程序）',
   persistent: true,
-  timeout_ms: 3600000
-})
+  timeout_ms: 3600000,
+});
 ```
 
 服务说明：
+
 - 微信小程序: 在微信开发者工具中打开 `dist/dev/mp-weixin` 目录
 - 实时编译：文件修改后自动重新编译
 

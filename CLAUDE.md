@@ -14,12 +14,12 @@
 
 ## 技术栈
 
-| 端           | 技术栈                                       |
-| ------------ | -------------------------------------------- |
-| **Backend**  | NestJS + tRPC + Prisma + PostgreSQL          |
-| **Admin UI** | React + Refine + Ant Design + tRPC Client    |
-| **Miniapp**  | uni-app + Vue 3 + TypeScript                 |
-| **Monorepo** | pnpm Workspace                               |
+| 端           | 技术栈                                    |
+| ------------ | ----------------------------------------- |
+| **Backend**  | NestJS + tRPC + Prisma + PostgreSQL       |
+| **Admin UI** | React + Refine + Ant Design + tRPC Client |
+| **Miniapp**  | uni-app + Vue 3 + TypeScript              |
+| **Monorepo** | pnpm Workspace                            |
 
 ## 目录结构
 
@@ -64,15 +64,15 @@ pnpm dev                        # 启动全部服务（API + Admin + Miniapp）
 
 ## 快速开发命令
 
-| 命令                   | 用途                                     |
-| ---------------------- | ---------------------------------------- |
-| `/genModule <name>`     | 交互式全栈 CRUD 模块生成                   |
+| 命令                   | 用途                                         |
+| ---------------------- | -------------------------------------------- |
+| `/genModule <name>`    | 交互式全栈 CRUD 模块生成                     |
 | `/init-project`        | 初始化新项目（重命名包名、数据库、环境变量） |
-| `/analyze`             | 分析现有模块，识别标准化机会               |
-| `/refactor`            | 重构现有模块为脚手架标准模式               |
-| `/deleteModule <name>` | 删除模块（清理前后端和 Schema）            |
-| `/seed-data`           | 创建假数据                                |
-| `/simplify`            | 简化代码，提升复用性                      |
+| `/analyze`             | 分析现有模块，识别标准化机会                 |
+| `/refactor`            | 重构现有模块为脚手架标准模式                 |
+| `/deleteModule <name>` | 删除模块（清理前后端和 Schema）              |
+| `/seed-data`           | 创建假数据                                   |
+| `/simplify`            | 简化代码，提升复用性                         |
 
 ## 编码规范
 
@@ -82,7 +82,7 @@ pnpm dev                        # 启动全部服务（API + Admin + Miniapp）
 // 继承 BaseService
 export class ProductService extends BaseService<Product> {
   constructor(prisma: PrismaService) {
-    super(prisma, "product");
+    super(prisma, 'product');
   }
 }
 ```
@@ -114,12 +114,12 @@ export class ProductService extends BaseService<Product> {
 
 **关键原则：**
 
-| 原则 | 说明 |
-|------|------|
-| 唯一真理源 | `schema.prisma` 是唯一的模型定义来源 |
+| 原则                | 说明                                                      |
+| ------------------- | --------------------------------------------------------- |
+| 唯一真理源          | `schema.prisma` 是唯一的模型定义来源                      |
 | 禁止 db push 到生产 | `db push` 不生成迁移记录，生产环境必须用 `migrate deploy` |
-| 迁移文件必须入库 | 迁移文件提交到 git，CI 才能拿到 |
-| 先本地验证再推送 | `migrate dev` 在本地验证迁移 SQL 正确性，避免生产事故 |
+| 迁移文件必须入库    | 迁移文件提交到 git，CI 才能拿到                           |
+| 先本地验证再推送    | `migrate dev` 在本地验证迁移 SQL 正确性，避免生产事故     |
 
 ## 双用户认证体系
 
@@ -141,6 +141,7 @@ docker exec -i postgres psql -U xinnix -d couponHub < infra/database/prisma/seed
 ```
 
 测试账号：
+
 - 管理端：`superadmin@example.com / password123`
 - 小程序：`user@example.com / password123`
 

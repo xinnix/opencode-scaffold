@@ -1,5 +1,5 @@
-import { Form, Input, Switch, Select, Space, Tag } from "antd";
-import { useEffect } from "react";
+import { Form, Input, Switch, Select, Space, Tag } from 'antd';
+import { useEffect } from 'react';
 
 interface Role {
   id: string;
@@ -16,11 +16,16 @@ interface AdminFormProps {
   currentRoles?: string[]; // 当前管理员的角色 ID 列表（编辑时使用）
 }
 
-export const AdminForm: React.FC<AdminFormProps> = ({ form, isEdit, roles = [], currentRoles = [] }) => {
+export const AdminForm: React.FC<AdminFormProps> = ({
+  form,
+  isEdit,
+  roles = [],
+  currentRoles = [],
+}) => {
   // 编辑模式下，初始化角色字段
   useEffect(() => {
     if (isEdit && currentRoles.length > 0) {
-      form.setFieldValue("roleIds", currentRoles);
+      form.setFieldValue('roleIds', currentRoles);
     }
   }, [isEdit, currentRoles, form]);
 
@@ -29,7 +34,7 @@ export const AdminForm: React.FC<AdminFormProps> = ({ form, isEdit, roles = [], 
       <Form.Item
         name="username"
         label="用户名"
-        rules={[{ required: true, message: "请输入用户名" }]}
+        rules={[{ required: true, message: '请输入用户名' }]}
       >
         <Input placeholder="请输入用户名" />
       </Form.Item>
@@ -38,8 +43,8 @@ export const AdminForm: React.FC<AdminFormProps> = ({ form, isEdit, roles = [], 
         name="email"
         label="邮箱"
         rules={[
-          { required: true, message: "请输入邮箱" },
-          { type: "email", message: "请输入有效的邮箱地址" },
+          { required: true, message: '请输入邮箱' },
+          { type: 'email', message: '请输入有效的邮箱地址' },
         ]}
       >
         <Input placeholder="请输入邮箱" />
@@ -50,8 +55,8 @@ export const AdminForm: React.FC<AdminFormProps> = ({ form, isEdit, roles = [], 
           name="password"
           label="密码"
           rules={[
-            { required: true, message: "请输入密码" },
-            { min: 8, message: "密码至少 8 个字符" },
+            { required: true, message: '请输入密码' },
+            { min: 8, message: '密码至少 8 个字符' },
           ]}
         >
           <Input.Password placeholder="请输入密码（至少 8 个字符）" />
@@ -71,15 +76,15 @@ export const AdminForm: React.FC<AdminFormProps> = ({ form, isEdit, roles = [], 
           mode="multiple"
           placeholder="请选择角色"
           optionFilterProp="label"
-          style={{ width: "100%" }}
+          style={{ width: '100%' }}
           options={roles.map((role) => ({
             value: role.id,
             label: (
               <Space>
-                <Tag color={role.level <= 5 ? "red" : role.level <= 10 ? "blue" : "default"}>
+                <Tag color={role.level <= 5 ? 'red' : role.level <= 10 ? 'blue' : 'default'}>
                   {role.name}
                 </Tag>
-                <span style={{ fontSize: 12, color: "#999" }}>{role.slug}</span>
+                <span style={{ fontSize: 12, color: '#999' }}>{role.slug}</span>
               </Space>
             ),
           }))}

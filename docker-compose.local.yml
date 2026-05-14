@@ -4,7 +4,7 @@
 # 注意：此配置不包含 PostgreSQL，需要连接外部数据库
 # 请在 .env.prod 中配置 DATABASE_URL
 
-version: "3.8"
+version: '3.8'
 
 services:
   api:
@@ -14,7 +14,7 @@ services:
     image: ${PROJECT_NAME:-opencode}-api:v1-local
     container_name: ${PROJECT_NAME:-opencode}-api-local
     ports:
-      - "3000:3000"
+      - '3000:3000'
     env_file:
       - 1panel.env
     restart: unless-stopped
@@ -23,7 +23,7 @@ services:
     image: ${PROJECT_NAME:-opencode}-admin:v1-local
     container_name: ${PROJECT_NAME:-opencode}-admin-local
     ports:
-      - "8080:80"
+      - '8080:80'
     env_file:
       - 1panel.env
     environment:

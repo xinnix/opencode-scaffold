@@ -30,9 +30,15 @@
 
 <!-- ✅ 正确：使用自定义 SCSS -->
 <style>
-.w-100px { width: 100px; }
-.bg-blue-50 { background: rgba(0, 123, 255, 0.5); }
-.top-half { top: 50%; }
+  .w-100px {
+    width: 100px;
+  }
+  .bg-blue-50 {
+    background: rgba(0, 123, 255, 0.5);
+  }
+  .top-half {
+    top: 50%;
+  }
 </style>
 ```
 
@@ -63,25 +69,25 @@
 
 ## ✅ 标签转换对照表
 
-| HTML | 小程序 | 说明 |
-|------|--------|------|
-| `<div>` | `<view>` | 块级容器 |
-| `<section>` | `<view>` | 块级容器 |
-| `<article>` | `<view>` | 块级容器 |
-| `<span>` | `<text>` | 行内文本 |
-| `<p>` | `<text>` | 段落文本 |
-| `<img>` | `<image>` | 图片 ⚠️ 需要 mode 属性 |
-| `<a>` | `<view>` | 导航（用事件处理） |
+| HTML        | 小程序    | 说明                   |
+| ----------- | --------- | ---------------------- |
+| `<div>`     | `<view>`  | 块级容器               |
+| `<section>` | `<view>`  | 块级容器               |
+| `<article>` | `<view>`  | 块级容器               |
+| `<span>`    | `<text>`  | 行内文本               |
+| `<p>`       | `<text>`  | 段落文本               |
+| `<img>`     | `<image>` | 图片 ⚠️ 需要 mode 属性 |
+| `<a>`       | `<view>`  | 导航（用事件处理）     |
 
 ---
 
 ## 📐 单位转换速查
 
-| Web (px) | UnoCSS 类名 | 小程序 (rpx) | 说明 |
-|----------|------------|--------------|------|
-| 10px | `w-10` | 10rpx | 自动转换 |
-| 100px | `w-100` | 100rpx | 自动转换 |
-| 固定 px | `w-[100px]px` | 100px | 强制单位 |
+| Web (px) | UnoCSS 类名   | 小程序 (rpx) | 说明     |
+| -------- | ------------- | ------------ | -------- |
+| 10px     | `w-10`        | 10rpx        | 自动转换 |
+| 100px    | `w-100`       | 100rpx       | 自动转换 |
+| 固定 px  | `w-[100px]px` | 100px        | 强制单位 |
 
 **设计稿基准**: 375px 宽度
 
@@ -98,7 +104,9 @@
 
 <!-- 方案 3: 自定义 SCSS -->
 <style>
-.text-black-50 { color: rgba(0, 0, 0, 0.5); }
+  .text-black-50 {
+    color: rgba(0, 0, 0, 0.5);
+  }
 </style>
 ```
 
@@ -120,8 +128,8 @@ function getBtnClass(status: string) {
     active: 'bg-green text-white',
     pending: 'bg-yellow text-black',
     disabled: 'bg-gray text-gray-500',
-  }
-  return classMap[status] || 'bg-white'
+  };
+  return classMap[status] || 'bg-white';
 }
 ```
 
@@ -134,11 +142,8 @@ function getBtnClass(status: string) {
 ```typescript
 // uno.config.ts
 export default defineConfig({
-  safelist: [
-    'bg-red', 'bg-blue', 'bg-green',
-    'text-white', 'text-black',
-  ],
-})
+  safelist: ['bg-red', 'bg-blue', 'bg-green', 'text-white', 'text-black'],
+});
 ```
 
 ---
@@ -184,12 +189,12 @@ export default defineConfig({
 
 ## 🐛 故障排查速查
 
-| 症状 | 可能原因 | 解决方案 |
-|-----|---------|---------|
+| 症状       | 可能原因 | 解决方案      |
+| ---------- | -------- | ------------- |
 | 类名不生效 | 特殊字符 | 用自定义 SCSS |
-| 编译报错 | 动态拼接 | 改用完整类名 |
-| 真机无样式 | CSS 变量 | 降级处理 |
-| 图片不显示 | 本地路径 | 改网络地址 |
+| 编译报错   | 动态拼接 | 改用完整类名  |
+| 真机无样式 | CSS 变量 | 降级处理      |
+| 图片不显示 | 本地路径 | 改网络地址    |
 
 ---
 

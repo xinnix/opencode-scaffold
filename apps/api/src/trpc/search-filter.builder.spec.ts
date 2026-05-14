@@ -1,9 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  buildSearchWhere,
-  buildFilterCondition,
-  buildWhereClause,
-} from './search-filter.builder';
+import { buildSearchWhere, buildFilterCondition, buildWhereClause } from './search-filter.builder';
 
 describe('buildSearchWhere', () => {
   it('builds OR conditions for each field', () => {
@@ -22,85 +18,102 @@ describe('buildSearchWhere', () => {
 
 describe('buildFilterCondition', () => {
   it('eq', () => {
-    expect(buildFilterCondition({ field: 'isActive', operator: 'eq', value: true }))
-      .toEqual({ isActive: true });
+    expect(buildFilterCondition({ field: 'isActive', operator: 'eq', value: true })).toEqual({
+      isActive: true,
+    });
   });
 
   it('ne', () => {
-    expect(buildFilterCondition({ field: 'status', operator: 'ne', value: 'draft' }))
-      .toEqual({ status: { not: 'draft' } });
+    expect(buildFilterCondition({ field: 'status', operator: 'ne', value: 'draft' })).toEqual({
+      status: { not: 'draft' },
+    });
   });
 
   it('gt', () => {
-    expect(buildFilterCondition({ field: 'price', operator: 'gt', value: 100 }))
-      .toEqual({ price: { gt: 100 } });
+    expect(buildFilterCondition({ field: 'price', operator: 'gt', value: 100 })).toEqual({
+      price: { gt: 100 },
+    });
   });
 
   it('gte', () => {
-    expect(buildFilterCondition({ field: 'price', operator: 'gte', value: 100 }))
-      .toEqual({ price: { gte: 100 } });
+    expect(buildFilterCondition({ field: 'price', operator: 'gte', value: 100 })).toEqual({
+      price: { gte: 100 },
+    });
   });
 
   it('lt', () => {
-    expect(buildFilterCondition({ field: 'price', operator: 'lt', value: 500 }))
-      .toEqual({ price: { lt: 500 } });
+    expect(buildFilterCondition({ field: 'price', operator: 'lt', value: 500 })).toEqual({
+      price: { lt: 500 },
+    });
   });
 
   it('lte', () => {
-    expect(buildFilterCondition({ field: 'price', operator: 'lte', value: 500 }))
-      .toEqual({ price: { lte: 500 } });
+    expect(buildFilterCondition({ field: 'price', operator: 'lte', value: 500 })).toEqual({
+      price: { lte: 500 },
+    });
   });
 
   it('contains', () => {
-    expect(buildFilterCondition({ field: 'name', operator: 'contains', value: 'hello' }))
-      .toEqual({ name: { contains: 'hello', mode: 'insensitive' } });
+    expect(buildFilterCondition({ field: 'name', operator: 'contains', value: 'hello' })).toEqual({
+      name: { contains: 'hello', mode: 'insensitive' },
+    });
   });
 
   it('startsWith', () => {
-    expect(buildFilterCondition({ field: 'slug', operator: 'startsWith', value: 'prod' }))
-      .toEqual({ slug: { startsWith: 'prod', mode: 'insensitive' } });
+    expect(buildFilterCondition({ field: 'slug', operator: 'startsWith', value: 'prod' })).toEqual({
+      slug: { startsWith: 'prod', mode: 'insensitive' },
+    });
   });
 
   it('endsWith', () => {
-    expect(buildFilterCondition({ field: 'email', operator: 'endsWith', value: '@test.com' }))
-      .toEqual({ email: { endsWith: '@test.com', mode: 'insensitive' } });
+    expect(
+      buildFilterCondition({ field: 'email', operator: 'endsWith', value: '@test.com' }),
+    ).toEqual({ email: { endsWith: '@test.com', mode: 'insensitive' } });
   });
 
   it('in with array', () => {
-    expect(buildFilterCondition({ field: 'status', operator: 'in', value: ['active', 'pending'] }))
-      .toEqual({ status: { in: ['active', 'pending'] } });
+    expect(
+      buildFilterCondition({ field: 'status', operator: 'in', value: ['active', 'pending'] }),
+    ).toEqual({ status: { in: ['active', 'pending'] } });
   });
 
   it('in with single value wraps in array', () => {
-    expect(buildFilterCondition({ field: 'status', operator: 'in', value: 'active' }))
-      .toEqual({ status: { in: ['active'] } });
+    expect(buildFilterCondition({ field: 'status', operator: 'in', value: 'active' })).toEqual({
+      status: { in: ['active'] },
+    });
   });
 
   it('notIn', () => {
-    expect(buildFilterCondition({ field: 'status', operator: 'notIn', value: ['deleted'] }))
-      .toEqual({ status: { notIn: ['deleted'] } });
+    expect(
+      buildFilterCondition({ field: 'status', operator: 'notIn', value: ['deleted'] }),
+    ).toEqual({ status: { notIn: ['deleted'] } });
   });
 
   it('between with valid array', () => {
-    expect(buildFilterCondition({ field: 'price', operator: 'between', value: [10, 100] }))
-      .toEqual({ price: { gte: 10, lte: 100 } });
+    expect(buildFilterCondition({ field: 'price', operator: 'between', value: [10, 100] })).toEqual(
+      { price: { gte: 10, lte: 100 } },
+    );
   });
 
   it('between throws for invalid value', () => {
-    expect(() => buildFilterCondition({ field: 'price', operator: 'between', value: [10] }))
-      .toThrow();
-    expect(() => buildFilterCondition({ field: 'price', operator: 'between', value: 'invalid' }))
-      .toThrow();
+    expect(() =>
+      buildFilterCondition({ field: 'price', operator: 'between', value: [10] }),
+    ).toThrow();
+    expect(() =>
+      buildFilterCondition({ field: 'price', operator: 'between', value: 'invalid' }),
+    ).toThrow();
   });
 
   it('isNull', () => {
-    expect(buildFilterCondition({ field: 'deletedAt', operator: 'isNull', value: null }))
-      .toEqual({ deletedAt: null });
+    expect(buildFilterCondition({ field: 'deletedAt', operator: 'isNull', value: null })).toEqual({
+      deletedAt: null,
+    });
   });
 
   it('isNotNull', () => {
-    expect(buildFilterCondition({ field: 'deletedAt', operator: 'isNotNull', value: null }))
-      .toEqual({ deletedAt: { not: null } });
+    expect(
+      buildFilterCondition({ field: 'deletedAt', operator: 'isNotNull', value: null }),
+    ).toEqual({ deletedAt: { not: null } });
   });
 });
 
@@ -148,10 +161,7 @@ describe('buildWhereClause', () => {
         { field: 'price', operator: 'gt', value: 100 },
       ],
     });
-    expect(result.AND).toEqual([
-      { isActive: true },
-      { price: { gt: 100 } },
-    ]);
+    expect(result.AND).toEqual([{ isActive: true }, { price: { gt: 100 } }]);
   });
 
   it('merges with existing AND', () => {
@@ -159,10 +169,7 @@ describe('buildWhereClause', () => {
       existingWhere: { AND: { status: 'active' } },
       filters: [{ field: 'isActive', operator: 'eq', value: true }],
     });
-    expect(result.AND).toEqual([
-      { status: 'active' },
-      { isActive: true },
-    ]);
+    expect(result.AND).toEqual([{ status: 'active' }, { isActive: true }]);
   });
 
   it('combines search and filter', () => {
@@ -172,9 +179,7 @@ describe('buildWhereClause', () => {
       searchFields: ['name'],
       filters: [{ field: 'isActive', operator: 'eq', value: true }],
     });
-    expect(result.OR).toEqual([
-      { name: { contains: 'test', mode: 'insensitive' } },
-    ]);
+    expect(result.OR).toEqual([{ name: { contains: 'test', mode: 'insensitive' } }]);
     expect(result.isActive).toBe(true);
   });
 

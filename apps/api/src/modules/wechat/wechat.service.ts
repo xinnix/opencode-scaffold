@@ -136,7 +136,11 @@ export class WechatService {
    */
   async getAccessToken(): Promise<string> {
     // 1. 检查内存缓存
-    if (this.accessTokenCache && this.accessTokenExpiresAt && this.accessTokenExpiresAt > Date.now()) {
+    if (
+      this.accessTokenCache &&
+      this.accessTokenExpiresAt &&
+      this.accessTokenExpiresAt > Date.now()
+    ) {
       this.logger.debug('使用缓存的 access_token');
       return this.accessTokenCache;
     }
@@ -174,7 +178,10 @@ export class WechatService {
    * @param page 扫码后跳转的页面路径（必须与 app.json 中的路径一致，不带 / 前缀）
    * @returns 小程序码图片 Buffer
    */
-  async generateMiniProgramCode(sceneId: string, page: string = 'pages/coupon/detail'): Promise<Buffer> {
+  async generateMiniProgramCode(
+    sceneId: string,
+    page: string = 'pages/coupon/detail',
+  ): Promise<Buffer> {
     const accessToken = await this.getAccessToken();
 
     // 构建请求参数

@@ -1,5 +1,5 @@
-import { useParams, useNavigate } from "react-router-dom";
-import { useOne, useList } from "@refinedev/core";
+import { useParams, useNavigate } from 'react-router-dom';
+import { useOne, useList } from '@refinedev/core';
 import {
   Card,
   Descriptions,
@@ -15,15 +15,10 @@ import {
   Modal,
   Select,
   Popconfirm,
-} from "antd";
-import {
-  ArrowLeftOutlined,
-  UserOutlined,
-  PlusOutlined,
-  DeleteOutlined,
-} from "@ant-design/icons";
-import { useState } from "react";
-import { trpcClient } from "../../../shared/dataProvider/dataProvider";
+} from 'antd';
+import { ArrowLeftOutlined, UserOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
+import { useState } from 'react';
+import { trpcClient } from '../../../shared/dataProvider/dataProvider';
 
 interface AdminRole {
   id: string;
@@ -53,18 +48,22 @@ interface AdminDetail {
 export const AdminDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("info");
+  const [activeTab, setActiveTab] = useState('info');
   const [isAssignModalVisible, setIsAssignModalVisible] = useState(false);
   const [selectedRoleId, setSelectedRoleId] = useState<string | undefined>(undefined);
   const { message } = App.useApp();
 
-  const { result: admin, isLoading, query: adminQuery } = useOne<AdminDetail>({
-    resource: "admin",
+  const {
+    result: admin,
+    isLoading,
+    query: adminQuery,
+  } = useOne<AdminDetail>({
+    resource: 'admin',
     id: id!,
   });
 
   const { result: rolesResult } = useList({
-    resource: "role",
+    resource: 'role',
     pagination: { pageSize: 100 },
   });
 
@@ -75,12 +74,12 @@ export const AdminDetailPage = () => {
         adminId: id,
         roleId: selectedRoleId,
       });
-      message.success("角色分配成功");
+      message.success('角色分配成功');
       setIsAssignModalVisible(false);
       setSelectedRoleId(undefined);
       adminQuery.refetch();
     } catch (error: any) {
-      message.error(error.message || "分配失败");
+      message.error(error.message || '分配失败');
     }
   };
 
@@ -91,16 +90,18 @@ export const AdminDetailPage = () => {
         adminId: id,
         roleId,
       });
-      message.success("角色已移除");
+      message.success('角色已移除');
       adminQuery.refetch();
     } catch (error: any) {
-      message.error(error.message || "移除失败");
+      message.error(error.message || '移除失败');
     }
   };
 
   if (isLoading) {
     return (
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: 400 }}>
+      <div
+        style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}
+      >
         <Spin size="large" />
       </div>
     );
@@ -110,48 +111,49 @@ export const AdminDetailPage = () => {
     return <Empty description="管理员不存在" />;
   }
 
-  const availableRoles = ((rolesResult as any)?.data || [])
-    .filter((r: any) => !admin.roles.some((ar) => ar.id === r.id));
+  const availableRoles = ((rolesResult as any)?.data || []).filter(
+    (r: any) => !admin.roles.some((ar) => ar.id === r.id),
+  );
 
   const tabItems = [
     {
-      key: "info",
-      label: "基本信息",
+      key: 'info',
+      label: '基本信息',
       children: (
         <Descriptions bordered column={2}>
           <Descriptions.Item label="用户名">{admin.username}</Descriptions.Item>
           <Descriptions.Item label="邮箱">{admin.email}</Descriptions.Item>
-          <Descriptions.Item label="姓">{admin.lastName || "-"}</Descriptions.Item>
-          <Descriptions.Item label="名">{admin.firstName || "-"}</Descriptions.Item>
+          <Descriptions.Item label="姓">{admin.lastName || '-'}</Descriptions.Item>
+          <Descriptions.Item label="名">{admin.firstName || '-'}</Descriptions.Item>
           <Descriptions.Item label="状态">
-            <Tag color={admin.isActive ? "success" : "error"}>
-              {admin.isActive ? "启用" : "停用"}
+            <Tag color={admin.isActive ? 'success' : 'error'}>
+              {admin.isActive ? '启用' : '停用'}
             </Tag>
           </Descriptions.Item>
           <Descriptions.Item label="邮箱验证">
-            <Tag color={admin.emailVerified ? "success" : "warning"}>
-              {admin.emailVerified ? "已验证" : "未验证"}
+            <Tag color={admin.emailVerified ? 'success' : 'warning'}>
+              {admin.emailVerified ? '已验证' : '未验证'}
             </Tag>
           </Descriptions.Item>
           <Descriptions.Item label="最后登录">
-            {admin.lastLoginAt ? new Date(admin.lastLoginAt).toLocaleString("zh-CN") : "-"}
+            {admin.lastLoginAt ? new Date(admin.lastLoginAt).toLocaleString('zh-CN') : '-'}
           </Descriptions.Item>
           <Descriptions.Item label="创建时间">
-            {new Date(admin.createdAt).toLocaleString("zh-CN")}
+            {new Date(admin.createdAt).toLocaleString('zh-CN')}
           </Descriptions.Item>
           <Descriptions.Item label="更新时间">
-            {new Date(admin.updatedAt).toLocaleString("zh-CN")}
+            {new Date(admin.updatedAt).toLocaleString('zh-CN')}
           </Descriptions.Item>
         </Descriptions>
       ),
     },
     {
-      key: "roles",
+      key: 'roles',
       label: `角色 (${admin.roles.length})`,
       children: (
-        <div style={{ padding: "24px 0" }}>
+        <div style={{ padding: '24px 0' }}>
           <Card>
-            <div style={{ marginBottom: 16, textAlign: "right" }}>
+            <div style={{ marginBottom: 16, textAlign: 'right' }}>
               <Button
                 type="primary"
                 icon={<PlusOutlined />}
@@ -168,24 +170,26 @@ export const AdminDetailPage = () => {
                 pagination={false}
                 columns={[
                   {
-                    title: "角色名称",
-                    dataIndex: "name",
+                    title: '角色名称',
+                    dataIndex: 'name',
                     render: (name: string, record: AdminRole) => (
-                      <Tag color={record.level <= 5 ? "red" : record.level <= 10 ? "blue" : "default"}>
+                      <Tag
+                        color={record.level <= 5 ? 'red' : record.level <= 10 ? 'blue' : 'default'}
+                      >
                         {name}
                       </Tag>
                     ),
                   },
-                  { title: "标识", dataIndex: "slug" },
-                  { title: "等级", dataIndex: "level", width: 80 },
-                  { title: "描述", dataIndex: "description", render: (v: string) => v || "-" },
+                  { title: '标识', dataIndex: 'slug' },
+                  { title: '等级', dataIndex: 'level', width: 80 },
+                  { title: '描述', dataIndex: 'description', render: (v: string) => v || '-' },
                   {
-                    title: "分配时间",
-                    dataIndex: "assignedAt",
-                    render: (date: string) => new Date(date).toLocaleString("zh-CN"),
+                    title: '分配时间',
+                    dataIndex: 'assignedAt',
+                    render: (date: string) => new Date(date).toLocaleString('zh-CN'),
                   },
                   {
-                    title: "操作",
+                    title: '操作',
                     width: 100,
                     render: (_: any, record: AdminRole) => (
                       <Popconfirm
@@ -210,24 +214,24 @@ export const AdminDetailPage = () => {
   ];
 
   return (
-    <div style={{ maxWidth: 1400, margin: "0 auto", padding: "24px" }}>
+    <div style={{ maxWidth: 1400, margin: '0 auto', padding: '24px' }}>
       <Card>
         <Space style={{ marginBottom: 16 }}>
-          <Button icon={<ArrowLeftOutlined />} onClick={() => navigate("/admins")}>
+          <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/admins')}>
             返回列表
           </Button>
         </Space>
 
-        <div style={{ display: "flex", alignItems: "center", marginBottom: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: 24 }}>
           <Avatar size={64} icon={<UserOutlined />} src={admin.avatar} />
           <div style={{ marginLeft: 16 }}>
-            <h1 style={{ margin: 0, fontSize: 28, fontWeight: "bold" }}>{admin.username}</h1>
+            <h1 style={{ margin: 0, fontSize: 28, fontWeight: 'bold' }}>{admin.username}</h1>
             <Space style={{ marginTop: 8 }}>
-              <Tag color={admin.isActive ? "success" : "error"}>
-                {admin.isActive ? "启用" : "停用"}
+              <Tag color={admin.isActive ? 'success' : 'error'}>
+                {admin.isActive ? '启用' : '停用'}
               </Tag>
               {admin.roles.map((role) => (
-                <Tag key={role.id} color={role.level <= 5 ? "red" : "blue"}>
+                <Tag key={role.id} color={role.level <= 5 ? 'red' : 'blue'}>
                   {role.name}
                 </Tag>
               ))}
@@ -254,7 +258,7 @@ export const AdminDetailPage = () => {
           placeholder="请选择要分配的角色"
           value={selectedRoleId}
           onChange={setSelectedRoleId}
-          style={{ width: "100%" }}
+          style={{ width: '100%' }}
           options={availableRoles.map((r: any) => ({
             value: r.id,
             label: `${r.name} (${r.slug})`,

@@ -4,10 +4,7 @@ import { ValidationException } from '../core/exceptions';
 /**
  * Build Prisma OR conditions from search keyword and fields.
  */
-export function buildSearchWhere(
-  keyword: string,
-  fields: string[],
-): Record<string, any>[] {
+export function buildSearchWhere(keyword: string, fields: string[]): Record<string, any>[] {
   return fields.map((field) => ({
     [field]: { contains: keyword, mode: 'insensitive' },
   }));
@@ -44,10 +41,11 @@ export function buildFilterCondition(condition: FilterCondition): Record<string,
       return { [field]: { notIn: Array.isArray(value) ? value : [value] } };
     case 'between':
       if (!Array.isArray(value) || value.length !== 2) {
-        throw new ValidationException(
-          `'between' operator requires an array of exactly 2 values`,
-          { field, operator, value },
-        );
+        throw new ValidationException(`'between' operator requires an array of exactly 2 values`, {
+          field,
+          operator,
+          value,
+        });
       }
       return { [field]: { gte: value[0], lte: value[1] } };
     case 'isNull':
@@ -55,10 +53,10 @@ export function buildFilterCondition(condition: FilterCondition): Record<string,
     case 'isNotNull':
       return { [field]: { not: null } };
     default:
-      throw new ValidationException(
-        `Unsupported filter operator: ${operator}`,
-        { field, operator },
-      );
+      throw new ValidationException(`Unsupported filter operator: ${operator}`, {
+        field,
+        operator,
+      });
   }
 }
 
@@ -87,10 +85,7 @@ export function buildWhereClause(opts: {
     const filterConditions = opts.filters.map(buildFilterCondition);
 
     if (where.AND) {
-      where.AND = [
-        ...(Array.isArray(where.AND) ? where.AND : [where.AND]),
-        ...filterConditions,
-      ];
+      where.AND = [...(Array.isArray(where.AND) ? where.AND : [where.AND]), ...filterConditions];
     } else if (filterConditions.length === 1) {
       // Single filter: merge directly into where
       Object.assign(where, filterConditions[0]);

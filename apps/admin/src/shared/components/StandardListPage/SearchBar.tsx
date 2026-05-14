@@ -1,7 +1,7 @@
-import { Space, Input, Select, DatePicker } from "antd";
-import { SearchOutlined } from "@ant-design/icons";
-import { useList } from "@refinedev/core";
-import type { SearchFieldConfig, FilterFieldConfig } from "./types";
+import { Space, Input, Select, DatePicker } from 'antd';
+import { SearchOutlined } from '@ant-design/icons';
+import { useList } from '@refinedev/core';
+import type { SearchFieldConfig, FilterFieldConfig } from './types';
 
 interface SearchBarProps {
   searchFields: SearchFieldConfig[];
@@ -36,7 +36,7 @@ export function SearchBar({
           key={field.field}
           placeholder={field.placeholder || `搜索${field.field}`}
           prefix={<SearchOutlined />}
-          value={searchValues[field.field] || ""}
+          value={searchValues[field.field] || ''}
           onChange={(e) => onSearchChange(field.field, e.target.value)}
           style={{ width: field.width || 250 }}
           allowClear
@@ -45,7 +45,7 @@ export function SearchBar({
 
       {/* 筛选器 */}
       {filterFields.map((field) => {
-        if (field.type === "select") {
+        if (field.type === 'select') {
           // 如果有 resource 配置,使用 useList 获取数据
           if (field.resource) {
             return (
@@ -72,11 +72,11 @@ export function SearchBar({
           );
         }
 
-        if (field.type === "dateRange") {
+        if (field.type === 'dateRange') {
           return (
             <DatePicker.RangePicker
               key={field.field}
-              placeholder={[field.placeholder || "开始日期", "结束日期"]}
+              placeholder={[field.placeholder || '开始日期', '结束日期']}
               value={filterValues[field.field]}
               onChange={(dates) => onFilterChange(field.field, dates)}
               style={{ width: field.width || 240 }}
@@ -125,7 +125,7 @@ function DynamicSelectFilter({
       allowClear
       showSearch
       filterOption={(input, option) =>
-        (option?.label ?? "").toString().toLowerCase().includes(input.toLowerCase())
+        (option?.label ?? '').toString().toLowerCase().includes(input.toLowerCase())
       }
       options={options}
     />

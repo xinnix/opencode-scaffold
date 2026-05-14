@@ -9,6 +9,7 @@ description: 同步工作区（生成 Prisma 客户端并构建共享包）
 ```
 
 或手动执行:
+
 ```bash
 cd infra/database && npx prisma generate
 cd ../shared && pnpm build

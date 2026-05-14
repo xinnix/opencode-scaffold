@@ -88,6 +88,7 @@ pnpm --filter @opencode/database prisma db seed     # 执行 Seed（推荐使用
 
 1. 使用 `/seed-data` command 快速创建假数据（推荐）
 2. 或手动执行 SQL 脚本：
+
    ```bash
    # 基础数据（用户、角色、权限）
    docker exec -i postgres psql -U xinnix -d couponHub < infra/database/prisma/seed-base.sql
@@ -97,10 +98,12 @@ pnpm --filter @opencode/database prisma db seed     # 执行 Seed（推荐使用
    ```
 
 **Seed 脚本位置：**
+
 - `infra/database/prisma/seed-base.sql` - 基础数据（Admin、User、Role、Permission、Todo）
 - `infra/database/prisma/seed-data.sql` - 业务数据（Merchant、CouponTemplate、Order、News、Settlement）
 
 **测试账号：**
+
 - 管理端：superadmin@example.com / password123
 - 小程序：user@example.com / password123
 

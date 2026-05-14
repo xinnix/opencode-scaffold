@@ -16,7 +16,7 @@
 
 ```yaml
 env:
-  VITE_API_URL: /trpc  # 构建时的默认值
+  VITE_API_URL: /trpc # 构建时的默认值
 
 jobs:
   build-and-push:
@@ -43,6 +43,7 @@ RUN pnpm build  # Vite 在构建时将此值硬编码到 JS 文件中
 ```
 
 **说明**:
+
 - ARG 定义构建参数，默认值为 `/trpc`
 - ENV 将其设置为环境变量，Vite 在构建时读取
 - 构建后的 JS 文件中会包含硬编码的 `/trpc`
@@ -61,6 +62,7 @@ location /trpc {
 ```
 
 **说明**:
+
 - Nginx 监听 80 端口
 - 接收 `/trpc` 请求并转发到 `api:3000`（容器内网络）
 - `api:3000` 是 Docker 网络中的服务名
@@ -76,10 +78,10 @@ services:
     container_name: feedbackhub-api-prod
 
   admin:
-    image: ...-admin:latest  # 使用 GitHub Actions 构建的镜像
+    image: ...-admin:latest # 使用 GitHub Actions 构建的镜像
     container_name: feedbackhub-admin-prod
     ports:
-      - "80:80"
+      - '80:80'
 
 networks:
   feedbackhub-network:
@@ -87,6 +89,7 @@ networks:
 ```
 
 **说明**:
+
 - 两个服务在同一 Docker 网络中
 - admin 容器可以通过 `http://api:3000` 访问 api 容器
 
@@ -98,7 +101,7 @@ networks:
 export const trpcClient = createTRPCProxyClient<AppRouter>({
   links: [
     httpLink({
-      url: import.meta.env.VITE_API_URL || "/trpc",
+      url: import.meta.env.VITE_API_URL || '/trpc',
       // ...
     }),
   ],
@@ -106,6 +109,7 @@ export const trpcClient = createTRPCProxyClient<AppRouter>({
 ```
 
 **说明**:
+
 - `import.meta.env.VITE_API_URL` 在构建时被替换为 `/trpc`
 - 最终代码中会包含硬编码的 `/trpc`
 
@@ -230,6 +234,7 @@ docker build \
 ### Q1: 为什么使用相对路径 `/trpc` 而不是完整 URL？
 
 **A**: 相对路径有以下优势：
+
 - ✅ 前后端同域名，无跨域问题
 - ✅ 利用 Nginx 反向代理，安全且灵活
 - ✅ 部署简单，只需配置一个域名
@@ -238,12 +243,14 @@ docker build \
 ### Q2: 为什么不在运行时配置 API URL？
 
 **A**: Vite 的 `VITE_*` 环境变量在**构建时**被硬编码到 JS 文件中，运行时无法修改。如果需要运行时配置，需要：
+
 1. 使用 `window.location` 动态构建 URL
 2. 或在 nginx 中注入配置文件
 
 ### Q3: docker-compose.prod.yml 中的 env_file 有用吗？
 
 **A**: 对于 admin 服务，`env_file` **没有用**，因为：
+
 - `env_file` 设置的是运行时环境变量
 - 但 Vite 在构建时就已经将 URL 硬编码了
 - 只有 api 服务需要 `env_file`（后端在运行时读取环境变量）
@@ -251,6 +258,7 @@ docker build \
 ### Q4: 如何确认生产环境使用的是正确的配置？
 
 **A**: 检查构建的 JS 文件：
+
 ```bash
 docker exec feedbackhub-admin-prod grep -a "/trpc" /usr/share/nginx/html/assets/*.js | head -1
 ```

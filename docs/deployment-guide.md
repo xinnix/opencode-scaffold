@@ -50,6 +50,7 @@ WX_PAY_SANDBOX=false  # 生产环境设为 false
 ### 方案一：Volume 挂载（推荐）
 
 **适用场景**：
+
 - 有服务器文件系统访问权限
 - 需要灵活更新证书文件
 - 多环境部署（开发/测试/生产）
@@ -74,7 +75,7 @@ scp apps/api/certs/wechatpay_public_key.pem user@server:/path/to/coupon/certs/
 
 ```yaml
 volumes:
-  - ./certs:/app/certs:ro  # 只读挂载，提升安全性
+  - ./certs:/app/certs:ro # 只读挂载，提升安全性
 ```
 
 3. 验证证书文件：
@@ -88,12 +89,14 @@ docker exec couponHub-api-prod ls -la /app/certs
 ```
 
 **优点**：
+
 - ✅ 不需要重新构建镜像即可更新证书
 - ✅ 证书文件不会包含在镜像中（安全性更高）
 - ✅ 容器重启自动加载新证书
 - ✅ 多环境部署只需修改挂载路径
 
 **缺点**：
+
 - ❌ 需要在服务器上维护证书文件
 - ❌ 部署时需要额外步骤上传证书
 
@@ -102,6 +105,7 @@ docker exec couponHub-api-prod ls -la /app/certs
 ### 方案二：构建时复制（适合 CI/CD）
 
 **适用场景**：
+
 - CI/CD 自动化构建
 - 容器化平台部署（K8s、Docker Swarm）
 - 需要镜像自包含所有配置
@@ -140,17 +144,20 @@ docker build -f Dockerfile.api -t couponHub-api:latest .
 ```
 
 **优点**：
+
 - ✅ 镜像自包含，无需外部依赖
 - ✅ 适合 K8s、Docker Swarm 等平台
 - ✅ 部署简单，只需拉取镜像
 
 **缺点**：
+
 - ❌ 证书文件会包含在镜像中（安全性较低）
 - ❌ 更新证书需要重新构建镜像
 - ❌ 需要在构建上下文中维护证书文件
 
 **⚠️ 安全提示**：
 如果使用此方案，**切勿将证书推送到公共镜像仓库**！建议：
+
 - 使用私有镜像仓库（ghcr.io private、阿里云 ACR）
 - 构建完成后删除本地镜像中的证书（使用多阶段构建清理）
 
@@ -159,6 +166,7 @@ docker build -f Dockerfile.api -t couponHub-api:latest .
 ### 方案三：Docker Secrets（生产推荐）
 
 **适用场景**：
+
 - Docker Swarm 集群部署
 - 需要最高安全级别
 - 多服务共享证书
@@ -193,12 +201,14 @@ services:
 ```
 
 **优点**：
+
 - ✅ 最高安全性（证书不会写入镜像或挂载为文件）
 - ✅ 自动分发到 Swarm 所有节点
 - ✅ 支持证书轮换和版本管理
 - ✅ 仅运行时可见，构建时不可见
 
 **缺点**：
+
 - ❌ 仅支持 Docker Swarm，不支持单机 Docker Compose
 - ❌ 配置复杂度较高
 
@@ -282,6 +292,7 @@ server {
 ### Q1: 证书文件找不到
 
 **错误信息**：
+
 ```
 微信支付商户私钥文件不存在或为空: /app/certs/apiclient_key.pem
 ```
@@ -308,6 +319,7 @@ docker exec couponHub-api-prod ls -la /app/certs
 ### Q2: 微信支付配置不完整
 
 **错误信息**：
+
 ```
 微信支付配置不完整（缺少 WX_PAY_APP_ID / WX_PAY_MCH_ID / WX_PAY_API_KEY / WX_PAY_SERIAL_NO）
 ```
@@ -334,6 +346,7 @@ grep WX_PAY 1panel.env
 ### Q3: 回调地址无法访问
 
 **错误信息**：
+
 ```
 支付回调失败: 连接超时
 ```
@@ -390,12 +403,14 @@ docker-compose -f docker-compose.prod.yml up -d --force-recreate api
    - 使用 `.env.prod` 或 `1panel.env` 存储配置（也不提交）
 
 2. ✅ **使用 Volume 只读挂载**：
+
    ```yaml
    volumes:
-     - ./certs:/app/certs:ro  # 只读，防止容器修改
+     - ./certs:/app/certs:ro # 只读，防止容器修改
    ```
 
 3. ✅ **限制证书文件权限**：
+
    ```bash
    chmod 600 certs/*.pem  # 仅 owner 可读写
    chown root:root certs/*.pem  # 或使用专用用户
@@ -414,13 +429,14 @@ docker-compose -f docker-compose.prod.yml up -d --force-recreate api
 
 ## 推荐方案对比
 
-| 方案 | 适用场景 | 安全性 | 灵活性 | 复杂度 |
-|------|---------|--------|--------|--------|
-| **Volume 挂载** | 单机部署、有服务器权限 | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐ |
-| **构建时复制** | CI/CD、K8s 平台 | ⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐ |
-| **Docker Secrets** | Swarm 集群 | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
+| 方案               | 适用场景               | 安全性     | 灵活性     | 复杂度   |
+| ------------------ | ---------------------- | ---------- | ---------- | -------- |
+| **Volume 挂载**    | 单机部署、有服务器权限 | ⭐⭐⭐⭐   | ⭐⭐⭐⭐⭐ | ⭐⭐     |
+| **构建时复制**     | CI/CD、K8s 平台        | ⭐⭐⭐     | ⭐⭐       | ⭐⭐⭐   |
+| **Docker Secrets** | Swarm 集群             | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐   | ⭐⭐⭐⭐ |
 
 **推荐**：
+
 - **单机部署**：使用 **Volume 挂载**
 - **Swarm 集群**：使用 **Docker Secrets**
 - **K8s 部署**：使用 **K8s Secrets**（类似 Docker Secrets）

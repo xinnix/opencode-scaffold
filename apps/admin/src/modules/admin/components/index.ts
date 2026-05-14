@@ -1,1 +1,1 @@
-export { AdminForm } from "./AdminForm";
+export { AdminForm } from './AdminForm';

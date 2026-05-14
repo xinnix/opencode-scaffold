@@ -7,12 +7,7 @@ import { PrismaService } from '../../../prisma/prisma.service';
 import { WechatService } from '../../wechat/wechat.service';
 
 // 🔥 使用 @opencode/shared 的类型和 schema
-import {
-  LoginSchema,
-  RegisterSchema,
-  RefreshTokenSchema,
-  User,
-} from '@opencode/shared';
+import { LoginSchema, RegisterSchema, RefreshTokenSchema, User } from '@opencode/shared';
 
 @Injectable()
 export class AuthService {
@@ -79,10 +74,7 @@ export class AuthService {
     // 2️⃣ 查找用户（支持用户名或邮箱）
     const user = await this.prisma.user.findFirst({
       where: {
-        OR: [
-          { username: data.username },
-          { email: data.username }
-        ]
+        OR: [{ username: data.username }, { email: data.username }],
       },
     });
 
@@ -182,10 +174,7 @@ export class AuthService {
     // 2️⃣ 查找管理员（支持用户名或邮箱）
     const admin = await this.prisma.admin.findFirst({
       where: {
-        OR: [
-          { username: data.username },
-          { email: data.username }
-        ]
+        OR: [{ username: data.username }, { email: data.username }],
       },
       include: {
         roles: {
@@ -235,11 +224,10 @@ export class AuthService {
     const { passwordHash: _, ...sanitizedAdmin } = admin;
 
     // 8️⃣ 扁平化权限
-    const permissions = sanitizedAdmin.roles?.flatMap((ar: any) =>
-      ar.role.permissions?.map((rp: any) =>
-        `${rp.permission.resource}:${rp.permission.action}`,
-      ),
-    ) || [];
+    const permissions =
+      sanitizedAdmin.roles?.flatMap((ar: any) =>
+        ar.role.permissions?.map((rp: any) => `${rp.permission.resource}:${rp.permission.action}`),
+      ) || [];
 
     return {
       user: {
@@ -268,10 +256,10 @@ export class AuthService {
 
     // 3️⃣ 如果 Admin 表没找到，在 User 表查找
     if (!refreshToken) {
-      refreshToken = await this.prisma.userRefreshToken.findUnique({
+      refreshToken = (await this.prisma.userRefreshToken.findUnique({
         where: { token: data.refreshToken },
         include: { user: true },
-      }) as any;
+      })) as any;
       userType = 'user';
     }
 
@@ -345,9 +333,9 @@ export class AuthService {
 
     // 如果 Admin 表没找到，在 User 表查找
     if (!user) {
-      user = await this.prisma.user.findUnique({
+      user = (await this.prisma.user.findUnique({
         where: { id: userId },
-      }) as any;
+      })) as any;
       userType = 'user';
     }
 
@@ -358,11 +346,12 @@ export class AuthService {
     const { passwordHash: _, ...sanitizedUser } = user;
 
     if (userType === 'admin') {
-      const permissions = (sanitizedUser as any).roles?.flatMap((ar: any) =>
-        ar.role.permissions?.map((rp: any) =>
-          `${rp.permission.resource}:${rp.permission.action}`,
-        ),
-      ) || [];
+      const permissions =
+        (sanitizedUser as any).roles?.flatMap((ar: any) =>
+          ar.role.permissions?.map(
+            (rp: any) => `${rp.permission.resource}:${rp.permission.action}`,
+          ),
+        ) || [];
 
       return {
         ...sanitizedUser,
@@ -376,7 +365,10 @@ export class AuthService {
   /**
    * 📝 更新用户信息
    */
-  async updateUserProfile(userId: string, data: { nickname?: string; avatar?: string; phone?: string }) {
+  async updateUserProfile(
+    userId: string,
+    data: { nickname?: string; avatar?: string; phone?: string },
+  ) {
     const user = await this.prisma.user.update({
       where: { id: userId },
       data: {

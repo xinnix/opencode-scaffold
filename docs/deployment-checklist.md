@@ -45,6 +45,7 @@
 - [ ] 验证镜像大小正常（< 500MB）
 
 **检查命令**：
+
 ```bash
 docker images | grep couponHub
 ```
@@ -56,6 +57,7 @@ docker images | grep couponHub
 - [ ] 容器状态为 `Up`（运行中）
 
 **检查命令**：
+
 ```bash
 docker ps | grep couponHub
 ```
@@ -68,6 +70,7 @@ docker ps | grep couponHub
 - [ ] 微信支付初始化成功
 
 **检查命令**：
+
 ```bash
 # API 健康检查
 curl http://localhost:3000/health
@@ -88,6 +91,7 @@ docker logs couponHub-api-prod | grep "初始化"
 - [ ] 容器内证书路径正确
 
 **检查命令**：
+
 ```bash
 # 检查本地证书权限
 ls -la certs/
@@ -122,6 +126,7 @@ docker exec couponHub-api-prod ls -la /app/certs
 - [ ] SSL 配置正确
 
 **测试命令**：
+
 ```bash
 # 测试 HTTPS
 curl -I https://你的域名/api/health
@@ -149,6 +154,7 @@ curl -I https://你的域名/api/payments/wechat/callback
 - [ ] Seed 数据导入成功（可选）
 
 **检查命令**：
+
 ```bash
 docker logs couponHub-api-prod | grep "Prisma"
 ```
@@ -160,11 +166,13 @@ docker logs couponHub-api-prod | grep "Prisma"
 - [ ] 日志显示「微信支付 V3 初始化成功」
 
 **检查命令**：
+
 ```bash
 docker logs couponHub-api-prod | grep "微信支付"
 ```
 
 **预期输出**：
+
 ```
 [WechatPayService] 微信支付 V3 初始化成功 | 商户号: XXXXXX | 沙箱: false | 验签模式: 微信支付公钥（推荐）
 ```
@@ -184,11 +192,13 @@ docker logs couponHub-api-prod | grep "微信支付"
 #### 1. 微信支付配置不完整
 
 **错误信息**：
+
 ```
 微信支付配置不完整（缺少 WX_PAY_APP_ID / WX_PAY_MCH_ID / WX_PAY_API_KEY / WX_PAY_SERIAL_NO）
 ```
 
 **解决方案**：
+
 - 检查 `1panel.env` 中所有 `WX_PAY_*` 变量是否填写
 - 确保变量值非空，不是占位符（如 `your_xxx`）
 
@@ -197,11 +207,13 @@ docker logs couponHub-api-prod | grep "微信支付"
 #### 2. 证书文件找不到
 
 **错误信息**：
+
 ```
 微信支付商户私钥文件不存在或为空: /app/certs/apiclient_key.pem
 ```
 
 **解决方案**：
+
 ```bash
 # 1. 检查本地证书目录
 ls -la certs/
@@ -218,11 +230,13 @@ grep "volumes" docker-compose.prod.yml -A 5
 #### 3. 微信支付公钥未配置
 
 **错误信息**：
+
 ```
 未配置微信支付公钥（WX_PAY_PUBLIC_KEY_ID / WX_PAY_PUBLIC_KEY_PATH）
 ```
 
 **解决方案**：
+
 - 确保已上传 `wechatpay_public_key.pem` 到 `certs/` 目录
 - 在 `1panel.env` 中配置 `WX_PAY_PUBLIC_KEY_ID`
 - 设置 `WX_PAY_PUBLIC_KEY_PATH=/app/certs/wechatpay_public_key.pem`
@@ -232,11 +246,13 @@ grep "volumes" docker-compose.prod.yml -A 5
 #### 4. 容器启动失败
 
 **错误信息**：
+
 ```
 Error: Cannot find module '@opencode/database'
 ```
 
 **解决方案**：
+
 ```bash
 # 1. 检查镜像构建是否完整
 docker build -f Dockerfile.api -t couponHub-api:test . --no-cache

@@ -77,11 +77,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       }
 
       // 扁平化权限
-      const permissions = admin.roles?.flatMap((ar: any) =>
-        ar.role.permissions?.map((rp: any) =>
-          `${rp.permission.resource}:${rp.permission.action}`,
-        ),
-      ) || [];
+      const permissions =
+        admin.roles?.flatMap((ar: any) =>
+          ar.role.permissions?.map(
+            (rp: any) => `${rp.permission.resource}:${rp.permission.action}`,
+          ),
+        ) || [];
 
       return {
         id: admin.id,

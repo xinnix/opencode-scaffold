@@ -1,5 +1,5 @@
-import { Result, Button } from "antd";
-import { useNavigate } from "react-router-dom";
+import { Result, Button } from 'antd';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * 401 登录过期页面
@@ -10,14 +10,22 @@ export const SessionExpiredPage: React.FC = () => {
 
   // 清除过期的认证信息
   const handleLogin = () => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("user");
-    navigate("/login");
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
+    navigate('/login');
   };
 
   return (
-    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", background: "#f0f2f5" }}>
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        background: '#f0f2f5',
+      }}
+    >
       <Result
         status="warning"
         title="登录已过期"
@@ -40,13 +48,21 @@ export const UnauthorizedPage: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", background: "#f0f2f5" }}>
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        background: '#f0f2f5',
+      }}
+    >
       <Result
         status="403"
         title="权限不足"
         subTitle="抱歉，您没有权限访问此页面"
         extra={
-          <Button type="primary" onClick={() => navigate("/dashboard")}>
+          <Button type="primary" onClick={() => navigate('/dashboard')}>
             返回首页
           </Button>
         }
@@ -62,13 +78,21 @@ export const NotFoundPage: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", background: "#f0f2f5" }}>
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        background: '#f0f2f5',
+      }}
+    >
       <Result
         status="404"
         title="404"
         subTitle="抱歉，您访问的页面不存在"
         extra={
-          <Button type="primary" onClick={() => navigate("/dashboard")}>
+          <Button type="primary" onClick={() => navigate('/dashboard')}>
             返回首页
           </Button>
         }

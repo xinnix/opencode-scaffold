@@ -1,27 +1,27 @@
 /**
  * 用户相关 API
  */
-import { http } from '@/utils/http'
-import { API_ENDPOINTS } from '@/config/api'
+import { http } from '@/utils/http';
+import { API_ENDPOINTS } from '@/config/api';
 
 export interface LoginParams {
-  username: string
-  password: string
+  username: string;
+  password: string;
 }
 
 export interface RegisterParams {
-  username: string
-  email: string
-  password: string
+  username: string;
+  email: string;
+  password: string;
 }
 
 export interface UserInfo {
-  id: string
-  username: string
-  email: string
-  firstName?: string
-  lastName?: string
-  avatar?: string
+  id: string;
+  username: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  avatar?: string;
 }
 
 export interface AuthResponse {
@@ -35,14 +35,14 @@ export const authApi = {
    * 用户登录
    */
   login: (params: LoginParams) => {
-    return http.post<AuthResponse>(API_ENDPOINTS.login, params)
+    return http.post<AuthResponse>(API_ENDPOINTS.login, params);
   },
 
   /**
    * 用户注册
    */
   register: (params: RegisterParams) => {
-    return http.post<AuthResponse>(API_ENDPOINTS.register, params)
+    return http.post<AuthResponse>(API_ENDPOINTS.register, params);
   },
 
   /**
@@ -51,19 +51,18 @@ export const authApi = {
   logout: (refreshToken?: string) => {
     return http.post(API_ENDPOINTS.logout, {
       refreshToken: refreshToken || uni.getStorageSync('refreshToken') || '',
-    })
+    });
   },
 
   /**
    * 获取用户信息
    */
   getProfile: () => {
-    return http.get<UserInfo>(API_ENDPOINTS.profile)
+    return http.get<UserInfo>(API_ENDPOINTS.profile);
   },
 
   /**
    * 微信登录
    */
-  wechatLogin: (code: string) =>
-    http.post<AuthResponse>(API_ENDPOINTS.wechatLogin, { code }),
-}
+  wechatLogin: (code: string) => http.post<AuthResponse>(API_ENDPOINTS.wechatLogin, { code }),
+};

@@ -1,5 +1,10 @@
-import { useQuery, useMutation, type UseQueryOptions, type UseMutationOptions } from "@tanstack/react-query";
-import { trpcClient } from "../dataProvider/dataProvider";
+import {
+  useQuery,
+  useMutation,
+  type UseQueryOptions,
+  type UseMutationOptions,
+} from '@tanstack/react-query';
+import { trpcClient } from '../dataProvider/dataProvider';
 
 /**
  * Generic tRPC query hook
@@ -8,9 +13,9 @@ import { trpcClient } from "../dataProvider/dataProvider";
 export function useTrpcQuery<TData = unknown, TError = unknown, TParams = unknown>(
   path: string,
   params?: TParams,
-  options?: Omit<UseQueryOptions<TData, TError>, "queryKey" | "queryFn">
+  options?: Omit<UseQueryOptions<TData, TError>, 'queryKey' | 'queryFn'>,
 ) {
-  const keys = path.split(".");
+  const keys = path.split('.');
 
   return useQuery({
     ...options,
@@ -31,9 +36,9 @@ export function useTrpcQuery<TData = unknown, TError = unknown, TParams = unknow
  */
 export function useTrpcMutation<TData = unknown, TError = unknown, TVariables = unknown>(
   path: string,
-  options?: UseMutationOptions<TData, TError, TVariables>
+  options?: UseMutationOptions<TData, TError, TVariables>,
 ) {
-  const keys = path.split(".");
+  const keys = path.split('.');
 
   return useMutation({
     ...options,

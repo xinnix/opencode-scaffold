@@ -6,7 +6,7 @@
 # - 包含健康检查和自动重启
 # - 日志和资源限制配置
 
-version: "3.8"
+version: '3.8'
 
 services:
   api:
@@ -17,7 +17,7 @@ services:
     environment:
       - TZ=Asia/Shanghai
     ports:
-      - "${API_PORT:-3001}:3000"
+      - '${API_PORT:-3001}:3000'
     volumes:
       # 微信支付证书文件
       # 宿主机证书目录映射到容器内 /app/certs
@@ -29,10 +29,10 @@ services:
     networks:
       - app-network
     logging:
-      driver: "json-file"
+      driver: 'json-file'
       options:
-        max-size: "10m"
-        max-file: "3"
+        max-size: '10m'
+        max-file: '3'
 
   admin:
     image: ${REGISTRY:-ghcr.io}/${IMAGE_NAME:-opencode}-admin:${TAG:-latest}
@@ -42,16 +42,16 @@ services:
     environment:
       - TZ=Asia/Shanghai
     ports:
-      - "${ADMIN_PORT:-8081}:80"
+      - '${ADMIN_PORT:-8081}:80'
     depends_on:
       - api
     networks:
       - app-network
     logging:
-      driver: "json-file"
+      driver: 'json-file'
       options:
-        max-size: "10m"
-        max-file: "3"
+        max-size: '10m'
+        max-file: '3'
 
 networks:
   app-network:

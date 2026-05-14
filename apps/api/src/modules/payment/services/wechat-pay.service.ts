@@ -52,18 +52,13 @@ export class WechatPayService implements OnModuleInit {
     this.mchId = this.configService.get<string>('WX_PAY_MCH_ID') || '';
     this.apiKey = this.configService.get<string>('WX_PAY_API_KEY') || '';
     this.serialNo = this.configService.get<string>('WX_PAY_SERIAL_NO') || '';
-    this.privateKeyPath =
-      this.configService.get<string>('WX_PAY_PRIVATE_KEY_PATH') || '';
-    this.publicKeyId =
-      this.configService.get<string>('WX_PAY_PUBLIC_KEY_ID') || ''; // 新增
-    this.publicKeyPath =
-      this.configService.get<string>('WX_PAY_PUBLIC_KEY_PATH') || '';
-    this.notifyUrl =
-      this.configService.get<string>('WX_PAY_NOTIFY_URL') || '';
+    this.privateKeyPath = this.configService.get<string>('WX_PAY_PRIVATE_KEY_PATH') || '';
+    this.publicKeyId = this.configService.get<string>('WX_PAY_PUBLIC_KEY_ID') || ''; // 新增
+    this.publicKeyPath = this.configService.get<string>('WX_PAY_PUBLIC_KEY_PATH') || '';
+    this.notifyUrl = this.configService.get<string>('WX_PAY_NOTIFY_URL') || '';
     this.refundNotifyUrl =
       this.configService.get<string>('WX_PAY_REFUND_NOTIFY_URL') || this.notifyUrl; // 默认使用支付回调地址
-    this.sandbox =
-      this.configService.get<string>('WX_PAY_SANDBOX') === 'true';
+    this.sandbox = this.configService.get<string>('WX_PAY_SANDBOX') === 'true';
   }
 
   onModuleInit() {
@@ -76,9 +71,7 @@ export class WechatPayService implements OnModuleInit {
 
     const privateKey = this.readPrivateKey();
     if (!privateKey) {
-      this.logger.warn(
-        `微信支付商户私钥文件不存在或为空: ${this.privateKeyPath}`,
-      );
+      this.logger.warn(`微信支付商户私钥文件不存在或为空: ${this.privateKeyPath}`);
       return;
     }
 
@@ -106,9 +99,7 @@ export class WechatPayService implements OnModuleInit {
       this.logger.warn(
         `未配置微信支付公钥（WX_PAY_PUBLIC_KEY_ID / WX_PAY_PUBLIC_KEY_PATH），支付功能将不可用`,
       );
-      this.logger.warn(
-        `请参考文档配置微信支付公钥: docs/wechatpay-sdk-upgrade-guide.md`,
-      );
+      this.logger.warn(`请参考文档配置微信支付公钥: docs/wechatpay-sdk-upgrade-guide.md`);
       return;
     }
   }
@@ -228,16 +219,14 @@ export class WechatPayService implements OnModuleInit {
 
     // 读取商户私钥用于签名
     // 使用 file:// 协议加载私钥文件
-    const privateKey = Rsa.from(`file://${path.resolve(this.privateKeyPath)}`, Rsa.KEY_TYPE_PRIVATE);
+    const privateKey = Rsa.from(
+      `file://${path.resolve(this.privateKeyPath)}`,
+      Rsa.KEY_TYPE_PRIVATE,
+    );
 
     // 生成签名
     const paySign = Rsa.sign(
-      Formatter.joinedByLineFeed(
-        appId,
-        timeStamp,
-        nonceStr,
-        packageStr,
-      ),
+      Formatter.joinedByLineFeed(appId, timeStamp, nonceStr, packageStr),
       privateKey,
     );
 
@@ -343,9 +332,7 @@ export class WechatPayService implements OnModuleInit {
     const notification = JSON.parse(body);
     const { resource } = notification;
 
-    this.logger.log(
-      `退款回调通知: 类型 ${notification.event_type}, 摘要 ${notification.summary}`,
-    );
+    this.logger.log(`退款回调通知: 类型 ${notification.event_type}, 摘要 ${notification.summary}`);
 
     // 解密回调数据（使用 AES-256-GCM）
     const decrypted = Aes.AesGcm.decrypt(
@@ -397,9 +384,7 @@ export class WechatPayService implements OnModuleInit {
 
     const { orderNo, refundNo, totalAmount, refundAmount, reason } = params;
 
-    this.logger.log(
-      `发起退款: 订单 ${orderNo}, 退款 ${refundAmount}元, 原因: ${reason}`,
-    );
+    this.logger.log(`发起退款: 订单 ${orderNo}, 退款 ${refundAmount}元, 原因: ${reason}`);
 
     try {
       const { data } = await this.wxpay!.v3.refund.domestic.refunds.post({
@@ -435,9 +420,7 @@ export class WechatPayService implements OnModuleInit {
     this.logger.log(`查询订单支付状态: ${orderNo}`);
 
     try {
-      const { data } = await this.wxpay!.v3.pay.transactions.outTradeNo[
-        orderNo
-      ].get({
+      const { data } = await this.wxpay!.v3.pay.transactions.outTradeNo[orderNo].get({
         params: {
           mchid: this.mchId,
         },

@@ -5,16 +5,18 @@ description: 启动前端管理后台（React + Refine）
 启动前端开发服务器，使用 Monitor 工具实时监控日志。
 
 启动命令：
+
 ```typescript
 Monitor({
-  command: "cd apps/admin && pnpm dev",
-  description: "前端管理后台监控（React + Refine）",
+  command: 'cd apps/admin && pnpm dev',
+  description: '前端管理后台监控（React + Refine）',
   persistent: true,
-  timeout_ms: 3600000
-})
+  timeout_ms: 3600000,
+});
 ```
 
 服务地址：
+
 - 管理后台: http://localhost:5173（如果端口被占用会自动切换）
 
 停止服务：

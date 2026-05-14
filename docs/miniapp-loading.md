@@ -15,13 +15,13 @@
 ### 1. 默认使用（自动显示 loading）
 
 ```typescript
-import { http } from '@/utils/http'
+import { http } from '@/utils/http';
 
 // 显示 "加载中..."
-http.get('/api/coupons')
+http.get('/api/coupons');
 
 // 自定义 loading 文案
-http.post('/api/order', data, { loadingText: '提交订单中...' })
+http.post('/api/order', data, { loadingText: '提交订单中...' });
 ```
 
 ### 2. 静默请求（不显示 loading）
@@ -30,7 +30,7 @@ http.post('/api/order', data, { loadingText: '提交订单中...' })
 
 ```typescript
 // 不显示 loading
-http.get('/api/status', null, { showLoading: false })
+http.get('/api/status', null, { showLoading: false });
 ```
 
 ### 3. 手动控制 Loading
@@ -38,13 +38,13 @@ http.get('/api/status', null, { showLoading: false })
 适用于特殊场景（如文件上传进度）：
 
 ```typescript
-import { showLoading, hideLoading } from '@/stores/loading'
+import { showLoading, hideLoading } from '@/stores/loading';
 
 // 手动显示
-showLoading('上传文件中...')
+showLoading('上传文件中...');
 
 // 手动隐藏（会在至少 500ms 后隐藏）
-hideLoading()
+hideLoading();
 ```
 
 ---
@@ -69,10 +69,10 @@ hideLoading()
 
 ## 配置参数
 
-| 参数 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `showLoading` | boolean | true | 是否显示 loading |
-| `loadingText` | string | '加载中...' | Loading 文案 |
+| 参数          | 类型    | 默认值      | 说明             |
+| ------------- | ------- | ----------- | ---------------- |
+| `showLoading` | boolean | true        | 是否显示 loading |
+| `loadingText` | string  | '加载中...' | Loading 文案     |
 
 ---
 

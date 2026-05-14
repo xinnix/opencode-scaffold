@@ -1,5 +1,5 @@
-import { useParams, useNavigate } from "react-router-dom";
-import { useOne } from "@refinedev/core";
+import { useParams, useNavigate } from 'react-router-dom';
+import { useOne } from '@refinedev/core';
 import {
   Card,
   Button,
@@ -14,28 +14,22 @@ import {
   Empty,
   Statistic,
   Popconfirm,
-} from "antd";
-import {
-  ArrowLeftOutlined,
-} from "@ant-design/icons";
-import { useState, useEffect } from "react";
-import { PermissionGuard } from "../PermissionGuard";
-import type {
-  StandardDetailPageProps,
-  DetailFieldConfig,
-  DetailTabConfig,
-} from "./types";
+} from 'antd';
+import { ArrowLeftOutlined } from '@ant-design/icons';
+import { useState, useEffect } from 'react';
+import { PermissionGuard } from '../PermissionGuard';
+import type { StandardDetailPageProps, DetailFieldConfig, DetailTabConfig } from './types';
 
 export function StandardDetailPage<T extends Record<string, any> = any>(
-  props: StandardDetailPageProps<T>
+  props: StandardDetailPageProps<T>,
 ) {
   const {
     resource,
     maxWidth = 1200,
-    headerType = "simple",
-    titleField = "name",
+    headerType = 'simple',
+    titleField = 'name',
     avatarField,
-    statusField = "status",
+    statusField = 'status',
     statusConfig,
     headerTags,
     fields = [],
@@ -47,7 +41,7 @@ export function StandardDetailPage<T extends Record<string, any> = any>(
     actions,
     hideBackButton = false,
     backPath,
-    backLabel = "返回",
+    backLabel = '返回',
     cardExtra,
     meta,
     renderHeader,
@@ -59,9 +53,7 @@ export function StandardDetailPage<T extends Record<string, any> = any>(
 
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState(
-    defaultTab || tabs?.[0]?.key || "info"
-  );
+  const [activeTab, setActiveTab] = useState(defaultTab || tabs?.[0]?.key || 'info');
 
   const { result, query } = useOne<T>({
     resource,
@@ -90,9 +82,9 @@ export function StandardDetailPage<T extends Record<string, any> = any>(
 
   if (isLoading) {
     return (
-      <div style={{ maxWidth, margin: "0 auto", padding: "24px" }}>
+      <div style={{ maxWidth, margin: '0 auto', padding: '24px' }}>
         <Card>
-          <Spin size="large" style={{ display: "block", margin: "100px auto" }} />
+          <Spin size="large" style={{ display: 'block', margin: '100px auto' }} />
         </Card>
       </div>
     );
@@ -100,15 +92,11 @@ export function StandardDetailPage<T extends Record<string, any> = any>(
 
   if (isError || !entity) {
     return (
-      <div style={{ maxWidth, margin: "0 auto", padding: "24px" }}>
+      <div style={{ maxWidth, margin: '0 auto', padding: '24px' }}>
         <Card>
           <Empty description="数据不存在或加载失败" />
           {!hideBackButton && (
-            <Button
-              type="link"
-              icon={<ArrowLeftOutlined />}
-              onClick={handleBack}
-            >
+            <Button type="link" icon={<ArrowLeftOutlined />} onClick={handleBack}>
               {backLabel}
             </Button>
           )}
@@ -118,7 +106,7 @@ export function StandardDetailPage<T extends Record<string, any> = any>(
   }
 
   const getFieldValue = (key: string): any => {
-    const keys = key.split(".");
+    const keys = key.split('.');
     let value: any = entity;
     for (const k of keys) {
       value = value?.[k];
@@ -129,29 +117,24 @@ export function StandardDetailPage<T extends Record<string, any> = any>(
 
   // Header
   const renderDefaultHeader = () => {
-    const displayTitle =
-      props.title || getFieldValue(titleField) || "详情";
+    const displayTitle = props.title || getFieldValue(titleField) || '详情';
     const avatar = avatarField ? getFieldValue(avatarField) : undefined;
     const status = statusField ? getFieldValue(statusField) : undefined;
     const statusInfo = status !== undefined && statusConfig?.[String(status)];
 
-    if (headerType === "avatar") {
+    if (headerType === 'avatar') {
       return (
         <Space size="large" align="start">
           {avatar && <Avatar size={64} src={avatar} shape="square" />}
           <div>
-            <h1 style={{ margin: 0, fontSize: 24, fontWeight: "bold" }}>
-              {displayTitle}
-            </h1>
+            <h1 style={{ margin: 0, fontSize: 24, fontWeight: 'bold' }}>{displayTitle}</h1>
             <Space style={{ marginTop: 8 }}>
-              {statusInfo && (
-                <Tag color={statusInfo.color}>{statusInfo.text}</Tag>
-              )}
+              {statusInfo && <Tag color={statusInfo.color}>{statusInfo.text}</Tag>}
               {headerTags?.map((tag, i) => (
                 <Tag key={i} color={tag.color}>
                   {tag.text ||
-                    (tag.field ? getFieldValue(tag.field) : "") ||
-                    (tag.render ? tag.render(entity) : "")}
+                    (tag.field ? getFieldValue(tag.field) : '') ||
+                    (tag.render ? tag.render(entity) : '')}
                 </Tag>
               ))}
             </Space>
@@ -162,15 +145,13 @@ export function StandardDetailPage<T extends Record<string, any> = any>(
 
     return (
       <Space>
-        <h1 style={{ margin: 0, fontSize: 24, fontWeight: "bold" }}>
-          {displayTitle}
-        </h1>
+        <h1 style={{ margin: 0, fontSize: 24, fontWeight: 'bold' }}>{displayTitle}</h1>
         {statusInfo && <Tag color={statusInfo.color}>{statusInfo.text}</Tag>}
         {headerTags?.map((tag, i) => (
           <Tag key={i} color={tag.color}>
             {tag.text ||
-              (tag.field ? getFieldValue(tag.field) : "") ||
-              (tag.render ? tag.render(entity) : "")}
+              (tag.field ? getFieldValue(tag.field) : '') ||
+              (tag.render ? tag.render(entity) : '')}
           </Tag>
         ))}
       </Space>
@@ -180,7 +161,7 @@ export function StandardDetailPage<T extends Record<string, any> = any>(
   // Field rendering
   const renderField = (field: DetailFieldConfig) => {
     const value = getFieldValue(field.key);
-    const fb = field.fallback ?? "-";
+    const fb = field.fallback ?? '-';
 
     if (field.render) {
       return field.render(value, entity);
@@ -191,35 +172,31 @@ export function StandardDetailPage<T extends Record<string, any> = any>(
     }
 
     switch (field.type) {
-      case "datetime":
-        return new Date(value).toLocaleString("zh-CN");
-      case "date":
-        return new Date(value).toLocaleDateString("zh-CN");
-      case "boolean": {
-        const labels = field.booleanLabels || ["否", "是"];
-        const colors = field.booleanColors || ["default", "success"];
+      case 'datetime':
+        return new Date(value).toLocaleString('zh-CN');
+      case 'date':
+        return new Date(value).toLocaleDateString('zh-CN');
+      case 'boolean': {
+        const labels = field.booleanLabels || ['否', '是'];
+        const colors = field.booleanColors || ['default', 'success'];
         const boolVal = !!value;
-        return (
-          <Tag color={boolVal ? colors[1] : colors[0]}>
-            {boolVal ? labels[1] : labels[0]}
-          </Tag>
-        );
+        return <Tag color={boolVal ? colors[1] : colors[0]}>{boolVal ? labels[1] : labels[0]}</Tag>;
       }
-      case "tag": {
+      case 'tag': {
         const color = field.tagColors?.[String(value)];
         const text = field.tagLabels?.[String(value)] || String(value);
         return <Tag color={color}>{text}</Tag>;
       }
-      case "number":
+      case 'number':
         return String(value);
-      case "currency": {
-        const symbol = field.currencySymbol || "¥";
+      case 'currency': {
+        const symbol = field.currencySymbol || '¥';
         const precision = field.currencyPrecision ?? 2;
         return `${symbol}${Number(value).toFixed(precision)}`;
       }
-      case "percent":
+      case 'percent':
         return `${value}%`;
-      case "image":
+      case 'image':
         return (
           <img
             src={value}
@@ -227,30 +204,26 @@ export function StandardDetailPage<T extends Record<string, any> = any>(
             style={{
               maxWidth: field.imageWidth || 200,
               maxHeight: field.imageHeight || 200,
-              objectFit: "cover",
+              objectFit: 'cover',
             }}
           />
         );
-      case "relation": {
-        const tryFields = field.relationFields || [
-          "name",
-          "title",
-          "username",
-        ];
+      case 'relation': {
+        const tryFields = field.relationFields || ['name', 'title', 'username'];
         for (const f of tryFields) {
           if (value?.[f]) return value[f];
         }
         return fb;
       }
-      case "email":
+      case 'email':
         return <a href={`mailto:${value}`}>{value}</a>;
-      case "url":
+      case 'url':
         return (
-          <a href={value} target={field.urlTarget || "_blank"} rel="noreferrer">
+          <a href={value} target={field.urlTarget || '_blank'} rel="noreferrer">
             {value}
           </a>
         );
-      case "text":
+      case 'text':
       default:
         return value || fb;
     }
@@ -281,8 +254,7 @@ export function StandardDetailPage<T extends Record<string, any> = any>(
     return (
       <Row gutter={16} style={{ marginBottom: 24 }}>
         {statistics.map((stat, index) => {
-          const value =
-            stat.value ?? (stat.field ? getFieldValue(stat.field) : 0);
+          const value = stat.value ?? (stat.field ? getFieldValue(stat.field) : 0);
 
           return (
             <Col span={6} key={index}>
@@ -313,7 +285,7 @@ export function StandardDetailPage<T extends Record<string, any> = any>(
           const button = (
             <Button
               key={action.key}
-              type={action.type || "default"}
+              type={action.type || 'default'}
               icon={action.icon}
               danger={action.danger}
               onClick={() => action.handler?.(entity)}
@@ -323,15 +295,8 @@ export function StandardDetailPage<T extends Record<string, any> = any>(
           );
 
           const wrappedButton = action.confirm ? (
-            <Popconfirm
-              title={action.confirm}
-              onConfirm={() => action.handler?.(entity)}
-            >
-              <Button
-                type={action.type || "default"}
-                icon={action.icon}
-                danger={action.danger}
-              >
+            <Popconfirm title={action.confirm} onConfirm={() => action.handler?.(entity)}>
+              <Button type={action.type || 'default'} icon={action.icon} danger={action.danger}>
                 {action.label}
               </Button>
             </Popconfirm>
@@ -371,18 +336,17 @@ export function StandardDetailPage<T extends Record<string, any> = any>(
       return tab.component;
     }
 
-    if (tab.key === "info") {
+    if (tab.key === 'info') {
       return renderDefaultDescriptions();
     }
 
     return <Empty description="暂无数据" />;
   };
 
-  const resolvedCardExtra =
-    typeof cardExtra === "function" ? cardExtra(entity) : cardExtra;
+  const resolvedCardExtra = typeof cardExtra === 'function' ? cardExtra(entity) : cardExtra;
 
   return (
-    <div style={{ maxWidth, margin: "0 auto", padding: "24px" }}>
+    <div style={{ maxWidth, margin: '0 auto', padding: '24px' }}>
       <Card extra={resolvedCardExtra}>
         {!hideBackButton && (
           <Button
@@ -395,8 +359,7 @@ export function StandardDetailPage<T extends Record<string, any> = any>(
           </Button>
         )}
 
-        {headerType !== "none" &&
-          (renderHeader ? renderHeader(entity) : renderDefaultHeader())}
+        {headerType !== 'none' && (renderHeader ? renderHeader(entity) : renderDefaultHeader())}
 
         {renderActions ? renderActions(entity) : renderDefaultActions()}
 

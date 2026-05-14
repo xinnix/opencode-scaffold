@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { useLoading } from '@/stores/loading'
-import GlobalLoading from '@/components/GlobalLoading.vue'
+import { useLoading } from '@/stores/loading';
+import GlobalLoading from '@/components/GlobalLoading.vue';
 
-const { state: loadingState } = useLoading()
+const { state: loadingState } = useLoading();
 
-onLaunch(() => { })
+onLaunch(() => {});
 </script>
 
 <template>
@@ -21,11 +21,11 @@ onLaunch(() => { })
 
 /* 全局页面样式 - 禁止页面横向滚动 */
 page {
-    background-color: #F5FAFF;
-    width: 100vw;
-    max-width: 100vw;
-    overflow-x: hidden;
-    overflow-y: auto;
+  background-color: #f5faff;
+  width: 100vw;
+  max-width: 100vw;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 /* 移除全局 view 的溢出限制，让各个组件自己控制 */
@@ -33,13 +33,13 @@ page {
 
 /* 字体图标基础样式 - 只设置字体大小,颜色由各组件控制 */
 .iconfont {
-    font-size: 28px;
+  font-size: 28px;
 }
 
 /* SVG 图标样式 - 只能改变大小，不能改变颜色 */
 .t-icon {
-    width: 28px !important;
-    height: 28px !important;
-    background-size: contain !important;
+  width: 28px !important;
+  height: 28px !important;
+  background-size: contain !important;
 }
 </style>

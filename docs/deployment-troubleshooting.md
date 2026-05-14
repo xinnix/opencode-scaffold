@@ -17,6 +17,7 @@ Terminated
 ```
 
 **根本原因：**
+
 - Prisma CLI 不在预期位置，fallback 到 npx
 - npx 需要解析包路径，耗时 5-30 秒
 - 数据库连接慢或首次迁移耗时长
@@ -26,11 +27,13 @@ Terminated
 ### 1. Dockerfile.api 改进
 
 **修复点：**
+
 - ✅ 拷贝完整的 Prisma CLI 到 `/app/node_modules/prisma-standalone`
 - ✅ 创建 `node_modules/.bin/prisma` 软链接
 - ✅ 使用终极优化启动脚本
 
 **变更：**
+
 ```dockerfile
 # 新增：拷贝 Prisma CLI 并创建软链接
 COPY --from=builder /app/node_modules/.pnpm/prisma@*/node_modules/prisma ./node_modules/prisma-standalone
@@ -43,6 +46,7 @@ COPY apps/api/entrypoint-final.sh ./entrypoint.sh
 ### 2. 启动脚本优化（entrypoint-final.sh）
 
 **特性：**
+
 - ✅ **数据库连接预检查**（5秒快速失败）
 - ✅ **多级 Prisma CLI 查找**（4种方案，从快到慢）：
   1. `node_modules/.bin/prisma`（最快，<1s）
@@ -86,6 +90,7 @@ docker logs couponHub-api-prod --tail 100
 ```
 
 **预期输出：**
+
 ```
 🚀 Starting Production Environment...
 ✅ DATABASE_URL configured
@@ -110,6 +115,7 @@ docker logs couponHub-api-prod --tail 100
 ```
 
 **启动时间预期：**
+
 - 数据库连接预检查：5 秒
 - 迁移执行：5-30 秒（取决于迁移数量）
 - 服务启动：5 秒
@@ -130,6 +136,7 @@ docker-compose -f docker-compose.prod.yml restart api
 ```
 
 **适用场景：**
+
 - 数据库表已存在，仅更新应用代码
 - 数据库迁移失败但表结构完整
 - 快速重启服务不等待迁移
@@ -167,6 +174,7 @@ bash /tmp/test-db-connection.sh
 ```
 
 **检查项：**
+
 - ✅ DATABASE_URL 配置正确
 - ✅ 数据库端口可达（5秒超时）
 - ✅ PostgreSQL 认证成功
@@ -182,6 +190,7 @@ docker exec couponHub-api-prod ls -la /app/node_modules/.bin/
 ```
 
 **预期：**
+
 - `/app/node_modules/.bin/prisma` 软链接存在
 - `/app/node_modules/prisma-standalone/` 目录存在
 
@@ -213,6 +222,7 @@ psql "$DATABASE_URL" -c "SELECT migration_name, logs FROM _prisma_migrations WHE
 ```
 
 **如果有失败的迁移，手动清理：**
+
 ```bash
 psql "$DATABASE_URL" -c "DELETE FROM _prisma_migrations WHERE finished_at IS NULL;"
 ```
@@ -220,11 +230,13 @@ psql "$DATABASE_URL" -c "DELETE FROM _prisma_migrations WHERE finished_at IS NUL
 ## 📊 性能对比
 
 ### 之前（使用旧脚本）
+
 - 启动时间：**60-120+ 秒**（npx 慢 + 无超时）
 - 可能卡住不启动
 - 无诊断信息
 
 ### 现在（使用终极优化脚本）
+
 - 数据库预检查：**5 秒**（快速失败）
 - Prisma CLI 查找：**1 秒**（使用 .bin/prisma）
 - 迁移执行：**5-30 秒**（有超时）
@@ -234,7 +246,9 @@ psql "$DATABASE_URL" -c "DELETE FROM _prisma_migrations WHERE finished_at IS NUL
 ## 💡 最佳实践
 
 ### 1. 预热数据库连接
+
 确保数据库连接池已建立，避免首次连接慢：
+
 ```typescript
 // 在 main.ts 中增加启动预热
 async function bootstrap() {
@@ -250,6 +264,7 @@ async function bootstrap() {
 ```
 
 ### 2. 分离迁移和启动
+
 如果迁移耗时很长，可以分离执行：
 
 ```bash
@@ -264,7 +279,9 @@ docker-compose -f docker-compose.prod.yml up -d
 ```
 
 ### 3. 监控启动时间
+
 在容器日志中记录启动时间：
+
 ```bash
 # 查看容器启动时间
 docker inspect couponHub-api-prod | grep "StartedAt"
@@ -275,13 +292,13 @@ docker logs couponHub-api-prod | grep "Nest application successfully started"
 
 ## 🎯 快速解决清单
 
-| 问题现象 | 解决方案 | 预期效果 |
-|---------|---------|---------|
-| 启动时间长（60+秒） | 重新构建镜像使用新 Dockerfile | 15-40秒启动 |
-| 找不到 Prisma CLI | Dockerfile 已修复 | 自动找到 CLI |
-| npx 解析慢 | 已添加多级查找 | 避免 npx fallback |
-| 数据库不可用时卡住 | 已添加预检查 | 5秒快速失败 |
-| 表已存在无需迁移 | 设置 SKIP_MIGRATION=true | 直接启动服务 |
+| 问题现象            | 解决方案                      | 预期效果          |
+| ------------------- | ----------------------------- | ----------------- |
+| 启动时间长（60+秒） | 重新构建镜像使用新 Dockerfile | 15-40秒启动       |
+| 找不到 Prisma CLI   | Dockerfile 已修复             | 自动找到 CLI      |
+| npx 解析慢          | 已添加多级查找                | 避免 npx fallback |
+| 数据库不可用时卡住  | 已添加预检查                  | 5秒快速失败       |
+| 表已存在无需迁移    | 设置 SKIP_MIGRATION=true      | 直接启动服务      |
 
 ## 📝 下一步
 
@@ -295,6 +312,7 @@ docker logs couponHub-api-prod | grep "Nest application successfully started"
 ---
 
 **预期改进：**
+
 - ✅ 启动时间从 60-120+ 秒降至 15-40 秒
 - ✅ 避免 npx 慢的问题
 - ✅ 数据库不可用时快速失败（不卡住）

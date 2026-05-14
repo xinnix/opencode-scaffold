@@ -4,10 +4,7 @@ const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
 
 export function createRateLimiter(options: { limit: number; ttlMs: number }) {
   return async ({ ctx, next }: any) => {
-    const ip =
-      ctx.req?.headers?.['x-forwarded-for'] ||
-      ctx.req?.socket?.remoteAddress ||
-      'unknown';
+    const ip = ctx.req?.headers?.['x-forwarded-for'] || ctx.req?.socket?.remoteAddress || 'unknown';
     const key = `${ip}:${options.limit}:${options.ttlMs}`;
     const now = Date.now();
 

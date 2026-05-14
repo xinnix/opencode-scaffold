@@ -1,5 +1,5 @@
 // apps/admin/src/modules/role/components/RoleForm.tsx
-import { Form, Input } from "antd";
+import { Form, Input } from 'antd';
 
 interface RoleFormProps {
   form: any;
@@ -18,22 +18,17 @@ export const RoleForm = ({ form, isEdit = false, isSystemRole = false }: RoleFor
       <Form.Item
         name="name"
         label="角色名称"
-        rules={[
-          { required: true, message: "请输入角色名称" },
-        ]}
+        rules={[{ required: true, message: '请输入角色名称' }]}
       >
         <Input placeholder="请输入角色名称" />
       </Form.Item>
 
-      <Form.Item
-        name="description"
-        label="描述"
-      >
+      <Form.Item name="description" label="描述">
         <Input.TextArea placeholder="请输入角色描述" rows={3} />
       </Form.Item>
 
       {isSystemRole && (
-        <div style={{ color: "#999", fontSize: 12, marginTop: 16 }}>
+        <div style={{ color: '#999', fontSize: 12, marginTop: 16 }}>
           注：系统角色的标识（slug）和层级（level）不可修改
         </div>
       )}

@@ -111,16 +111,34 @@ interface ModuleReport {
 
 // BaseService methods (inherited, not custom)
 const BASE_SERVICE_METHODS = new Set([
-  'list', 'getOne', 'getOneOrThrow', 'create', 'update', 'remove',
-  'removeMany', 'count', 'exists',
-  'beforeCreate', 'afterCreate', 'beforeUpdate', 'afterUpdate',
-  'beforeDelete', 'afterDelete', 'beforeDeleteMany', 'afterDeleteMany',
+  'list',
+  'getOne',
+  'getOneOrThrow',
+  'create',
+  'update',
+  'remove',
+  'removeMany',
+  'count',
+  'exists',
+  'beforeCreate',
+  'afterCreate',
+  'beforeUpdate',
+  'afterUpdate',
+  'beforeDelete',
+  'afterDelete',
+  'beforeDeleteMany',
+  'afterDeleteMany',
   'checkOwnership',
 ]);
 
 // Standard CRUD procedure names
 const CRUD_PROCEDURE_NAMES = new Set([
-  'getMany', 'getOne', 'create', 'update', 'delete', 'deleteMany',
+  'getMany',
+  'getOne',
+  'create',
+  'update',
+  'delete',
+  'deleteMany',
 ]);
 
 // ============================================
@@ -194,7 +212,9 @@ function getCandidateModelNames(moduleName: string): string[] {
   if (moduleName.endsWith('ies')) {
     // e.g., categories -> Category
     candidates.unshift(moduleName.slice(0, -3) + 'y');
-    candidates.unshift(moduleName.slice(0, -3).charAt(0).toUpperCase() + moduleName.slice(0, -3).slice(1) + 'y');
+    candidates.unshift(
+      moduleName.slice(0, -3).charAt(0).toUpperCase() + moduleName.slice(0, -3).slice(1) + 'y',
+    );
   } else if (moduleName.endsWith('es')) {
     // e.g., addresses -> Address
     candidates.unshift(moduleName.charAt(0).toUpperCase() + moduleName.slice(1, -2));
@@ -250,12 +270,47 @@ function analyzeService(moduleName: string): ServiceAnalysis {
 
   // JS/TS keywords that could be false-positive matched as method names
   const JS_KEYWORDS = new Set([
-    'if', 'else', 'while', 'for', 'switch', 'case', 'catch', 'finally',
-    'return', 'throw', 'new', 'typeof', 'instanceof', 'delete', 'void',
-    'do', 'try', 'break', 'continue', 'class', 'function', 'const',
-    'let', 'var', 'import', 'export', 'from', 'default', 'type',
-    'interface', 'enum', 'extends', 'implements', 'super', 'this',
-    'async', 'await', 'yield', 'of', 'in', 'as',
+    'if',
+    'else',
+    'while',
+    'for',
+    'switch',
+    'case',
+    'catch',
+    'finally',
+    'return',
+    'throw',
+    'new',
+    'typeof',
+    'instanceof',
+    'delete',
+    'void',
+    'do',
+    'try',
+    'break',
+    'continue',
+    'class',
+    'function',
+    'const',
+    'let',
+    'var',
+    'import',
+    'export',
+    'from',
+    'default',
+    'type',
+    'interface',
+    'enum',
+    'extends',
+    'implements',
+    'super',
+    'this',
+    'async',
+    'await',
+    'yield',
+    'of',
+    'in',
+    'as',
   ]);
 
   // Extract async methods — match class method declarations
@@ -281,7 +336,12 @@ function analyzeService(moduleName: string): ServiceAnalysis {
   const arrowMethodRegex = /(\w+)\s*=\s*(?:async\s*)?\([^)]*\)\s*(?::\s*[^=]+)?\s*=>/g;
   while ((match = arrowMethodRegex.exec(content)) !== null) {
     const methodName = match[1];
-    if (methodName && !JS_KEYWORDS.has(methodName) && !methodName.startsWith('_') && methodName[0] === methodName[0].toLowerCase()) {
+    if (
+      methodName &&
+      !JS_KEYWORDS.has(methodName) &&
+      !methodName.startsWith('_') &&
+      methodName[0] === methodName[0].toLowerCase()
+    ) {
       allMethods.add(methodName);
     }
   }
@@ -346,8 +406,7 @@ function analyzeRouter(moduleName: string): RouterAnalysis {
   // The custom procedures are defined in the () => ({ ... }) callback
   if (result.usesCreateCrudRouterWithCustom) {
     // Extract from the custom procedures callback
-    const customCallbackRegex =
-      /\(\)\s*=>\s*\(\{([^}]*(?:\{[^}]*\}[^}]*)*)\}\)/;
+    const customCallbackRegex = /\(\)\s*=>\s*\(\{([^}]*(?:\{[^}]*\}[^}]*)*)\}\)/;
     const customMatch = customCallbackRegex.exec(content);
     if (customMatch) {
       const callbackBody = customMatch[1];
@@ -703,14 +762,18 @@ function formatReport(report: ModuleReport): string {
   lines.push('');
 
   // Standardization summary
-  lines.push(`  Standardization: ${levelBadge(standardization.level)}  Score: ${colorize(`${standardization.score}/100`, C.bold)}`);
+  lines.push(
+    `  Standardization: ${levelBadge(standardization.level)}  Score: ${colorize(`${standardization.score}/100`, C.bold)}`,
+  );
   lines.push('');
 
   // Backend: Service
   lines.push(colorize('  Backend Service', C.bold + C.cyan));
   lines.push(colorize('  ' + '-'.repeat(40), C.dim));
   if (service.exists) {
-    lines.push(`    File:           ${colorize(service.filePath!.replace(PROJECT_ROOT + '/', ''), C.dim)}`);
+    lines.push(
+      `    File:           ${colorize(service.filePath!.replace(PROJECT_ROOT + '/', ''), C.dim)}`,
+    );
     lines.push(`    Lines:          ${service.loc}`);
     lines.push(`    BaseService:    ${checkMark(service.usesBaseService)}`);
     if (service.crudMethods.length > 0) {
@@ -728,14 +791,18 @@ function formatReport(report: ModuleReport): string {
   lines.push(colorize('  Backend Router', C.bold + C.cyan));
   lines.push(colorize('  ' + '-'.repeat(40), C.dim));
   if (router.exists) {
-    lines.push(`    File:           ${colorize(router.filePath!.replace(PROJECT_ROOT + '/', ''), C.dim)}`);
+    lines.push(
+      `    File:           ${colorize(router.filePath!.replace(PROJECT_ROOT + '/', ''), C.dim)}`,
+    );
     lines.push(`    Lines:          ${router.loc}`);
     const routerType = router.usesCreateCrudRouterWithCustom
       ? 'createCrudRouterWithCustom'
       : router.usesCreateCrudRouter
         ? 'createCrudRouter'
         : 'manual router({ ... })';
-    lines.push(`    Router type:    ${colorize(routerType, router.usesCreateCrudRouter || router.usesCreateCrudRouterWithCustom ? C.green : C.yellow)}`);
+    lines.push(
+      `    Router type:    ${colorize(routerType, router.usesCreateCrudRouter || router.usesCreateCrudRouterWithCustom ? C.green : C.yellow)}`,
+    );
     if (router.crudProcedures.length > 0) {
       lines.push(`    CRUD procs:     ${router.crudProcedures.join(', ')}`);
     }
@@ -773,21 +840,29 @@ function formatReport(report: ModuleReport): string {
   // Schema
   lines.push(colorize('  Schema', C.bold + C.cyan));
   lines.push(colorize('  ' + '-'.repeat(40), C.dim));
-  lines.push(`    Prisma model:   ${checkMark(schema.prismaModelExists)}${schema.prismaModelExists ? ` (${schema.prismaModelFields} fields)` : ''}`);
+  lines.push(
+    `    Prisma model:   ${checkMark(schema.prismaModelExists)}${schema.prismaModelExists ? ` (${schema.prismaModelFields} fields)` : ''}`,
+  );
   if (schema.prismaModelRelations.length > 0) {
     lines.push(`    Relations:      ${schema.prismaModelRelations.join(', ')}`);
   }
   if (schema.prismaModelIndexes.length > 0) {
     lines.push(`    Indexes:        ${schema.prismaModelIndexes.length} index(es)`);
   }
-  lines.push(`    Zod schemas:    ${checkMark(schema.zodSchemaDefined)}${schema.zodSchemaNames.length > 0 ? ` (${schema.zodSchemaNames.join(', ')})` : ''}`);
+  lines.push(
+    `    Zod schemas:    ${checkMark(schema.zodSchemaDefined)}${schema.zodSchemaNames.length > 0 ? ` (${schema.zodSchemaNames.join(', ')})` : ''}`,
+  );
   lines.push('');
 
   // Standardization details
   lines.push(colorize('  Standardization Breakdown', C.bold + C.cyan));
   lines.push(colorize('  ' + '-'.repeat(40), C.dim));
   for (const detail of standardization.details) {
-    const icon = detail.includes('(+') ? colorize('+', C.green) : detail.includes('NOT') ? colorize('!', C.red) : colorize('i', C.blue);
+    const icon = detail.includes('(+')
+      ? colorize('+', C.green)
+      : detail.includes('NOT')
+        ? colorize('!', C.red)
+        : colorize('i', C.blue);
     lines.push(`    ${icon} ${detail}`);
   }
   lines.push('');
@@ -815,7 +890,11 @@ function getRefactoringSuggestions(report: ModuleReport): string[] {
     );
   }
 
-  if (report.router.exists && !report.router.usesCreateCrudRouter && !report.router.usesCreateCrudRouterWithCustom) {
+  if (
+    report.router.exists &&
+    !report.router.usesCreateCrudRouter &&
+    !report.router.usesCreateCrudRouterWithCustom
+  ) {
     if (report.router.crudProcedures.length >= 3) {
       suggestions.push(
         `Use createCrudRouter or createCrudRouterWithCustom to replace ${report.router.crudProcedures.length} manual CRUD procedures`,
@@ -833,7 +912,10 @@ function getRefactoringSuggestions(report: ModuleReport): string[] {
         );
       }
     }
-    if (!report.frontend.usesStandardForm && report.frontend.pages.some((p) => p.includes('List') || p.includes('Form'))) {
+    if (
+      !report.frontend.usesStandardForm &&
+      report.frontend.pages.some((p) => p.includes('List') || p.includes('Form'))
+    ) {
       suggestions.push('Use StandardForm for declarative form rendering');
     }
   }
@@ -869,7 +951,10 @@ function formatAllReport(reports: ModuleReport[]): string {
           ? colorize('PARTIAL', C.yellow)
           : colorize('MANUAL', C.red);
 
-    const scoreStr = colorize(`${standardization.score}`, standardization.score >= 80 ? C.green : standardization.score >= 40 ? C.yellow : C.red);
+    const scoreStr = colorize(
+      `${standardization.score}`,
+      standardization.score >= 80 ? C.green : standardization.score >= 40 ? C.yellow : C.red,
+    );
 
     const serviceStr = service.exists
       ? service.usesBaseService
@@ -883,14 +968,17 @@ function formatAllReport(reports: ModuleReport[]): string {
         : colorize('Manual', C.red)
       : colorize('-', C.dim);
 
-    const feStr = frontend.directoryExists && frontend.pages.length > 0
-      ? frontend.usesStandardListPage
-        ? colorize('StdList', C.green)
-        : colorize('Manual', C.red)
-      : colorize('-', C.dim);
+    const feStr =
+      frontend.directoryExists && frontend.pages.length > 0
+        ? frontend.usesStandardListPage
+          ? colorize('StdList', C.green)
+          : colorize('Manual', C.red)
+        : colorize('-', C.dim);
 
     const row = `  ${pascalName.padEnd(16)} ${levelStr.padEnd(18 + (standardization.level === 'STANDARDIZED' ? 9 : standardization.level === 'PARTIAL' ? 9 : 0))} ${scoreStr.padEnd(8 + (standardization.score >= 100 ? 0 : 0))} ${serviceStr}         ${routerStr}         ${feStr}`;
-    lines.push(`  ${pascalName.padEnd(16)} ${levelStr}  ${scoreStr}   ${serviceStr}       ${routerStr}       ${feStr}`);
+    lines.push(
+      `  ${pascalName.padEnd(16)} ${levelStr}  ${scoreStr}   ${serviceStr}       ${routerStr}       ${feStr}`,
+    );
   }
 
   lines.push('');
@@ -905,9 +993,15 @@ function formatAllReport(reports: ModuleReport[]): string {
   lines.push(colorize('  Statistics', C.bold + C.cyan));
   lines.push(colorize('  ' + '-'.repeat(40), C.dim));
   lines.push(`    Total modules:    ${total}`);
-  lines.push(`    ${colorize('STANDARDIZED', C.green)}:  ${standardized} (${Math.round((standardized / total) * 100)}%)`);
-  lines.push(`    ${colorize('PARTIAL', C.yellow)}:       ${partial} (${Math.round((partial / total) * 100)}%)`);
-  lines.push(`    ${colorize('MANUAL', C.red)}:         ${manual} (${Math.round((manual / total) * 100)}%)`);
+  lines.push(
+    `    ${colorize('STANDARDIZED', C.green)}:  ${standardized} (${Math.round((standardized / total) * 100)}%)`,
+  );
+  lines.push(
+    `    ${colorize('PARTIAL', C.yellow)}:       ${partial} (${Math.round((partial / total) * 100)}%)`,
+  );
+  lines.push(
+    `    ${colorize('MANUAL', C.red)}:         ${manual} (${Math.round((manual / total) * 100)}%)`,
+  );
   lines.push(`    Average score:    ${avgScore}/100`);
   lines.push('');
 
@@ -917,7 +1011,8 @@ function formatAllReport(reports: ModuleReport[]): string {
     lines.push(colorize('  Refactoring Candidates (MANUAL modules)', C.bold + C.yellow));
     lines.push(colorize('  ' + '-'.repeat(40), C.dim));
     for (const candidate of candidates) {
-      const pascalName = candidate.moduleName.charAt(0).toUpperCase() + candidate.moduleName.slice(1);
+      const pascalName =
+        candidate.moduleName.charAt(0).toUpperCase() + candidate.moduleName.slice(1);
       lines.push(`    ${colorize(pascalName, C.red)} (score: ${candidate.standardization.score})`);
 
       const suggestions = getRefactoringSuggestions(candidate);
@@ -934,8 +1029,11 @@ function formatAllReport(reports: ModuleReport[]): string {
     lines.push(colorize('  Partial Standardization (could be improved)', C.bold + C.yellow));
     lines.push(colorize('  ' + '-'.repeat(40), C.dim));
     for (const candidate of partialCandidates) {
-      const pascalName = candidate.moduleName.charAt(0).toUpperCase() + candidate.moduleName.slice(1);
-      lines.push(`    ${colorize(pascalName, C.yellow)} (score: ${candidate.standardization.score})`);
+      const pascalName =
+        candidate.moduleName.charAt(0).toUpperCase() + candidate.moduleName.slice(1);
+      lines.push(
+        `    ${colorize(pascalName, C.yellow)} (score: ${candidate.standardization.score})`,
+      );
 
       const suggestions = getRefactoringSuggestions(candidate);
       for (const s of suggestions) {
@@ -1004,7 +1102,9 @@ function formatAllJson(reports: ModuleReport[]): object {
       standardized: reports.filter((r) => r.standardization.level === 'STANDARDIZED').length,
       partial: reports.filter((r) => r.standardization.level === 'PARTIAL').length,
       manual: reports.filter((r) => r.standardization.level === 'MANUAL').length,
-      averageScore: Math.round(reports.reduce((sum, r) => sum + r.standardization.score, 0) / reports.length),
+      averageScore: Math.round(
+        reports.reduce((sum, r) => sum + r.standardization.score, 0) / reports.length,
+      ),
     },
     modules: reports.map(formatJson),
   };

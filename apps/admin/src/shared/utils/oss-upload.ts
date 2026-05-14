@@ -27,7 +27,12 @@ export interface UploadResult {
   fileSize: number;
 }
 
-export type UploadType = 'merchant_logo' | 'news_banner' | 'merchant_gallery' | 'news_content' | 'avatar';
+export type UploadType =
+  | 'merchant_logo'
+  | 'news_banner'
+  | 'merchant_gallery'
+  | 'news_content'
+  | 'avatar';
 
 /**
  * OSS 直传上传类
@@ -92,7 +97,7 @@ export class OSSUploader {
    * @returns 上传结果列表
    */
   static async uploadMultiple(files: File[], type: UploadType): Promise<UploadResult[]> {
-    return Promise.all(files.map(file => this.upload(file, type)));
+    return Promise.all(files.map((file) => this.upload(file, type)));
   }
 
   /**

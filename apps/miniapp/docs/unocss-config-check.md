@@ -27,14 +27,14 @@
 
 ```typescript
 // vite.config.ts
-import UnoCSS from 'unocss/vite'
+import UnoCSS from 'unocss/vite';
 
 export default defineConfig({
   plugins: [
     Uni(),
     UnoCSS(), // ✅ 已配置
   ],
-})
+});
 ```
 
 **状态**: ✅ 已正确配置
@@ -43,14 +43,14 @@ export default defineConfig({
 
 ```typescript
 // uno.config.ts
-import { presetUni } from '@uni-helper/unocss-preset-uni'
-import { defineConfig } from 'unocss'
+import { presetUni } from '@uni-helper/unocss-preset-uni';
+import { defineConfig } from 'unocss';
 
 export default defineConfig({
   presets: [
     presetUni(), // ✅ 正确：仅使用 presetUni
   ],
-})
+});
 ```
 
 **状态**: ✅ 已正确配置
@@ -65,7 +65,7 @@ export default defineConfig({
 presets: [
   presetUni(),
   presetUno(), // ❌ 重复！presetUni 已内置
-]
+];
 ```
 
 ### ✅ 修复后的正确配置
@@ -73,10 +73,11 @@ presets: [
 ```typescript
 presets: [
   presetUni(), // ✅ 仅使用 presetUni，它会自动处理小程序适配
-]
+];
 ```
 
 **原因**:
+
 - `presetUni()` 内置了 `presetUno` 和 `presetAttributify`
 - 对小程序自动使用 `@unocss-applet/preset-applet` 替代 `presetUno`
 - 无需手动添加 `presetUno()`
@@ -89,34 +90,23 @@ presets: [
 
 ```typescript
 // uno.config.ts
-import { defineConfig } from 'unocss'
-import { presetUni } from '@uni-helper/unocss-preset-uni'
+import { defineConfig } from 'unocss';
+import { presetUni } from '@uni-helper/unocss-preset-uni';
 
 export default defineConfig({
-  presets: [
-    presetUni()
-  ]
-})
+  presets: [presetUni()],
+});
 ```
 
 ### 完整配置（本项目使用）
 
 ```typescript
-import { presetUni } from '@uni-helper/unocss-preset-uni'
-import {
-  defineConfig,
-  transformerDirectives,
-  transformerVariantGroup,
-} from 'unocss'
+import { presetUni } from '@uni-helper/unocss-preset-uni';
+import { defineConfig, transformerDirectives, transformerVariantGroup } from 'unocss';
 
 export default defineConfig({
-  presets: [
-    presetUni(),
-  ],
-  transformers: [
-    transformerDirectives(),
-    transformerVariantGroup(),
-  ],
+  presets: [presetUni()],
+  transformers: [transformerDirectives(), transformerVariantGroup()],
   theme: {
     colors: {
       // 自定义颜色
@@ -131,7 +121,7 @@ export default defineConfig({
   rules: [
     // 自定义规则
   ],
-})
+});
 ```
 
 ---

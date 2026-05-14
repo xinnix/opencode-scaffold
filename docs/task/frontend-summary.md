@@ -6,16 +6,17 @@
 
 **创建的页面：**
 
-| 页面 | 路径 | 功能 |
-|------|------|------|
-| 首页 | `pages/index.vue` | 新闻列表 + 商户列表 |
-| 商户详情 | `pages/merchant/detail.vue` | 商户信息 + 可用优惠券 |
-| 券详情 | `pages/coupon/detail.vue` | 券信息 + 购买按钮 |
-| 我的券包 | `pages/wallet/index.vue` | 按状态筛选订单 |
-| 核销二维码 | `pages/qrcode/index.vue` | 30秒自动刷新二维码 |
-| 扫码核销 | `pages/scan/index.vue` | 调起扫码 + 核销 |
+| 页面       | 路径                        | 功能                  |
+| ---------- | --------------------------- | --------------------- |
+| 首页       | `pages/index.vue`           | 新闻列表 + 商户列表   |
+| 商户详情   | `pages/merchant/detail.vue` | 商户信息 + 可用优惠券 |
+| 券详情     | `pages/coupon/detail.vue`   | 券信息 + 购买按钮     |
+| 我的券包   | `pages/wallet/index.vue`    | 按状态筛选订单        |
+| 核销二维码 | `pages/qrcode/index.vue`    | 30秒自动刷新二维码    |
+| 扫码核销   | `pages/scan/index.vue`      | 调起扫码 + 核销       |
 
 **页面特点：**
+
 - ✅ 功能逻辑完整
 - ✅ 简单占位样式（等UI设计）
 - ✅ 预留API调用接口
@@ -30,24 +31,28 @@
 **封装的API模块：**
 
 #### 商户 API (`merchantApi`)
+
 ```typescript
 - getList(params?)     // 获取商户列表
 - getDetail(id)        // 获取商户详情
 ```
 
 #### 新闻 API (`newsApi`)
+
 ```typescript
 - getList(params?)     // 获取新闻列表
 - getDetail(id)        // 获取新闻详情
 ```
 
 #### 券模板 API (`couponApi`)
+
 ```typescript
 - getList(params?)     // 获取券模板列表
 - getDetail(id)        // 获取券模板详情
 ```
 
 #### 订单 API (`orderApi`)
+
 ```typescript
 - create(data)         // 创建订单
 - getMyOrders(params?) // 我的券包
@@ -56,28 +61,31 @@
 ```
 
 #### 支付 API (`paymentApi`)
+
 ```typescript
-- create(data)         // 创建支付
+-create(data); // 创建支付
 ```
 
 #### 核销 API (`redemptionApi`)
+
 ```typescript
 - redeem(data)         // 扫码核销
 - getRecords(params?)  // 核销记录
 ```
 
 **API调用示例：**
+
 ```typescript
 import { orderApi } from '@/api/business';
 
 // 创建订单
 const order = await orderApi.create({
-  templateId: 'coupon-template-id'
+  templateId: 'coupon-template-id',
 });
 
 // 查询我的券包
 const orders = await orderApi.getMyOrders({
-  status: 'PAID'
+  status: 'PAID',
 });
 ```
 
@@ -86,6 +94,7 @@ const orders = await orderApi.getMyOrders({
 ## 📁 文件清单
 
 ### 页面文件
+
 ```
 apps/miniapp/src/pages/
 ├── index.vue                  # 首页（新闻+商户）
@@ -102,6 +111,7 @@ apps/miniapp/src/pages/
 ```
 
 ### API 封装
+
 ```
 apps/miniapp/src/api/
 ├── auth.ts                   # 认证API（已存在）
@@ -116,12 +126,14 @@ apps/miniapp/src/api/
 ### 1. 首页 (`pages/index.vue`)
 
 **功能：**
+
 - 展示新闻资讯列表
 - 展示商户推荐列表
 - 点击新闻跳转详情
 - 点击商户跳转详情
 
 **数据结构：**
+
 ```typescript
 // 新闻列表
 const newsList = ref<News[]>([]);
@@ -131,6 +143,7 @@ const merchantList = ref<Merchant[]>([]);
 ```
 
 **交互：**
+
 ```typescript
 // 点击新闻
 function handleNewsClick(item: any) {
@@ -152,17 +165,20 @@ function handleMerchantClick(item: any) {
 ### 2. 商户详情页 (`pages/merchant/detail.vue`)
 
 **功能：**
+
 - 展示商户基本信息
 - 展示该商户可用的优惠券
 - 点击优惠券跳转券详情
 
 **数据结构：**
+
 ```typescript
 const merchant = ref<Merchant | null>(null);
 const couponList = ref<CouponTemplate[]>([]);
 ```
 
 **加载逻辑：**
+
 ```typescript
 onMounted(async () => {
   const pages = getCurrentPages();
@@ -180,22 +196,24 @@ onMounted(async () => {
 ### 3. 券详情页 (`pages/coupon/detail.vue`)
 
 **功能：**
+
 - 展示券的详细信息
 - 立即购买按钮
 - 创建订单流程
 
 **核心流程：**
+
 ```typescript
 async function handleBuy() {
   try {
     // 1. 创建订单
     const order = await orderApi.create({
-      templateId: coupon.value.id
+      templateId: coupon.value.id,
     });
 
     // 2. 发起支付
     const payment = await paymentApi.create({
-      orderId: order.id
+      orderId: order.id,
     });
 
     // 3. 跳转到支付页面
@@ -211,11 +229,13 @@ async function handleBuy() {
 ### 4. 我的券包 (`pages/wallet/index.vue`)
 
 **功能：**
+
 - 按状态筛选订单（待使用/已核销/已退款）
 - 展示订单列表
 - 点击"出示二维码"跳转二维码页
 
 **Tab切换：**
+
 ```typescript
 const tabs = [
   { label: '待使用', value: 'PAID' },
@@ -231,6 +251,7 @@ watch(currentTab, async () => {
 ```
 
 **显示二维码：**
+
 ```typescript
 function showQRCode(item: any) {
   uni.navigateTo({
@@ -244,11 +265,13 @@ function showQRCode(item: any) {
 ### 5. 核销二维码页 (`pages/qrcode/index.vue`)
 
 **功能：**
+
 - 显示核销二维码
 - 30秒自动刷新
 - 展示订单信息
 
 **自动刷新逻辑：**
+
 ```typescript
 const countdown = ref(30);
 let timer: any = null;
@@ -276,6 +299,7 @@ onUnmounted(() => {
 ```
 
 **二维码生成：**
+
 ```typescript
 // TODO: 调用后端生成二维码接口
 // const code = generateRedeemCode(order.value.id);
@@ -287,12 +311,14 @@ onUnmounted(() => {
 ### 6. 扫码核销页 (`pages/scan/index.vue`)
 
 **功能：**
+
 - 调起微信扫码
 - 解析二维码内容
 - 调用核销接口
 - 显示核销结果
 
 **扫码流程：**
+
 ```typescript
 async function handleScan() {
   try {
@@ -332,11 +358,13 @@ async function redeemOrder(code: string) {
 ## 🔄 核心业务流程
 
 ### 购券流程
+
 ```
 首页 → 商户详情 → 券详情 → 创建订单 → 发起支付 → 支付成功 → 券包
 ```
 
 **涉及的页面和API：**
+
 1. **首页** - 浏览商户
 2. **商户详情** - 查看可用券
 3. **券详情** - 点击购买
@@ -348,11 +376,13 @@ async function redeemOrder(code: string) {
 ---
 
 ### 核销流程
+
 ```
 我的券包 → 出示二维码 → 商户扫码核销 → 核销成功
 ```
 
 **涉及的页面和API：**
+
 1. **我的券包** - 点击"出示二维码"
 2. **核销二维码** - 30秒自动刷新
 3. **扫码核销页** - 商户端使用
@@ -362,11 +392,13 @@ async function redeemOrder(code: string) {
 ---
 
 ### 退款流程
+
 ```
 我的券包 → 订单详情 → 申请退款 → 退款成功
 ```
 
 **涉及的页面和API：**
+
 1. **我的券包** - 查看订单
 2. **订单详情** - 申请退款（待实现）
 3. **API调用：**
@@ -377,12 +409,14 @@ async function redeemOrder(code: string) {
 ## 🎨 UI设计待定
 
 **当前状态：**
+
 - ✅ 页面结构完整
 - ✅ 功能逻辑完整
 - ⏳ UI样式使用简单占位
 - ⏳ 等待设计定稿
 
 **设计注意事项：**
+
 1. **首页** - 需要Banner轮播、新闻卡片、商户卡片设计
 2. **商户详情** - 需要商户信息展示、优惠券列表设计
 3. **券详情** - 需要券信息展示、购买按钮设计
@@ -395,6 +429,7 @@ async function redeemOrder(code: string) {
 ## 📱 测试建议
 
 ### 1. 页面跳转测试
+
 ```bash
 # 启动小程序
 pnpm --filter @opencode/miniapp dev:mp-weixin
@@ -406,6 +441,7 @@ pnpm --filter @opencode/miniapp dev:mp-weixin
 ```
 
 ### 2. API 联调测试
+
 ```typescript
 // 在页面中临时添加测试代码
 import { merchantApi } from '@/api/business';
@@ -421,6 +457,7 @@ onMounted(async () => {
 ```
 
 ### 3. 二维码功能测试
+
 ```typescript
 // 测试二维码生成和刷新
 1. 打开二维码页面
@@ -468,6 +505,7 @@ onMounted(async () => {
 当前API封装使用 RESTful 风格，但后端使用 tRPC。需要调整：
 
 **方式一：使用 tRPC Client（推荐）**
+
 ```typescript
 // 创建 tRPC 客户端
 import { createTRPCProxyClient } from '@trpc/client';
@@ -482,6 +520,7 @@ const orders = await client.order.getMyOrders.query({ status: 'PAID' });
 ```
 
 **方式二：后端提供 RESTful 端点**
+
 ```typescript
 // 后端需要创建 REST Controller
 @Controller('api')
@@ -496,6 +535,7 @@ class ApiController {
 ### 2. 认证 Token 注入
 
 确保所有 API 调用都携带 Token：
+
 ```typescript
 // utils/http.ts 中已实现
 request(option: any) {
@@ -513,6 +553,7 @@ request(option: any) {
 ### 3. 错误处理
 
 统一错误处理机制：
+
 ```typescript
 // utils/http.ts 中已实现
 fail: (err: any) => {
@@ -522,7 +563,7 @@ fail: (err: any) => {
     uni.navigateTo({ url: '/pages/login' });
   }
   reject(err);
-}
+};
 ```
 
 ---
@@ -530,6 +571,7 @@ fail: (err: any) => {
 ## 🎉 总结
 
 **完成情况：**
+
 - ✅ 6个核心页面创建完成
 - ✅ 完整的API封装
 - ✅ 核心业务流程逻辑实现
@@ -537,6 +579,7 @@ fail: (err: any) => {
 - ⏳ UI设计待定稿
 
 **页面结构：**
+
 - 首页 - 新闻 + 商户
 - 商户详情 - 信息 + 券列表
 - 券详情 - 购买入口
@@ -545,6 +588,7 @@ fail: (err: any) => {
 - 扫码核销 - 商户端功能
 
 **下一步：**
+
 1. 根据实际后端 API 调整接口调用
 2. UI 设计定稿后进行样式还原
 3. 完善错误处理和边界情况

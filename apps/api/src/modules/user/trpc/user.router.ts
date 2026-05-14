@@ -1,6 +1,6 @@
-import { router, publicProcedure, permissionProcedure } from "../../../trpc/trpc";
-import { z } from "zod";
-import { NotFoundBusinessException, ErrorCodes } from "../../../core/exceptions";
+import { router, publicProcedure, permissionProcedure } from '../../../trpc/trpc';
+import { z } from 'zod';
+import { NotFoundBusinessException, ErrorCodes } from '../../../core/exceptions';
 
 /**
  * User tRPC Router
@@ -11,23 +11,20 @@ import { NotFoundBusinessException, ErrorCodes } from "../../../core/exceptions"
 export const userRouter = router({
   // Get list of miniapp users
   getMany: publicProcedure
-    .input(z.object({
-      page: z.number().optional().default(1),
-      limit: z.number().optional().default(10),
-      skip: z.number().optional(),
-      take: z.number().optional(),
-      where: z.any().optional(),
-      orderBy: z.any().optional(),
-      include: z.any().optional(),
-      select: z.any().optional(),
-    }))
+    .input(
+      z.object({
+        page: z.number().optional().default(1),
+        limit: z.number().optional().default(10),
+        skip: z.number().optional(),
+        take: z.number().optional(),
+        where: z.any().optional(),
+        orderBy: z.any().optional(),
+        include: z.any().optional(),
+        select: z.any().optional(),
+      }),
+    )
     .query(async ({ ctx, input }) => {
-      const {
-        page = 1,
-        limit = 10,
-        where = {},
-        orderBy,
-      } = input;
+      const { page = 1, limit = 10, where = {}, orderBy } = input;
       const skip = (page - 1) * limit;
 
       // Extract custom filters from where object
@@ -41,10 +38,10 @@ export const userRouter = router({
 
       if (searchStr) {
         prismaWhere.OR = [
-          { username: { contains: searchStr, mode: "insensitive" } },
-          { email: { contains: searchStr, mode: "insensitive" } },
-          { nickname: { contains: searchStr, mode: "insensitive" } },
-          { phone: { contains: searchStr, mode: "insensitive" } },
+          { username: { contains: searchStr, mode: 'insensitive' } },
+          { email: { contains: searchStr, mode: 'insensitive' } },
+          { nickname: { contains: searchStr, mode: 'insensitive' } },
+          { phone: { contains: searchStr, mode: 'insensitive' } },
         ];
       }
 
@@ -57,7 +54,7 @@ export const userRouter = router({
           where: prismaWhere,
           skip,
           take: limit,
-          orderBy: orderBy || { createdAt: "desc" },
+          orderBy: orderBy || { createdAt: 'desc' },
           select: {
             id: true,
             username: true,
@@ -85,7 +82,7 @@ export const userRouter = router({
     }),
 
   // Get single user detail
-  getOne: permissionProcedure("user", "read")
+  getOne: permissionProcedure('user', 'read')
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
       const user = await ctx.prisma.user.findUnique({
@@ -113,23 +110,25 @@ export const userRouter = router({
       });
 
       if (!user) {
-        throw new NotFoundBusinessException("User", input.id, ErrorCodes.USER_NOT_FOUND);
+        throw new NotFoundBusinessException('User', input.id, ErrorCodes.USER_NOT_FOUND);
       }
 
       return user;
     }),
 
   // Update user (limited fields)
-  update: permissionProcedure("user", "update")
-    .input(z.object({
-      id: z.string(),
-      data: z.object({
-        nickname: z.string().optional(),
-        phone: z.string().optional(),
-        avatar: z.string().optional(),
-        isActive: z.boolean().optional(),
+  update: permissionProcedure('user', 'update')
+    .input(
+      z.object({
+        id: z.string(),
+        data: z.object({
+          nickname: z.string().optional(),
+          phone: z.string().optional(),
+          avatar: z.string().optional(),
+          isActive: z.boolean().optional(),
+        }),
       }),
-    }))
+    )
     .mutation(async ({ ctx, input }) => {
       const { id, data } = input;
 
@@ -152,7 +151,7 @@ export const userRouter = router({
     }),
 
   // Toggle user active status
-  toggleActive: permissionProcedure("user", "update")
+  toggleActive: permissionProcedure('user', 'update')
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const user = await ctx.prisma.user.findUnique({
@@ -161,7 +160,7 @@ export const userRouter = router({
       });
 
       if (!user) {
-        throw new NotFoundBusinessException("User", input.id, ErrorCodes.USER_NOT_FOUND);
+        throw new NotFoundBusinessException('User', input.id, ErrorCodes.USER_NOT_FOUND);
       }
 
       const updatedUser = await ctx.prisma.user.update({

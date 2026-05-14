@@ -1,6 +1,6 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import path from 'path'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -26,8 +26,8 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          'quill': ['quill'],
-          'antd': ['antd'],
+          quill: ['quill'],
+          antd: ['antd'],
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
         },
       },
@@ -45,4 +45,4 @@ export default defineConfig({
       },
     },
   },
-})
+});

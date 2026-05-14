@@ -7,10 +7,10 @@ export class PermissionsGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const requiredPermission = this.reflector.getAllAndOverride<{ resource: string; action: string }>(
-      PERMISSIONS_KEY,
-      [context.getHandler(), context.getClass()],
-    );
+    const requiredPermission = this.reflector.getAllAndOverride<{
+      resource: string;
+      action: string;
+    }>(PERMISSIONS_KEY, [context.getHandler(), context.getClass()]);
 
     if (!requiredPermission) {
       return true;

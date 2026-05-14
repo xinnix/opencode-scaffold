@@ -21,28 +21,28 @@ A full-stack management system scaffold for developers. Ships with RBAC, dual-id
 
 ## Feature Highlights
 
-| Feature | Description |
-|---------|-------------|
-| **End-to-end Type Safety** | tRPC `AppRouter` type flows directly to frontend — zero manual API contracts |
-| **CRUD Router Factory** | `createCrudRouter('Model', schemas)` generates 6 tRPC procedures in one line |
-| **Dual Identity Auth** | Admin (RBAC) + User (WeChat login), JWT `type` claim auto-isolation |
-| **Permission as Middleware** | `permissionProcedure('user', 'create')` declarative auth, super_admin auto-bypass |
-| **Three-tier Frontend Abstraction** | `StandardListPage` → `StandardForm` → `FieldDefinition` for declarative CRUD UI |
-| **Auto Token Refresh** | Admin + Miniapp dual 401→refresh→retry with mutex for concurrent prevention |
-| **genModule Generator** | One command generates Prisma Schema + tRPC Router + Service + Frontend pages |
-| **Business-friendly Errors** | PostgreSQL constraint violations auto-translated to user-friendly messages |
-| **WeChat Pay Integration** | JSAPI order + refund + callback verification, ready to use |
-| **Monorepo Management** | pnpm Workspace + shared Zod Schema + Prisma Client |
+| Feature                             | Description                                                                       |
+| ----------------------------------- | --------------------------------------------------------------------------------- |
+| **End-to-end Type Safety**          | tRPC `AppRouter` type flows directly to frontend — zero manual API contracts      |
+| **CRUD Router Factory**             | `createCrudRouter('Model', schemas)` generates 6 tRPC procedures in one line      |
+| **Dual Identity Auth**              | Admin (RBAC) + User (WeChat login), JWT `type` claim auto-isolation               |
+| **Permission as Middleware**        | `permissionProcedure('user', 'create')` declarative auth, super_admin auto-bypass |
+| **Three-tier Frontend Abstraction** | `StandardListPage` → `StandardForm` → `FieldDefinition` for declarative CRUD UI   |
+| **Auto Token Refresh**              | Admin + Miniapp dual 401→refresh→retry with mutex for concurrent prevention       |
+| **genModule Generator**             | One command generates Prisma Schema + tRPC Router + Service + Frontend pages      |
+| **Business-friendly Errors**        | PostgreSQL constraint violations auto-translated to user-friendly messages        |
+| **WeChat Pay Integration**          | JSAPI order + refund + callback verification, ready to use                        |
+| **Monorepo Management**             | pnpm Workspace + shared Zod Schema + Prisma Client                                |
 
 ## Tech Stack
 
-| Layer | Tech | Role |
-|-------|------|------|
-| **Backend** | NestJS + tRPC + Prisma + PostgreSQL | API + type-safe RPC + ORM |
+| Layer        | Tech                                    | Role                                   |
+| ------------ | --------------------------------------- | -------------------------------------- |
+| **Backend**  | NestJS + tRPC + Prisma + PostgreSQL     | API + type-safe RPC + ORM              |
 | **Admin UI** | React 19 + Refine + Ant Design 5 + tRPC | Admin dashboard + strongly-typed calls |
-| **Miniapp** | uni-app + Vue 3 + TypeScript | WeChat Mini Program |
-| **Shared** | Zod + `@opencode/shared` | Validation Schema + type registry |
-| **Infra** | pnpm Workspace + Docker + Nginx | Monorepo + containerized deployment |
+| **Miniapp**  | uni-app + Vue 3 + TypeScript            | WeChat Mini Program                    |
+| **Shared**   | Zod + `@opencode/shared`                | Validation Schema + type registry      |
+| **Infra**    | pnpm Workspace + Docker + Nginx         | Monorepo + containerized deployment    |
 
 **Type flow — end-to-end type safety from database to UI:**
 
@@ -134,42 +134,42 @@ pnpm dev
 
 **Verify services:**
 
-| Service | URL | Test Account |
-|---------|-----|--------------|
-| API | `http://localhost:3000` | — |
-| Swagger | `http://localhost:3000/api/docs` | — |
-| Admin | `http://localhost:5173` | `superadmin@example.com / password123` |
-| Miniapp H5 | `http://localhost:8080` | `user@example.com / password123` |
+| Service    | URL                              | Test Account                           |
+| ---------- | -------------------------------- | -------------------------------------- |
+| API        | `http://localhost:3000`          | —                                      |
+| Swagger    | `http://localhost:3000/api/docs` | —                                      |
+| Admin      | `http://localhost:5173`          | `superadmin@example.com / password123` |
+| Miniapp H5 | `http://localhost:8080`          | `user@example.com / password123`       |
 
 ## Development Commands
 
 ### CLI Commands
 
-| Command | Description |
-|---------|-------------|
-| `pnpm dev` | Start all services (API + Admin + Miniapp) |
-| `pnpm --filter @opencode/api dev` | Start backend API only |
-| `pnpm --filter admin dev` | Start admin dashboard only |
-| `pnpm --filter @opencode/miniapp dev` | Start miniapp H5 only |
-| `pnpm build` | Build entire monorepo |
-| `pnpm type-check` | TypeScript type checking |
-| `cd infra/database && npx prisma migrate dev` | Run database migration |
-| `cd infra/database && npx prisma db seed` | Seed database |
+| Command                                       | Description                                |
+| --------------------------------------------- | ------------------------------------------ |
+| `pnpm dev`                                    | Start all services (API + Admin + Miniapp) |
+| `pnpm --filter @opencode/api dev`             | Start backend API only                     |
+| `pnpm --filter admin dev`                     | Start admin dashboard only                 |
+| `pnpm --filter @opencode/miniapp dev`         | Start miniapp H5 only                      |
+| `pnpm build`                                  | Build entire monorepo                      |
+| `pnpm type-check`                             | TypeScript type checking                   |
+| `cd infra/database && npx prisma migrate dev` | Run database migration                     |
+| `cd infra/database && npx prisma db seed`     | Seed database                              |
 
 ### Claude Code Slash Commands
 
 > Use [Claude Code](https://claude.ai/code) CLI for AI-assisted development
 
-| Command | Description |
-|---------|-------------|
-| `/genModule <name>` | Interactive full-stack CRUD module generation |
-| `/init-project` | Initialize new project (rename packages, database, env vars) |
-| `/analyze` | Analyze existing modules, identify standardization opportunities |
-| `/refactor` | Refactor to scaffold standard patterns |
-| `/deleteModule <name>` | Delete module (clean up frontend, backend, and schema) |
-| `/seed-data` | Create seed data |
-| `/db-migrate` | Run migration + generate Prisma Client + seed |
-| `/sync` | Sync workspace (Prisma Generate + Build Shared) |
+| Command                | Description                                                      |
+| ---------------------- | ---------------------------------------------------------------- |
+| `/genModule <name>`    | Interactive full-stack CRUD module generation                    |
+| `/init-project`        | Initialize new project (rename packages, database, env vars)     |
+| `/analyze`             | Analyze existing modules, identify standardization opportunities |
+| `/refactor`            | Refactor to scaffold standard patterns                           |
+| `/deleteModule <name>` | Delete module (clean up frontend, backend, and schema)           |
+| `/seed-data`           | Create seed data                                                 |
+| `/db-migrate`          | Run migration + generate Prisma Client + seed                    |
+| `/sync`                | Sync workspace (Prisma Generate + Build Shared)                  |
 
 ## Core Abstractions
 
@@ -194,13 +194,17 @@ export class ProductService extends BaseService<'Product'> {
 Generate 6 standard CRUD procedures in one line:
 
 ```typescript
-export const productRouter = createCrudRouter('Product', {
-  create: CreateProductSchema,
-  update: UpdateProductSchema,
-}, {
-  protectedGetMany: true,
-  protectedCreate: true,
-});
+export const productRouter = createCrudRouter(
+  'Product',
+  {
+    create: CreateProductSchema,
+    update: UpdateProductSchema,
+  },
+  {
+    protectedGetMany: true,
+    protectedCreate: true,
+  },
+);
 // Generates: getMany, getOne, create, update, delete, deleteMany
 ```
 
@@ -226,7 +230,7 @@ create: permissionProcedure('product', 'create')
   searchFields={[{ field: 'name', placeholder: 'Search by name' }]}
   formComponent={ProductForm}
   permissions={{ create: 'product:create', update: 'product:update', delete: 'product:delete' }}
-/>
+/>;
 
 // Form: declarative field definitions
 const fields: FieldDefinition[] = [
@@ -267,46 +271,48 @@ One command generates a complete full-stack CRUD module:
 
 **Generated targets:**
 
-| Target | Path |
-|--------|------|
-| Prisma Model | `infra/database/prisma/schema.prisma` (appended) |
-| tRPC Router | `apps/api/src/modules/product/trpc/product.router.ts` |
-| NestJS Module | `apps/api/src/modules/product/module.ts` |
-| List Page | `apps/admin/src/modules/product/pages/ProductListPage.tsx` |
-| Form Component | `apps/admin/src/modules/product/components/ProductForm.tsx` |
-| App Router Registration | `apps/api/src/trpc/app.router.ts` (appended) |
-| Refine Resource | `apps/admin/src/App.tsx` (appended) |
+| Target                  | Path                                                        |
+| ----------------------- | ----------------------------------------------------------- |
+| Prisma Model            | `infra/database/prisma/schema.prisma` (appended)            |
+| tRPC Router             | `apps/api/src/modules/product/trpc/product.router.ts`       |
+| NestJS Module           | `apps/api/src/modules/product/module.ts`                    |
+| List Page               | `apps/admin/src/modules/product/pages/ProductListPage.tsx`  |
+| Form Component          | `apps/admin/src/modules/product/components/ProductForm.tsx` |
+| App Router Registration | `apps/api/src/trpc/app.router.ts` (appended)                |
+| Refine Resource         | `apps/admin/src/App.tsx` (appended)                         |
 
 **Smart field inference:**
 
-| Field pattern | Inferred UI component |
-|---------------|-----------------------|
-| `price`, `amount` | InputNumber + ¥ formatter + min:0 |
-| `email` | email validation rules |
-| `phone` | phone regex validation |
-| `avatar`, `cover` | OSSUpload image upload |
-| `parentId` | TreeSelect (auto-detect tree structure) |
+| Field pattern       | Inferred UI component                     |
+| ------------------- | ----------------------------------------- |
+| `price`, `amount`   | InputNumber + ¥ formatter + min:0         |
+| `email`             | email validation rules                    |
+| `phone`             | phone regex validation                    |
+| `avatar`, `cover`   | OSSUpload image upload                    |
+| `parentId`          | TreeSelect (auto-detect tree structure)   |
 | `*Id` (foreign key) | Select dropdown (auto-associate resource) |
-| `is*` | Switch toggle |
-| `*At` (date) | DatePicker + showTime |
+| `is*`               | Switch toggle                             |
+| `*At` (date)        | DatePicker + showTime                     |
 
 ## Coding Conventions
 
-| Convention | Example |
-|------------|---------|
-| File naming | `feature-name.service.ts` (kebab-case) |
-| TS variables | `camelCase` |
-| DB fields | `snake_case` (via `@@map`) |
-| Prisma models | `PascalCase` |
-| tRPC routes | Aligned with Prisma model name |
-| Zod schemas | `CreateXxxSchema` / `UpdateXxxSchema` |
+| Convention    | Example                                |
+| ------------- | -------------------------------------- |
+| File naming   | `feature-name.service.ts` (kebab-case) |
+| TS variables  | `camelCase`                            |
+| DB fields     | `snake_case` (via `@@map`)             |
+| Prisma models | `PascalCase`                           |
+| tRPC routes   | Aligned with Prisma model name         |
+| Zod schemas   | `CreateXxxSchema` / `UpdateXxxSchema`  |
 
 **SSOT (Single Source of Truth):**
+
 - `schema.prisma` is the single model truth source
 - `infra/shared` is the single validation truth source
 - All apps share `@opencode/shared` types
 
 **Data isolation:**
+
 - Admin users access all data
 - User users access only their own data (`where: { userId: user.id }`)
 - `createdById` / `updatedById` auto-injected from JWT context
@@ -346,33 +352,33 @@ For detailed deployment guides, see `docs/deployment-guide.md` and `docs/deploym
 
 ## Environment Variables
 
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `DATABASE_URL` | Yes | — | PostgreSQL connection string |
-| `JWT_SECRET` | Yes | — | JWT signing key (>=32 chars) |
-| `JWT_EXPIRES_IN` | No | `7d` | Access token expiration |
-| `JWT_REFRESH_EXPIRES_IN` | No | `30d` | Refresh token expiration |
-| `CORS_ORIGIN` | No | `localhost:5173` | Allowed frontend domains |
-| `PORT` | No | `3000` | API server port |
-| `WX_APP_ID` | No | — | WeChat Mini Program AppID |
-| `WX_APP_SECRET` | No | — | WeChat Mini Program AppSecret |
-| `WX_PAY_MCH_ID` | No | — | WeChat Pay merchant ID |
+| Variable                 | Required | Default          | Description                   |
+| ------------------------ | -------- | ---------------- | ----------------------------- |
+| `DATABASE_URL`           | Yes      | —                | PostgreSQL connection string  |
+| `JWT_SECRET`             | Yes      | —                | JWT signing key (>=32 chars)  |
+| `JWT_EXPIRES_IN`         | No       | `7d`             | Access token expiration       |
+| `JWT_REFRESH_EXPIRES_IN` | No       | `30d`            | Refresh token expiration      |
+| `CORS_ORIGIN`            | No       | `localhost:5173` | Allowed frontend domains      |
+| `PORT`                   | No       | `3000`           | API server port               |
+| `WX_APP_ID`              | No       | —                | WeChat Mini Program AppID     |
+| `WX_APP_SECRET`          | No       | —                | WeChat Mini Program AppSecret |
+| `WX_PAY_MCH_ID`          | No       | —                | WeChat Pay merchant ID        |
 
 See `.env.example` for the complete list.
 
 ## Built-in Modules
 
-| Module | Backend | Frontend | Description |
-|--------|---------|----------|-------------|
-| auth | auth.service + auth.router | LoginPage + SessionExpired | Dual identity auth + JWT |
-| user | user.service + user.router | UserListPage + UserDetail | Miniapp user CRUD |
-| admin | admin.service + admin.router | AdminListPage + AdminDetail | Admin CRUD + RBAC |
-| role | role.service + role.router | RoleListPage + RoleDetail | Role management + permission assignment |
-| permission | permission.service + permission.router | — | Permission registry |
-| upload | upload.service + upload.router | OSSUpload component | Multi-strategy file storage |
-| payment | payment.service + payment.router | — | WeChat Pay JSAPI + refund |
-| wechat | wechat.service | — | WeChat login + mini program API |
-| agents | agents.service + dify.service + agents.router | AgentListPage + AgentChatPage | Dify AI Agent chat (SSE streaming) |
+| Module     | Backend                                       | Frontend                      | Description                             |
+| ---------- | --------------------------------------------- | ----------------------------- | --------------------------------------- |
+| auth       | auth.service + auth.router                    | LoginPage + SessionExpired    | Dual identity auth + JWT                |
+| user       | user.service + user.router                    | UserListPage + UserDetail     | Miniapp user CRUD                       |
+| admin      | admin.service + admin.router                  | AdminListPage + AdminDetail   | Admin CRUD + RBAC                       |
+| role       | role.service + role.router                    | RoleListPage + RoleDetail     | Role management + permission assignment |
+| permission | permission.service + permission.router        | —                             | Permission registry                     |
+| upload     | upload.service + upload.router                | OSSUpload component           | Multi-strategy file storage             |
+| payment    | payment.service + payment.router              | —                             | WeChat Pay JSAPI + refund               |
+| wechat     | wechat.service                                | —                             | WeChat login + mini program API         |
+| agents     | agents.service + dify.service + agents.router | AgentListPage + AgentChatPage | Dify AI Agent chat (SSE streaming)      |
 
 ## Contributing
 

@@ -1,23 +1,23 @@
-import type { ReactNode, CSSProperties } from "react";
-import type { ButtonType } from "antd/es/button";
+import type { ReactNode, CSSProperties } from 'react';
+import type { ButtonType } from 'antd/es/button';
 
 /**
  * 字段类型
  */
 export type DetailFieldType =
-  | "text"
-  | "datetime"
-  | "date"
-  | "boolean"
-  | "number"
-  | "currency"
-  | "percent"
-  | "tag"
-  | "image"
-  | "relation"
-  | "email"
-  | "url"
-  | "custom";
+  | 'text'
+  | 'datetime'
+  | 'date'
+  | 'boolean'
+  | 'number'
+  | 'currency'
+  | 'percent'
+  | 'tag'
+  | 'image'
+  | 'relation'
+  | 'email'
+  | 'url'
+  | 'custom';
 
 /**
  * 字段配置
@@ -127,7 +127,7 @@ export interface PermissionConfig {
 /**
  * Header 类型
  */
-export type HeaderType = "simple" | "avatar" | "none";
+export type HeaderType = 'simple' | 'avatar' | 'none';
 
 /**
  * StandardDetailPage Props

@@ -1,9 +1,9 @@
 // StandardListPage 主组件
 
-import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
-import { useTable, useCreate, useUpdate, useDelete, useDeleteMany, useList } from "@refinedev/core";
-import { List } from "@refinedev/antd";
+import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useTable, useCreate, useUpdate, useDelete, useDeleteMany, useList } from '@refinedev/core';
+import { List } from '@refinedev/antd';
 import {
   Table,
   Button,
@@ -16,12 +16,15 @@ import {
   Col,
   App,
   Statistic,
-} from "antd";
-import { PlusOutlined } from "@ant-design/icons";
-import { PermissionGuard } from "../PermissionGuard";
-import { createMutationCallbacks, createBatchMutationCallbacks } from "../../utils/mutationCallbacks";
-import { SearchBar } from "./SearchBar";
-import type { StandardListPageProps, FilterFieldConfig } from "./types";
+} from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
+import { PermissionGuard } from '../PermissionGuard';
+import {
+  createMutationCallbacks,
+  createBatchMutationCallbacks,
+} from '../../utils/mutationCallbacks';
+import { SearchBar } from './SearchBar';
+import type { StandardListPageProps, FilterFieldConfig } from './types';
 
 /**
  * StandardListPage - 标准列表页面组件
@@ -34,7 +37,7 @@ import type { StandardListPageProps, FilterFieldConfig } from "./types";
  * - 创建/编辑 Modal
  */
 export function StandardListPage<T extends Record<string, any> = any>(
-  props: StandardListPageProps<T>
+  props: StandardListPageProps<T>,
 ) {
   const {
     resource,
@@ -77,69 +80,66 @@ export function StandardListPage<T extends Record<string, any> = any>(
   }, [searchValues]);
 
   // 构建 filters
-  const buildFilters = useCallback((searchState?: Record<string, string>, filterState?: Record<string, any>) => {
-    const currentSearchState = searchState || debouncedSearchValues;
-    const currentFilterState = filterState || filterValues;
-    const filters: any[] = [];
+  const buildFilters = useCallback(
+    (searchState?: Record<string, string>, filterState?: Record<string, any>) => {
+      const currentSearchState = searchState || debouncedSearchValues;
+      const currentFilterState = filterState || filterValues;
+      const filters: any[] = [];
 
-    // 搜索字段
-    searchFields.forEach(({ field }) => {
-      if (currentSearchState[field]) {
-        filters.push({
-          field,
-          operator: "contains",
-          value: currentSearchState[field],
-        });
-      }
-    });
-
-    // 筛选字段
-    filterFields.forEach(({ field, type }) => {
-      if (currentFilterState[field]) {
-        if (type === 'dateRange' && Array.isArray(currentFilterState[field])) {
+      // 搜索字段
+      searchFields.forEach(({ field }) => {
+        if (currentSearchState[field]) {
           filters.push({
             field,
-            operator: "gte",
-            value: currentFilterState[field][0],
-          });
-          filters.push({
-            field,
-            operator: "lte",
-            value: currentFilterState[field][1],
-          });
-        } else {
-          filters.push({
-            field,
-            operator: "eq",
-            value: currentFilterState[field],
+            operator: 'contains',
+            value: currentSearchState[field],
           });
         }
-      }
-    });
+      });
 
-    return filters;
-  }, [debouncedSearchValues, filterValues, searchFields, filterFields]);
+      // 筛选字段
+      filterFields.forEach(({ field, type }) => {
+        if (currentFilterState[field]) {
+          if (type === 'dateRange' && Array.isArray(currentFilterState[field])) {
+            filters.push({
+              field,
+              operator: 'gte',
+              value: currentFilterState[field][0],
+            });
+            filters.push({
+              field,
+              operator: 'lte',
+              value: currentFilterState[field][1],
+            });
+          } else {
+            filters.push({
+              field,
+              operator: 'eq',
+              value: currentFilterState[field],
+            });
+          }
+        }
+      });
+
+      return filters;
+    },
+    [debouncedSearchValues, filterValues, searchFields, filterFields],
+  );
 
   // useTable Hook
-  const {
-    tableQuery,
-    currentPage,
-    setCurrentPage,
-    pageSize,
-    setPageSize,
-    setFilters,
-  } = useTable<T>({
-    resource,
-    pagination: {
-      currentPage: 1,
-      pageSize: 10,
-      mode: "server",
-    },
-    filters: {
-      initial: buildFilters(),
-    },
-    meta,
-  });
+  const { tableQuery, currentPage, setCurrentPage, pageSize, setPageSize, setFilters } =
+    useTable<T>({
+      resource,
+      pagination: {
+        currentPage: 1,
+        pageSize: 10,
+        mode: 'server',
+      },
+      filters: {
+        initial: buildFilters(),
+      },
+      meta,
+    });
 
   // 当过滤器变化时自动触发搜索
   useEffect(() => {
@@ -175,16 +175,19 @@ export function StandardListPage<T extends Record<string, any> = any>(
   };
 
   const handleDelete = (id: string) => {
-    deleteOne(
-      { resource, id },
-      createMutationCallbacks("删除", query, undefined, message)
-    );
+    deleteOne({ resource, id }, createMutationCallbacks('删除', query, undefined, message));
   };
 
   const handleBatchDelete = () => {
     deleteMany(
       { resource, ids: selectedRowKeys },
-      createBatchMutationCallbacks("删除", selectedRowKeys.length, query, () => setSelectedRowKeys([]), message)
+      createBatchMutationCallbacks(
+        '删除',
+        selectedRowKeys.length,
+        query,
+        () => setSelectedRowKeys([]),
+        message,
+      ),
     );
   };
 
@@ -194,16 +197,16 @@ export function StandardListPage<T extends Record<string, any> = any>(
       if (editingRecord) {
         update(
           { resource, id: editingRecord.id, values },
-          createMutationCallbacks("更新", query, () => setIsModalVisible(false), message)
+          createMutationCallbacks('更新', query, () => setIsModalVisible(false), message),
         );
       } else {
         create(
           { resource, values },
-          createMutationCallbacks("创建", query, () => setIsModalVisible(false), message)
+          createMutationCallbacks('创建', query, () => setIsModalVisible(false), message),
         );
       }
     } catch (error) {
-      console.error("表单验证失败:", error);
+      console.error('表单验证失败:', error);
     }
   };
 
@@ -229,25 +232,23 @@ export function StandardListPage<T extends Record<string, any> = any>(
   };
 
   return (
-    <div style={{ maxWidth, margin: "0 auto", padding: "24px" }}>
+    <div style={{ maxWidth, margin: '0 auto', padding: '24px' }}>
       <List>
         <Card>
           {/* Header */}
-          {renderHeader ? renderHeader() : (
+          {renderHeader ? (
+            renderHeader()
+          ) : (
             <Row justify="space-between" align="middle" style={{ marginBottom: 24 }}>
               <Col>
-                <h1 style={{ margin: 0, fontSize: 24, fontWeight: "bold" }}>{title}</h1>
+                <h1 style={{ margin: 0, fontSize: 24, fontWeight: 'bold' }}>{title}</h1>
               </Col>
               <Col>
                 <Space>
                   {specialActions}
                   {!hideCreateButton && (
                     <PermissionGuard permission={permissions?.create}>
-                      <Button
-                        type="primary"
-                        icon={<PlusOutlined />}
-                        onClick={handleCreate}
-                      >
+                      <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
                         新建
                       </Button>
                     </PermissionGuard>
@@ -321,9 +322,9 @@ export function StandardListPage<T extends Record<string, any> = any>(
               ...(renderRowActions
                 ? [
                     {
-                      title: "操作",
-                      key: "actions",
-                      fixed: "right" as any,
+                      title: '操作',
+                      key: 'actions',
+                      fixed: 'right' as any,
                       width: 150,
                       render: (record: T) => renderRowActions(record),
                     },
@@ -363,7 +364,9 @@ export function StandardListPage<T extends Record<string, any> = any>(
           cancelText="取消"
           width={formWidth}
         >
-          {renderModalContent ? renderModalContent() : (
+          {renderModalContent ? (
+            renderModalContent()
+          ) : (
             <formComponent form={form} isEdit={!!editingRecord} />
           )}
         </Modal>

@@ -7,11 +7,7 @@
 
       <!-- Logo + 动画 -->
       <view class="loading-logo-wrapper">
-        <image
-          class="loading-logo"
-          src="/static/logo.png"
-          mode="aspectFit"
-        />
+        <image class="loading-logo" src="/static/logo.png" mode="aspectFit" />
         <view class="loading-pulse"></view>
       </view>
 
@@ -27,31 +23,34 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch } from 'vue';
 
 interface Props {
-  visible: boolean
-  text?: string
+  visible: boolean;
+  text?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   visible: false,
   text: '加载中...',
-})
+});
 
-const isVisible = ref(false)
+const isVisible = ref(false);
 
 // 淡入淡出动画
-watch(() => props.visible, (newVal) => {
-  if (newVal) {
-    isVisible.value = true
-  } else {
-    // 延迟消失，实现淡出效果
-    setTimeout(() => {
-      isVisible.value = false
-    }, 200)
-  }
-})
+watch(
+  () => props.visible,
+  (newVal) => {
+    if (newVal) {
+      isVisible.value = true;
+    } else {
+      // 延迟消失，实现淡出效果
+      setTimeout(() => {
+        isVisible.value = false;
+      }, 200);
+    }
+  },
+);
 </script>
 
 <style lang="scss" scoped>
@@ -139,7 +138,8 @@ watch(() => props.visible, (newVal) => {
 }
 
 @keyframes logoFloat {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {

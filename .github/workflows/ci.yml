@@ -35,9 +35,32 @@ jobs:
       - name: Type Check
         run: pnpm --filter @opencode/shared build && pnpm --filter @opencode/database generate && pnpm type-check
 
-  test:
+  lint:
     runs-on: ubuntu-latest
     needs: type-check
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Format check
+        run: pnpm format:check
+
+  test:
+    runs-on: ubuntu-latest
+    needs: [type-check, lint]
     steps:
       - uses: actions/checkout@v4
 
@@ -61,10 +84,32 @@ jobs:
       - name: Run tests
         run: pnpm test
 
+  security-audit:
+    runs-on: ubuntu-latest
+    needs: [type-check, lint, test]
+    if: github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Dependency audit
+        run: pnpm audit --audit-level moderate
+        continue-on-error: true
+
   migrate:
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
-    needs: [type-check, test]
+    needs: [type-check, lint, test]
     permissions:
       contents: read
 

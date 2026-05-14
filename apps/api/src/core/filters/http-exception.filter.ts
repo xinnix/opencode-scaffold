@@ -20,23 +20,16 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
     const isProduction = process.env.NODE_ENV === 'production';
 
-    const requestId =
-      (request.headers['x-request-id'] as string) || randomUUID();
+    const requestId = (request.headers['x-request-id'] as string) || randomUUID();
 
     const status =
-      exception instanceof HttpException
-        ? exception.getStatus()
-        : HttpStatus.INTERNAL_SERVER_ERROR;
+      exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
 
     const message =
-      exception instanceof HttpException
-        ? exception.getResponse()
-        : 'Internal server error';
+      exception instanceof HttpException ? exception.getResponse() : 'Internal server error';
 
     // Extract errorCode from BusinessException
-    const errorCode = exception instanceof BusinessException
-      ? exception.errorCode
-      : null;
+    const errorCode = exception instanceof BusinessException ? exception.errorCode : null;
 
     // Always log full error with requestId for debugging
     this.logger.error(

@@ -16,7 +16,7 @@
  * ```
  */
 
-import type { MessageInstance } from "antd/es/message/interface";
+import type { MessageInstance } from 'antd/es/message/interface';
 
 /**
  * Create standard mutation callbacks with success/error notifications
@@ -25,7 +25,7 @@ export function createMutationCallbacks(
   actionName: string,
   query?: { refetch: () => void },
   onSuccessCallback?: () => void,
-  messageApi?: MessageInstance
+  messageApi?: MessageInstance,
 ) {
   const msg = messageApi || { success: console.log, error: console.error };
 
@@ -50,7 +50,7 @@ export function createBatchMutationCallbacks(
   count: number,
   query?: { refetch: () => void },
   clearSelection?: () => void,
-  messageApi?: MessageInstance
+  messageApi?: MessageInstance,
 ) {
   const msg = messageApi || { success: console.log, error: console.error };
 

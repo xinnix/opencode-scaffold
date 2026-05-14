@@ -21,7 +21,7 @@ out/
 infra/database/generated/
 
 # IDE
-.vscode/
+# .vscode/ — checked in for workspace recommendations
 .idea/
 *.swp
 *.swo

@@ -65,6 +65,7 @@ grep -l "StandardListPage" apps/admin/src/modules/<name>/**/*.tsx || echo "NEEDS
 ### Step 1: Refactor Backend Service → BaseService
 
 **Before (Manual CRUD):**
+
 ```typescript
 @Injectable()
 export class MerchantService {
@@ -99,6 +100,7 @@ export class MerchantService {
 ```
 
 **After (BaseService):**
+
 ```typescript
 import { BaseService } from './base.service';
 
@@ -119,6 +121,7 @@ export class MerchantService extends BaseService<'Merchant'> {
 ```
 
 **Key changes:**
+
 - Extend `BaseService<'ModelName'>` instead of manual implementation
 - Constructor passes `prisma` and model name to super
 - Keep only custom business methods
@@ -127,6 +130,7 @@ export class MerchantService extends BaseService<'Merchant'> {
 ### Step 2: Refactor tRPC Router → createCrudRouter
 
 **Before (Manual Router):**
+
 ```typescript
 import { publicProcedure } from '../../trpc/trpc.helper';
 import { z } from 'zod';
@@ -152,43 +156,49 @@ export const merchantRouter = router({
 ```
 
 **After (createCrudRouter):**
+
 ```typescript
 import { createCrudRouter } from '../../../trpc/trpc.helper';
 import { MerchantSchema } from '@opencode/shared';
 
-export const merchantRouter = createCrudRouter(
-  'Merchant',
-  {
-    create: MerchantSchema.createInput,
-    update: MerchantSchema.updateInput,
-    getMany: MerchantSchema.getManyInput,
-    getOne: MerchantSchema.getOneInput,
-  }
-);
+export const merchantRouter = createCrudRouter('Merchant', {
+  create: MerchantSchema.createInput,
+  update: MerchantSchema.updateInput,
+  getMany: MerchantSchema.getManyInput,
+  getOne: MerchantSchema.getOneInput,
+});
 ```
 
 **Key changes:**
+
 - Replace entire router with one `createCrudRouter` call
 - All CRUD procedures generated automatically
 - Custom procedures can be merged in if needed
 
 **If the router has custom procedures:**
+
 ```typescript
 import { createCrudRouter, mergeRouters } from '../../../trpc/trpc.helper';
 
-const crudRouter = createCrudRouter('Merchant', { /* schemas */ });
+const crudRouter = createCrudRouter('Merchant', {
+  /* schemas */
+});
 
-export const merchantRouter = mergeRouters(crudRouter, router({
-  // Custom procedures preserved
-  getActive: publicProcedure.query(async ({ ctx }) => {
-    return ctx.prisma.merchant.findMany({ where: { status: 'ACTIVE' } });
+export const merchantRouter = mergeRouters(
+  crudRouter,
+  router({
+    // Custom procedures preserved
+    getActive: publicProcedure.query(async ({ ctx }) => {
+      return ctx.prisma.merchant.findMany({ where: { status: 'ACTIVE' } });
+    }),
   }),
-}));
+);
 ```
 
 ### Step 3: Refactor Frontend List Page → StandardListPage
 
 **Before (Manual List Page):**
+
 ```typescript
 export const MerchantListPage = () => {
   const { result, query } = useList({ resource: "merchant", ... });
@@ -217,6 +227,7 @@ export const MerchantListPage = () => {
 ```
 
 **After (StandardListPage):**
+
 ```typescript
 import { StandardListPage } from "../../shared/components/StandardListPage";
 import { StandardForm } from "../../shared/components/StandardForm";
@@ -251,6 +262,7 @@ export const MerchantListPage = () => (
 ```
 
 **Key changes:**
+
 - Replace manual Modal/Table/Form with StandardListPage
 - Define columns and fields as config
 - Pass StandardForm as formComponent
@@ -277,6 +289,7 @@ merchantSchema.createInput: z.object({
 ```
 
 Apply the FIELD_INFERENCE_RULES from genModule for:
+
 - Currency fields → `.min(0)`
 - Email fields → `.email()`
 - Phone fields → `.regex()`
@@ -304,42 +317,48 @@ After completing the refactoring, generate a report:
 ## Changes Made
 
 ### Backend Service
+
 - Before: XXX lines
 - After: XXX lines
 - Reduction: XX%
 - Custom methods preserved: [list]
 
 ### tRPC Router
+
 - Before: XXX lines
 - After: XXX lines
 - Reduction: XX%
 - Custom procedures preserved: [list]
 
 ### Frontend Pages
+
 - Before: XXX lines
 - After: XXX lines
 - Reduction: XX%
 - Custom UI preserved: [list]
 
 ### Zod Schemas
+
 - Enhanced validations: [list fields]
 - New validation rules: [count]
 
 ## Impact Summary
 
-| Metric | Before | After | Change |
-|--------|--------|-------|--------|
-| Total LOC | XXX | XXX | -XX% |
-| Type Safety | Partial | Full | +100% |
-| Maintainability | Low/Medium | High | Improved |
+| Metric          | Before     | After | Change   |
+| --------------- | ---------- | ----- | -------- |
+| Total LOC       | XXX        | XXX   | -XX%     |
+| Type Safety     | Partial    | Full  | +100%    |
+| Maintainability | Low/Medium | High  | Improved |
 
 ## Files Changed
+
 - [ ] apps/api/src/modules/<name>/services/<name>.service.ts
 - [ ] apps/api/src/modules/<name>/trpc/<name>.router.ts
 - [ ] apps/admin/src/modules/<name>/pages/<name>ListPage.tsx
 - [ ] infra/shared/src/index.ts
 
 ## Verification Steps
+
 1. Start dev server: `pnpm dev`
 2. Navigate to the module page
 3. Test CRUD operations: Create, Read, Update, Delete
@@ -350,10 +369,10 @@ After completing the refactoring, generate a report:
 
 ## Scaffold Abstractions Quick Reference
 
-| Abstraction | Import Path | One-liner |
-|-------------|-----------|-----------|
-| BaseService | `scaffold/backend/base.service.ts` | `class X extends BaseService<'Model'>` |
-| createCrudRouter | `../../../trpc/trpc.helper` | `createCrudRouter('Model', schemas)` |
-| StandardListPage | `../../shared/components/StandardListPage` | `<StandardListPage resource="x" .../>` |
-| StandardForm | `../../shared/components/StandardForm` | `<StandardForm fields={[...]} />` |
-| StandardDetailPage | `../../shared/components/StandardDetailPage` | `<StandardDetailPage .../>` |
+| Abstraction        | Import Path                                  | One-liner                              |
+| ------------------ | -------------------------------------------- | -------------------------------------- |
+| BaseService        | `scaffold/backend/base.service.ts`           | `class X extends BaseService<'Model'>` |
+| createCrudRouter   | `../../../trpc/trpc.helper`                  | `createCrudRouter('Model', schemas)`   |
+| StandardListPage   | `../../shared/components/StandardListPage`   | `<StandardListPage resource="x" .../>` |
+| StandardForm       | `../../shared/components/StandardForm`       | `<StandardForm fields={[...]} />`      |
+| StandardDetailPage | `../../shared/components/StandardDetailPage` | `<StandardDetailPage .../>`            |

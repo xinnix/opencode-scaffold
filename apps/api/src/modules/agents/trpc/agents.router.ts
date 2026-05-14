@@ -1,20 +1,9 @@
 import { z } from 'zod';
-import {
-  CreateAgentSchema,
-  UpdateAgentSchema,
-} from '@opencode/shared';
+import { CreateAgentSchema, UpdateAgentSchema } from '@opencode/shared';
 import { createCrudRouterWithCustom } from '../../../trpc/trpc.helper';
-import {
-  permissionProcedure,
-  protectedProcedure,
-  publicProcedure,
-} from '../../../trpc/trpc';
+import { permissionProcedure, protectedProcedure, publicProcedure } from '../../../trpc/trpc';
 import { DifyService } from '../services/dify.service';
-import {
-  NotFoundBusinessException,
-  ConflictException,
-  ErrorCodes,
-} from '../../../core/exceptions';
+import { NotFoundBusinessException, ConflictException, ErrorCodes } from '../../../core/exceptions';
 
 const difyService = new DifyService();
 
@@ -50,55 +39,50 @@ export const agentsRouter = createCrudRouterWithCustom(
     update: UpdateAgentSchema,
   },
   () => ({
-    getMany: publicProcedure
-      .input(agentGetManySchema)
-      .query(async ({ ctx, input }) => {
-        const page = input?.page ?? 1;
-        const pageSize = input?.limit ?? input?.pageSize ?? 10;
-        const skip = (page - 1) * pageSize;
+    getMany: publicProcedure.input(agentGetManySchema).query(async ({ ctx, input }) => {
+      const page = input?.page ?? 1;
+      const pageSize = input?.limit ?? input?.pageSize ?? 10;
+      const skip = (page - 1) * pageSize;
 
-        const where: any =
-          input?.where && typeof input.where === 'object'
-            ? { ...input.where }
-            : {};
+      const where: any = input?.where && typeof input.where === 'object' ? { ...input.where } : {};
 
-        let searchTerm = input?.search;
-        const whereSearch = where.search;
-        if (!searchTerm && whereSearch) {
-          if (typeof whereSearch === 'string') {
-            searchTerm = whereSearch;
-          } else if (typeof whereSearch?.contains === 'string') {
-            searchTerm = whereSearch.contains;
-          }
+      let searchTerm = input?.search;
+      const whereSearch = where.search;
+      if (!searchTerm && whereSearch) {
+        if (typeof whereSearch === 'string') {
+          searchTerm = whereSearch;
+        } else if (typeof whereSearch?.contains === 'string') {
+          searchTerm = whereSearch.contains;
         }
-        delete where.search;
+      }
+      delete where.search;
 
-        if (searchTerm) {
-          where.OR = [
-            { name: { contains: searchTerm, mode: 'insensitive' } },
-            { slug: { contains: searchTerm, mode: 'insensitive' } },
-            { description: { contains: searchTerm, mode: 'insensitive' } },
-          ];
-        }
+      if (searchTerm) {
+        where.OR = [
+          { name: { contains: searchTerm, mode: 'insensitive' } },
+          { slug: { contains: searchTerm, mode: 'insensitive' } },
+          { description: { contains: searchTerm, mode: 'insensitive' } },
+        ];
+      }
 
-        const [agents, total] = await Promise.all([
-          ctx.prisma.agent.findMany({
-            where,
-            skip,
-            take: pageSize,
-            orderBy: input?.orderBy || { sort: 'asc' },
-          }),
-          ctx.prisma.agent.count({ where }),
-        ]);
+      const [agents, total] = await Promise.all([
+        ctx.prisma.agent.findMany({
+          where,
+          skip,
+          take: pageSize,
+          orderBy: input?.orderBy || { sort: 'asc' },
+        }),
+        ctx.prisma.agent.count({ where }),
+      ]);
 
-        return {
-          items: maskAgentRecords(agents),
-          total,
-          page,
-          pageSize,
-          totalPages: Math.ceil(total / pageSize),
-        };
-      }),
+      return {
+        items: maskAgentRecords(agents),
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+      };
+    }),
 
     getOne: permissionProcedure('agent', 'read')
       .input(z.object({ id: z.string() }))
@@ -106,7 +90,8 @@ export const agentsRouter = createCrudRouterWithCustom(
         const agent = await ctx.prisma.agent.findUnique({
           where: { id: input.id },
         });
-        if (!agent) throw new NotFoundBusinessException('Agent', input.id, ErrorCodes.AGENT_NOT_FOUND);
+        if (!agent)
+          throw new NotFoundBusinessException('Agent', input.id, ErrorCodes.AGENT_NOT_FOUND);
         return maskAgentRecord(agent);
       }),
 
@@ -123,7 +108,8 @@ export const agentsRouter = createCrudRouterWithCustom(
         const existing = await ctx.prisma.agent.findUnique({
           where: { slug: data.slug },
         });
-        if (existing) throw new ConflictException('Agent slug already exists', ErrorCodes.AGENT_SLUG_EXISTS);
+        if (existing)
+          throw new ConflictException('Agent slug already exists', ErrorCodes.AGENT_SLUG_EXISTS);
 
         return ctx.prisma.agent.create({
           data: {
@@ -156,7 +142,8 @@ export const agentsRouter = createCrudRouterWithCustom(
           const slugConflict = await ctx.prisma.agent.findUnique({
             where: { slug: data.slug },
           });
-          if (slugConflict) throw new ConflictException('Agent slug already exists', ErrorCodes.AGENT_SLUG_EXISTS);
+          if (slugConflict)
+            throw new ConflictException('Agent slug already exists', ErrorCodes.AGENT_SLUG_EXISTS);
         }
 
         return ctx.prisma.agent.update({
@@ -198,13 +185,11 @@ export const agentsRouter = createCrudRouterWithCustom(
         const agent = await ctx.prisma.agent.findUnique({
           where: { id: input.agentId },
         });
-        if (!agent) throw new NotFoundBusinessException('Agent', input.agentId, ErrorCodes.AGENT_NOT_FOUND);
+        if (!agent)
+          throw new NotFoundBusinessException('Agent', input.agentId, ErrorCodes.AGENT_NOT_FOUND);
 
         const userType = (ctx.user as any)?.type || 'admin';
-        const difyUser =
-          userType === 'user'
-            ? `user_${ctx.user.id}`
-            : `admin_${ctx.user.id}`;
+        const difyUser = userType === 'user' ? `user_${ctx.user.id}` : `admin_${ctx.user.id}`;
 
         return difyService.getConversations({
           apiUrl: agent.difyApiUrl,
@@ -229,13 +214,11 @@ export const agentsRouter = createCrudRouterWithCustom(
         const agent = await ctx.prisma.agent.findUnique({
           where: { id: input.agentId },
         });
-        if (!agent) throw new NotFoundBusinessException('Agent', input.agentId, ErrorCodes.AGENT_NOT_FOUND);
+        if (!agent)
+          throw new NotFoundBusinessException('Agent', input.agentId, ErrorCodes.AGENT_NOT_FOUND);
 
         const userType = (ctx.user as any)?.type || 'admin';
-        const difyUser =
-          userType === 'user'
-            ? `user_${ctx.user.id}`
-            : `admin_${ctx.user.id}`;
+        const difyUser = userType === 'user' ? `user_${ctx.user.id}` : `admin_${ctx.user.id}`;
 
         return difyService.getMessages(
           agent.difyApiUrl,

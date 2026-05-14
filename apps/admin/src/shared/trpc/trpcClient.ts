@@ -1,5 +1,5 @@
-import type { AppRouter } from "../../types/api";
-import { createTRPCProxyClient, httpLink } from "@trpc/client";
+import type { AppRouter } from '../../types/api';
+import { createTRPCProxyClient, httpLink } from '@trpc/client';
 
 // Token refresh state (mutex to prevent concurrent refresh calls)
 let isRefreshing = false;
@@ -21,7 +21,7 @@ async function refreshAccessToken(): Promise<boolean> {
   isRefreshing = true;
   refreshPromise = (async () => {
     try {
-      const refreshToken = localStorage.getItem("refreshToken");
+      const refreshToken = localStorage.getItem('refreshToken');
       console.log('[tRPC] 开始刷新 token, refreshToken:', refreshToken?.substring(0, 10) + '...');
 
       if (!refreshToken) {
@@ -31,11 +31,11 @@ async function refreshAccessToken(): Promise<boolean> {
 
       // tRPC v11 HTTP call format: POST to /trpc/auth.refreshToken
       // with JSON body containing the input
-      const response = await globalThis.fetch("/trpc/auth.refreshToken", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await globalThis.fetch('/trpc/auth.refreshToken', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          refreshToken: refreshToken
+          refreshToken: refreshToken,
         }),
       });
 
@@ -56,9 +56,9 @@ async function refreshAccessToken(): Promise<boolean> {
         return false;
       }
 
-      localStorage.setItem("accessToken", resultData.accessToken);
+      localStorage.setItem('accessToken', resultData.accessToken);
       if (resultData.refreshToken) {
-        localStorage.setItem("refreshToken", resultData.refreshToken);
+        localStorage.setItem('refreshToken', resultData.refreshToken);
       }
 
       console.log('[tRPC] Token 刷新成功');
@@ -82,10 +82,10 @@ async function refreshAccessToken(): Promise<boolean> {
 function handleUnauthorized(): void {
   if (isRedirecting) return;
   isRedirecting = true;
-  localStorage.removeItem("accessToken");
-  localStorage.removeItem("refreshToken");
-  localStorage.removeItem("user");
-  window.location.href = "/unauthorized";
+  localStorage.removeItem('accessToken');
+  localStorage.removeItem('refreshToken');
+  localStorage.removeItem('user');
+  window.location.href = '/unauthorized';
 }
 
 /**
@@ -104,10 +104,10 @@ export const createTrpcClient = () => {
   return createTRPCProxyClient<AppRouter>({
     links: [
       httpLink({
-        url: import.meta.env.VITE_API_URL || "/trpc",
+        url: import.meta.env.VITE_API_URL || '/trpc',
         // Headers are fetched on every request, ensuring fresh token is used
         headers: () => {
-          const token = localStorage.getItem("accessToken");
+          const token = localStorage.getItem('accessToken');
           return {
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
           };
@@ -119,10 +119,11 @@ export const createTrpcClient = () => {
             if (response.status === 401) {
               // 🔥 如果是登录相关的请求返回 401，不要触发全局处理
               // 登录失败应该由 authProvider.login 处理，显示错误信息而不是跳转
-              const isLoginRequest = inputUrl.includes('auth.adminLogin') ||
-                                     inputUrl.includes('auth.login') ||
-                                     inputUrl.includes('auth.register') ||
-                                     inputUrl.includes('auth.wechatLogin');
+              const isLoginRequest =
+                inputUrl.includes('auth.adminLogin') ||
+                inputUrl.includes('auth.login') ||
+                inputUrl.includes('auth.register') ||
+                inputUrl.includes('auth.wechatLogin');
 
               if (isLoginRequest) {
                 console.log('[tRPC] 登录请求返回 401，不触发全局处理');
@@ -137,10 +138,10 @@ export const createTrpcClient = () => {
               if (refreshed) {
                 // Token refreshed successfully — retry original request with new token
                 console.log('[tRPC] 使用新 token 重试请求');
-                const newToken = localStorage.getItem("accessToken");
-                const headers = { ...(init?.headers as Record<string, string> || {}) };
+                const newToken = localStorage.getItem('accessToken');
+                const headers = { ...((init?.headers as Record<string, string>) || {}) };
                 if (newToken) {
-                  headers["Authorization"] = `Bearer ${newToken}`;
+                  headers['Authorization'] = `Bearer ${newToken}`;
                 }
                 return globalThis.fetch(inputUrl, { ...init, headers });
               }

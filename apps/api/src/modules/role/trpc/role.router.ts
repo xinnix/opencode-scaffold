@@ -1,9 +1,5 @@
 import { z } from 'zod';
-import {
-  CreateRoleSchema,
-  UpdateRoleSchema,
-  UpdateRolePermissionsSchema,
-} from '@opencode/shared';
+import { CreateRoleSchema, UpdateRoleSchema, UpdateRolePermissionsSchema } from '@opencode/shared';
 import { createCrudRouterWithCustom } from '../../../trpc/trpc.helper';
 import { permissionProcedure, publicProcedure } from '../../../trpc/trpc';
 import {
@@ -31,67 +27,64 @@ export const roleRouter = createCrudRouterWithCustom(
     update: UpdateRoleSchema,
   },
   () => ({
-    getMany: publicProcedure
-      .input(roleGetManySchema)
-      .query(async ({ ctx, input }) => {
-        const page = input?.page ?? 1;
-        const pageSize = input?.limit ?? input?.pageSize ?? 10;
-        const skip = (page - 1) * pageSize;
+    getMany: publicProcedure.input(roleGetManySchema).query(async ({ ctx, input }) => {
+      const page = input?.page ?? 1;
+      const pageSize = input?.limit ?? input?.pageSize ?? 10;
+      const skip = (page - 1) * pageSize;
 
-        const where: any =
-          input?.where && typeof input.where === 'object' ? { ...input.where } : {};
+      const where: any = input?.where && typeof input.where === 'object' ? { ...input.where } : {};
 
-        let searchTerm = input?.search;
-        const whereSearch = where.search;
-        if (!searchTerm && whereSearch) {
-          if (typeof whereSearch === 'string') {
-            searchTerm = whereSearch;
-          } else if (typeof whereSearch?.contains === 'string') {
-            searchTerm = whereSearch.contains;
-          }
+      let searchTerm = input?.search;
+      const whereSearch = where.search;
+      if (!searchTerm && whereSearch) {
+        if (typeof whereSearch === 'string') {
+          searchTerm = whereSearch;
+        } else if (typeof whereSearch?.contains === 'string') {
+          searchTerm = whereSearch.contains;
         }
-        delete where.search;
+      }
+      delete where.search;
 
-        if (searchTerm) {
-          where.OR = [
-            { name: { contains: searchTerm, mode: 'insensitive' } },
-            { slug: { contains: searchTerm, mode: 'insensitive' } },
-            { description: { contains: searchTerm, mode: 'insensitive' } },
-          ];
-        }
+      if (searchTerm) {
+        where.OR = [
+          { name: { contains: searchTerm, mode: 'insensitive' } },
+          { slug: { contains: searchTerm, mode: 'insensitive' } },
+          { description: { contains: searchTerm, mode: 'insensitive' } },
+        ];
+      }
 
-        const [roles, total] = await Promise.all([
-          ctx.prisma.role.findMany({
-            where,
-            skip,
-            take: pageSize,
-            orderBy: input?.orderBy || { level: 'asc' },
-            include: {
-              _count: {
-                select: {
-                  admins: true,
-                  permissions: true,
-                },
+      const [roles, total] = await Promise.all([
+        ctx.prisma.role.findMany({
+          where,
+          skip,
+          take: pageSize,
+          orderBy: input?.orderBy || { level: 'asc' },
+          include: {
+            _count: {
+              select: {
+                admins: true,
+                permissions: true,
               },
             },
-          }),
-          ctx.prisma.role.count({ where }),
-        ]);
+          },
+        }),
+        ctx.prisma.role.count({ where }),
+      ]);
 
-        return {
-          items: roles.map((role) => ({
-            ...role,
-            _count: {
-              users: role._count.admins,
-              permissions: role._count.permissions,
-            },
-          })),
-          total,
-          page,
-          pageSize,
-          totalPages: Math.ceil(total / pageSize),
-        };
-      }),
+      return {
+        items: roles.map((role) => ({
+          ...role,
+          _count: {
+            users: role._count.admins,
+            permissions: role._count.permissions,
+          },
+        })),
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+      };
+    }),
 
     getOne: permissionProcedure('role', 'read')
       .input(
@@ -181,7 +174,10 @@ export const roleRouter = createCrudRouterWithCustom(
         }
 
         if (existing.isSystem && data.level !== undefined) {
-          throw new ForbiddenBusinessException('Cannot modify level of system role', ErrorCodes.ROLE_IS_SYSTEM);
+          throw new ForbiddenBusinessException(
+            'Cannot modify level of system role',
+            ErrorCodes.ROLE_IS_SYSTEM,
+          );
         }
 
         return ctx.prisma.role.update({
@@ -209,10 +205,16 @@ export const roleRouter = createCrudRouterWithCustom(
           throw new NotFoundBusinessException('Role', input.id, ErrorCodes.ROLE_NOT_FOUND);
         }
         if (role.isSystem) {
-          throw new ForbiddenBusinessException('Cannot delete system role', ErrorCodes.ROLE_IS_SYSTEM);
+          throw new ForbiddenBusinessException(
+            'Cannot delete system role',
+            ErrorCodes.ROLE_IS_SYSTEM,
+          );
         }
         if (role.admins.length > 0) {
-          throw new ForbiddenBusinessException('Cannot delete role that is assigned to users', ErrorCodes.ROLE_HAS_ADMINS);
+          throw new ForbiddenBusinessException(
+            'Cannot delete role that is assigned to users',
+            ErrorCodes.ROLE_HAS_ADMINS,
+          );
         }
 
         await ctx.prisma.role.delete({
@@ -236,10 +238,16 @@ export const roleRouter = createCrudRouterWithCustom(
         });
 
         if (roles.some((role) => role.isSystem)) {
-          throw new ForbiddenBusinessException('Cannot delete system role', ErrorCodes.ROLE_IS_SYSTEM);
+          throw new ForbiddenBusinessException(
+            'Cannot delete system role',
+            ErrorCodes.ROLE_IS_SYSTEM,
+          );
         }
         if (roles.some((role) => role.admins.length > 0)) {
-          throw new ForbiddenBusinessException('Cannot delete role that is assigned to users', ErrorCodes.ROLE_HAS_ADMINS);
+          throw new ForbiddenBusinessException(
+            'Cannot delete role that is assigned to users',
+            ErrorCodes.ROLE_HAS_ADMINS,
+          );
         }
 
         return ctx.prisma.role.deleteMany({
@@ -327,7 +335,11 @@ export const roleRouter = createCrudRouterWithCustom(
           where: { id: { in: permissionIds } },
         });
         if (permissions.length !== permissionIds.length) {
-          throw new NotFoundBusinessException('One or more permissions not found', undefined, ErrorCodes.PERMISSION_NOT_FOUND);
+          throw new NotFoundBusinessException(
+            'One or more permissions not found',
+            undefined,
+            ErrorCodes.PERMISSION_NOT_FOUND,
+          );
         }
 
         await ctx.prisma.rolePermission.deleteMany({

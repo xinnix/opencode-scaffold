@@ -1,7 +1,7 @@
-import { Modal, Form, Input, App } from "antd";
-import { useEffect } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { getTrpcClient } from "../trpc/trpcClient";
+import { Modal, Form, Input, App } from 'antd';
+import { useEffect } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { getTrpcClient } from '../trpc/trpcClient';
 
 interface ChangePasswordModalProps {
   visible: boolean;
@@ -35,17 +35,17 @@ export const ChangePasswordModal = ({ visible, onCancel, onSuccess }: ChangePass
         newPassword: values.newPassword,
       });
 
-      message.success("密码修改成功，请重新登录");
+      message.success('密码修改成功，请重新登录');
       form.resetFields();
       onSuccess();
 
       // Auto redirect to login page after 1.5s
       setTimeout(() => {
         localStorage.clear();
-        window.location.href = "/login";
+        window.location.href = '/login';
       }, 1500);
     } catch (error: any) {
-      message.error(error.message || "密码修改失败");
+      message.error(error.message || '密码修改失败');
     }
   };
 
@@ -60,17 +60,13 @@ export const ChangePasswordModal = ({ visible, onCancel, onSuccess }: ChangePass
       confirmLoading={changePasswordMutation.isPending}
       width={500}
     >
-      <Form
-        form={form}
-        layout="vertical"
-        onFinish={handleFinish}
-      >
+      <Form form={form} layout="vertical" onFinish={handleFinish}>
         <Form.Item
           label="旧密码"
           name="oldPassword"
           rules={[
-            { required: true, message: "请输入旧密码" },
-            { min: 1, message: "旧密码不能为空" },
+            { required: true, message: '请输入旧密码' },
+            { min: 1, message: '旧密码不能为空' },
           ]}
         >
           <Input.Password placeholder="请输入当前密码" />
@@ -80,9 +76,9 @@ export const ChangePasswordModal = ({ visible, onCancel, onSuccess }: ChangePass
           label="新密码"
           name="newPassword"
           rules={[
-            { required: true, message: "请输入新密码" },
-            { min: 8, message: "新密码至少 8 个字符" },
-            { max: 100, message: "新密码最多 100 个字符" },
+            { required: true, message: '请输入新密码' },
+            { min: 8, message: '新密码至少 8 个字符' },
+            { max: 100, message: '新密码最多 100 个字符' },
           ]}
           hasFeedback
         >
@@ -95,7 +91,7 @@ export const ChangePasswordModal = ({ visible, onCancel, onSuccess }: ChangePass
           dependencies={['newPassword']}
           hasFeedback
           rules={[
-            { required: true, message: "请确认新密码" },
+            { required: true, message: '请确认新密码' },
             ({ getFieldValue }) => ({
               validator(_, value) {
                 if (!value || getFieldValue('newPassword') === value) {

@@ -1,2 +1,2 @@
-export { StandardForm } from "./index";
-export * from "./types";
+export { StandardForm } from './index';
+export * from './types';

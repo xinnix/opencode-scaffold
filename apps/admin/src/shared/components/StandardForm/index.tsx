@@ -1,10 +1,10 @@
-import { Form, Input, InputNumber, Select, Switch, Checkbox, DatePicker } from "antd";
-import { useList } from "@refinedev/core";
-import { useWatch } from "antd/es/form/Form";
-import type { StandardFormProps, FieldDefinition } from "./types";
-import { OSSUpload } from "../OSSUpload";
-import { OSSUploadMultiple } from "../OSSUploadMultiple";
-import { RichTextEditor } from "../RichTextEditor";
+import { Form, Input, InputNumber, Select, Switch, Checkbox, DatePicker } from 'antd';
+import { useList } from '@refinedev/core';
+import { useWatch } from 'antd/es/form/Form';
+import type { StandardFormProps, FieldDefinition } from './types';
+import { OSSUpload } from '../OSSUpload';
+import { OSSUploadMultiple } from '../OSSUploadMultiple';
+import { RichTextEditor } from '../RichTextEditor';
 
 /**
  * StandardForm - 标准表单组件
@@ -194,7 +194,7 @@ function renderField(field: FieldDefinition, form: any) {
     case 'dateRange':
       return (
         <DatePicker.RangePicker
-          placeholder={[field.placeholder || "开始时间", "结束时间"]}
+          placeholder={[field.placeholder || '开始时间', '结束时间']}
           showTime={field.showTime}
           format={field.format}
           style={{ width: '100%' }}

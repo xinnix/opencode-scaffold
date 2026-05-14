@@ -21,14 +21,18 @@
 **状态**: ✅ 完全符合
 
 **检查结果**:
+
 - [x] 无包含 `[` `]` `/` `:` `.` 的原始类名
 - [x] 所有特殊字符已使用自定义 SCSS 类替代
 
 **示例**:
+
 ```html
 <!-- ✅ 正确处理：使用自定义 SCSS -->
-<view class="banner-aspect"></view>  <!-- 而非 aspect-16/9 -->
-<view class="top-bar-bg"></view>     <!-- 而非 bg-surface/90 -->
+<view class="banner-aspect"></view>
+<!-- 而非 aspect-16/9 -->
+<view class="top-bar-bg"></view>
+<!-- 而非 bg-surface/90 -->
 ```
 
 **自定义 SCSS 类统计**: 20+ 个
@@ -40,21 +44,26 @@
 **状态**: ✅ 完全符合
 
 **检查结果**:
+
 - [x] 使用 `presetUni()` 自动处理 rpx 转换
 - [x] 所有数值类名正确映射
 
 **示例**:
+
 ```html
 <!-- ✅ 正确转换 -->
-<view class="w-115px"></view>  <!-- 自动识别为 115rpx -->
-<view class="px-6"></view>     <!-- 自动识别为 6rpx * 4 = 24rpx -->
+<view class="w-115px"></view>
+<!-- 自动识别为 115rpx -->
+<view class="px-6"></view>
+<!-- 自动识别为 6rpx * 4 = 24rpx -->
 ```
 
 **配置验证**:
+
 ```typescript
 presets: [
   presetUni(), // ✅ 已配置，内置 rpx 转换
-]
+];
 ```
 
 ---
@@ -64,6 +73,7 @@ presets: [
 **状态**: ✅ 完全符合
 
 **检查结果**:
+
 - [x] 无使用 `html` `body` `*` 选择器
 - [x] 所有标签已转换为小程序兼容格式
 
@@ -75,6 +85,7 @@ presets: [
 | `<img>` | `<image>` | 20+ |
 
 **示例**:
+
 ```html
 <!-- ✅ 正确转换 -->
 <view class="top-bar">
@@ -90,10 +101,12 @@ presets: [
 **状态**: ✅ 完全符合
 
 **检查结果**:
+
 - [x] 未使用属性化语法
 - [x] 所有样式使用传统 class 写法
 
 **示例**:
+
 ```html
 <!-- ✅ 传统 class 写法 -->
 <view class="border-2 border-red text-center"></view>
@@ -108,24 +121,26 @@ presets: [
 **状态**: ✅ 完全符合
 
 **检查结果**:
+
 - [x] 无字符串拼接类名
 - [x] 使用方法返回完整类名
 - [x] 无过于复杂的三元表达式
 
 **解决方案验证**:
+
 ```typescript
 // ✅ 正确：使用方法返回完整类名
 function getAreaBtnClass(area: string) {
   if (currentArea.value === area) {
-    return 'area-btn-active'
+    return 'area-btn-active';
   }
-  return 'area-btn-inactive'
+  return 'area-btn-inactive';
 }
 ```
 
 ```html
 <!-- ✅ 正确使用 -->
-<button :class="['base-class', getAreaBtnClass(area)]">
+<button :class="['base-class', getAreaBtnClass(area)]"></button>
 ```
 
 ---
@@ -135,11 +150,13 @@ function getAreaBtnClass(area: string) {
 **状态**: ✅ 完全符合
 
 **检查结果**:
+
 - [x] 无本地图片路径
 - [x] 所有图片使用网络地址
 - [x] 图标使用 Emoji
 
 **示例**:
+
 ```html
 <!-- ✅ 网络图片 -->
 <image src="https://lh3.googleusercontent.com/..." />
@@ -156,10 +173,12 @@ function getAreaBtnClass(area: string) {
 **状态**: ✅ 完全符合
 
 **检查结果**:
+
 - [x] 使用自定义 SCSS 类处理透明度
 - [x] 避免使用 `/` 语法
 
 **示例**:
+
 ```scss
 /* ✅ 自定义透明度类 */
 .top-bar-bg {
@@ -240,6 +259,7 @@ pnpm --filter @opencode/miniapp dev:mp-weixin
 ### 真机测试
 
 **测试项目**:
+
 - [ ] 页面布局正确
 - [ ] 颜色显示正常
 - [ ] 图片加载成功
@@ -257,8 +277,12 @@ pnpm --filter @opencode/miniapp dev:mp-weixin
 
 ```scss
 /* 全局样式 */
-.opacity-90 { opacity: 0.9; }
-.aspect-16-9 { aspect-ratio: 16 / 9; }
+.opacity-90 {
+  opacity: 0.9;
+}
+.aspect-16-9 {
+  aspect-ratio: 16 / 9;
+}
 ```
 
 ### 2. 使用 UnoCSS shortcuts
@@ -287,12 +311,12 @@ shortcuts: {
 
 ### 转换前后对比
 
-| 指标 | 转换前 | 转换后 | 改进 |
-|-----|--------|--------|------|
-| 特殊字符问题 | 15+ | 0 | ✅ 100% 解决 |
-| 动态类名问题 | 3 | 0 | ✅ 100% 解决 |
-| 标签兼容性 | 0% | 100% | ✅ 完全兼容 |
-| 编译错误 | 多个 | 0 | ✅ 完美编译 |
+| 指标         | 转换前 | 转换后 | 改进         |
+| ------------ | ------ | ------ | ------------ |
+| 特殊字符问题 | 15+    | 0      | ✅ 100% 解决 |
+| 动态类名问题 | 3      | 0      | ✅ 100% 解决 |
+| 标签兼容性   | 0%     | 100%   | ✅ 完全兼容  |
+| 编译错误     | 多个   | 0      | ✅ 完美编译  |
 
 ---
 

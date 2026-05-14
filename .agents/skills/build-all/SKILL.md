@@ -24,6 +24,7 @@ pnpm -C apps/admin build
 ## Build Order
 
 Packages are built in dependency order:
+
 1. **shared** - Shared types and utilities
 2. **api** - NestJS backend
 3. **admin** - React frontend

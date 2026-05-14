@@ -16,6 +16,7 @@ Synchronizes the entire monorepo by regenerating the Prisma client and rebuildin
 ## When to Use
 
 Run this command after:
+
 - Pulling changes from git
 - Modifying the Prisma schema
 - Running database migrations
