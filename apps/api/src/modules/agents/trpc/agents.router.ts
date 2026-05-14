@@ -10,6 +10,11 @@ import {
   publicProcedure,
 } from '../../../trpc/trpc';
 import { DifyService } from '../services/dify.service';
+import {
+  NotFoundBusinessException,
+  ConflictException,
+  ErrorCodes,
+} from '../../../core/exceptions';
 
 const difyService = new DifyService();
 
@@ -101,7 +106,7 @@ export const agentsRouter = createCrudRouterWithCustom(
         const agent = await ctx.prisma.agent.findUnique({
           where: { id: input.id },
         });
-        if (!agent) throw new Error('Agent not found');
+        if (!agent) throw new NotFoundBusinessException('Agent', input.id, ErrorCodes.AGENT_NOT_FOUND);
         return maskAgentRecord(agent);
       }),
 
@@ -118,7 +123,7 @@ export const agentsRouter = createCrudRouterWithCustom(
         const existing = await ctx.prisma.agent.findUnique({
           where: { slug: data.slug },
         });
-        if (existing) throw new Error('Agent slug already exists');
+        if (existing) throw new ConflictException('Agent slug already exists', ErrorCodes.AGENT_SLUG_EXISTS);
 
         return ctx.prisma.agent.create({
           data: {
@@ -145,13 +150,13 @@ export const agentsRouter = createCrudRouterWithCustom(
         const existing = await ctx.prisma.agent.findUnique({
           where: { id },
         });
-        if (!existing) throw new Error('Agent not found');
+        if (!existing) throw new NotFoundBusinessException('Agent', id, ErrorCodes.AGENT_NOT_FOUND);
 
         if (data.slug && data.slug !== existing.slug) {
           const slugConflict = await ctx.prisma.agent.findUnique({
             where: { slug: data.slug },
           });
-          if (slugConflict) throw new Error('Agent slug already exists');
+          if (slugConflict) throw new ConflictException('Agent slug already exists', ErrorCodes.AGENT_SLUG_EXISTS);
         }
 
         return ctx.prisma.agent.update({
@@ -193,7 +198,7 @@ export const agentsRouter = createCrudRouterWithCustom(
         const agent = await ctx.prisma.agent.findUnique({
           where: { id: input.agentId },
         });
-        if (!agent) throw new Error('Agent not found');
+        if (!agent) throw new NotFoundBusinessException('Agent', input.agentId, ErrorCodes.AGENT_NOT_FOUND);
 
         const userType = (ctx.user as any)?.type || 'admin';
         const difyUser =
@@ -224,7 +229,7 @@ export const agentsRouter = createCrudRouterWithCustom(
         const agent = await ctx.prisma.agent.findUnique({
           where: { id: input.agentId },
         });
-        if (!agent) throw new Error('Agent not found');
+        if (!agent) throw new NotFoundBusinessException('Agent', input.agentId, ErrorCodes.AGENT_NOT_FOUND);
 
         const userType = (ctx.user as any)?.type || 'admin';
         const difyUser =

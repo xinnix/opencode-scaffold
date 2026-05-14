@@ -1,5 +1,5 @@
 import { TRPCError } from '@trpc/server';
-import { router, publicProcedure, protectedProcedure } from '../../../trpc/trpc';
+import { router, publicProcedure, protectedProcedure, rateLimitedPublicProcedure } from '../../../trpc/trpc';
 import * as bcrypt from 'bcryptjs';
 import { randomBytes } from 'crypto';
 import { z } from 'zod';
@@ -33,7 +33,7 @@ async function calculateRefreshTokenExpiry() {
 
 export const authRouter = router({
   // Register new user (小程序用户)
-  register: publicProcedure
+  register: rateLimitedPublicProcedure
     .input(RegisterSchema)
     .mutation(async ({ ctx, input }) => {
       // Check if user exists
@@ -94,7 +94,7 @@ export const authRouter = router({
     }),
 
   // Login for miniapp users (小程序用户登录)
-  login: publicProcedure
+  login: rateLimitedPublicProcedure
     .input(LoginSchema)
     .mutation(async ({ ctx, input }) => {
       // Find user by username or email
@@ -163,7 +163,7 @@ export const authRouter = router({
     }),
 
   // WeChat login (微信登录)
-  wechatLogin: publicProcedure
+  wechatLogin: rateLimitedPublicProcedure
     .input(z.object({ code: z.string() }))
     .mutation(async ({ ctx, input }) => {
       // Get WeChat config from environment
@@ -250,7 +250,7 @@ export const authRouter = router({
     }),
 
   // Login for admin users (管理端用户登录)
-  adminLogin: publicProcedure
+  adminLogin: rateLimitedPublicProcedure
     .input(LoginSchema)
     .mutation(async ({ ctx, input }) => {
       // Find admin by username or email
@@ -353,7 +353,7 @@ export const authRouter = router({
     }),
 
   // Refresh token
-  refreshToken: publicProcedure
+  refreshToken: rateLimitedPublicProcedure
     .input(RefreshTokenSchema)
     .mutation(async ({ ctx, input }) => {
       // Try to find admin refresh token first

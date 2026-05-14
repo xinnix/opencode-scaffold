@@ -115,6 +115,65 @@ export class FileStorageService implements IFileStorage {
     const allowedTypes = ['video/mp4', 'video/mpeg', 'video/quicktime'];
     return allowedTypes.includes(mimeType);
   }
+
+  /**
+   * Validate file before upload (size + MIME type + extension consistency)
+   * @throws Error if file is invalid
+   */
+  validateFile(file: UploadedFile, category: string = 'all'): void {
+    const maxFileSize = this.config.get<number>('MAX_FILE_SIZE', 10 * 1024 * 1024);
+
+    const allowedMimeTypes: Record<string, string[]> = {
+      image: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'],
+      document: [
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      ],
+      video: ['video/mp4', 'video/mpeg', 'video/quicktime'],
+      all: [
+        'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
+        'application/pdf', 'video/mp4',
+      ],
+    };
+
+    // Check file size
+    if (file.size > maxFileSize) {
+      throw new Error(
+        `File size exceeds maximum allowed size of ${maxFileSize / 1024 / 1024}MB`,
+      );
+    }
+
+    // Check MIME type
+    const allowed = allowedMimeTypes[category] || allowedMimeTypes.all;
+    if (!allowed.includes(file.mimetype)) {
+      throw new Error(
+        `File type "${file.mimetype}" is not allowed. Allowed types: ${allowed.join(', ')}`,
+      );
+    }
+
+    // Check extension consistency
+    const ext = pathModule.extname(file.originalname).toLowerCase();
+    if (ext && !this.isExtensionConsistent(ext, file.mimetype)) {
+      throw new Error(
+        `File extension "${ext}" does not match MIME type "${file.mimetype}"`,
+      );
+    }
+  }
+
+  private isExtensionConsistent(ext: string, mimeType: string): boolean {
+    const mimeToExt: Record<string, string[]> = {
+      'image/jpeg': ['.jpg', '.jpeg'],
+      'image/png': ['.png'],
+      'image/gif': ['.gif'],
+      'image/webp': ['.webp'],
+      'image/svg+xml': ['.svg'],
+      'application/pdf': ['.pdf'],
+      'video/mp4': ['.mp4'],
+    };
+    const allowedExts = mimeToExt[mimeType];
+    return !allowedExts || allowedExts.includes(ext);
+  }
 }
 
 // ============================================

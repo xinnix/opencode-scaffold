@@ -1,5 +1,6 @@
 import { router, publicProcedure, permissionProcedure } from "../../../trpc/trpc";
 import { z } from "zod";
+import { NotFoundBusinessException, ErrorCodes } from "../../../core/exceptions";
 
 /**
  * User tRPC Router
@@ -112,7 +113,7 @@ export const userRouter = router({
       });
 
       if (!user) {
-        throw new Error("User not found");
+        throw new NotFoundBusinessException("User", input.id, ErrorCodes.USER_NOT_FOUND);
       }
 
       return user;
@@ -160,7 +161,7 @@ export const userRouter = router({
       });
 
       if (!user) {
-        throw new Error("User not found");
+        throw new NotFoundBusinessException("User", input.id, ErrorCodes.USER_NOT_FOUND);
       }
 
       const updatedUser = await ctx.prisma.user.update({

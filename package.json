@@ -16,7 +16,9 @@
     "build:api": "pnpm -C apps/api build",
     "build:admin": "pnpm -C apps/admin build",
     "build:miniapp": "pnpm -C apps/miniapp build",
-    "build:shared": "pnpm -C infra/shared build"
+    "build:shared": "pnpm -C infra/shared build",
+    "test": "pnpm -r run test",
+    "test:watch": "pnpm -r --parallel run test:watch"
   },
   "keywords": [
     "nestjs",

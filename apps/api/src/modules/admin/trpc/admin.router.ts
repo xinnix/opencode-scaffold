@@ -5,6 +5,12 @@ import {
 } from "../../../trpc/trpc";
 import { z } from "zod";
 import * as bcrypt from "bcryptjs";
+import {
+  NotFoundBusinessException,
+  ConflictException,
+  ForbiddenBusinessException,
+  ErrorCodes,
+} from "../../../core/exceptions";
 
 /**
  * Admin tRPC Router
@@ -146,7 +152,7 @@ export const adminRouter = router({
         });
 
         if (!admin) {
-          throw new Error("Admin not found");
+          throw new NotFoundBusinessException("Admin", input.id, ErrorCodes.ADMIN_NOT_FOUND);
         }
 
         return {
@@ -186,7 +192,7 @@ export const adminRouter = router({
         });
 
         if (existing) {
-          throw new Error("Username or email already exists");
+          throw new ConflictException("Username or email already exists", ErrorCodes.ADMIN_ALREADY_EXISTS);
         }
 
         // Hash password
@@ -257,7 +263,7 @@ export const adminRouter = router({
         });
 
         if (!existing) {
-          throw new Error("Admin not found");
+          throw new NotFoundBusinessException("Admin", id, ErrorCodes.ADMIN_NOT_FOUND);
         }
 
         // Check if username/email is taken by another admin
@@ -273,7 +279,7 @@ export const adminRouter = router({
           });
 
           if (duplicate) {
-            throw new Error("Username or email already exists");
+            throw new ConflictException("Username or email already exists", ErrorCodes.ADMIN_ALREADY_EXISTS);
           }
         }
 
@@ -301,7 +307,7 @@ export const adminRouter = router({
       .mutation(async ({ ctx, input }) => {
         // Prevent self-deletion
         if (input.id === (ctx as any).user?.id) {
-          throw new Error("Cannot delete yourself");
+          throw new ForbiddenBusinessException("Cannot delete yourself", ErrorCodes.ADMIN_CANNOT_DELETE_SELF);
         }
 
         // Check if admin exists
@@ -317,7 +323,7 @@ export const adminRouter = router({
         });
 
         if (!admin) {
-          throw new Error("Admin not found");
+          throw new NotFoundBusinessException("Admin", input.id, ErrorCodes.ADMIN_NOT_FOUND);
         }
 
         // Check if admin is the last super admin
@@ -336,7 +342,7 @@ export const adminRouter = router({
           });
 
           if (superAdminCount <= 1) {
-            throw new Error("Cannot delete the last super admin");
+            throw new ForbiddenBusinessException("Cannot delete the last super admin", ErrorCodes.ADMIN_LAST_SUPER_ADMIN);
           }
         }
 
@@ -371,7 +377,7 @@ export const adminRouter = router({
         const filteredIds = ids.filter((id) => id !== (ctx as any).user?.id);
 
         if (filteredIds.length === 0) {
-          throw new Error("Cannot delete yourself");
+          throw new ForbiddenBusinessException("Cannot delete yourself", ErrorCodes.ADMIN_CANNOT_DELETE_SELF);
         }
 
         // Check for last super admin
@@ -398,7 +404,7 @@ export const adminRouter = router({
           });
 
           if (totalSuperAdmins <= superAdminAdmins.length) {
-            throw new Error("Cannot delete all super admins");
+            throw new ForbiddenBusinessException("Cannot delete all super admins", ErrorCodes.ADMIN_LAST_SUPER_ADMIN);
           }
         }
 
@@ -433,7 +439,7 @@ export const adminRouter = router({
       .mutation(async ({ ctx, input }) => {
         // Prevent self-deactivation
         if (input.id === (ctx as any).user?.id) {
-          throw new Error("Cannot deactivate yourself");
+          throw new ForbiddenBusinessException("Cannot deactivate yourself", ErrorCodes.ADMIN_CANNOT_DEACTIVATE_SELF);
         }
 
         const admin = await ctx.prisma.admin.findUnique({
@@ -442,7 +448,7 @@ export const adminRouter = router({
         });
 
         if (!admin) {
-          throw new Error("Admin not found");
+          throw new NotFoundBusinessException("Admin", input.id, ErrorCodes.ADMIN_NOT_FOUND);
         }
 
         const updatedAdmin = await ctx.prisma.admin.update({
@@ -495,7 +501,7 @@ export const adminRouter = router({
         });
 
         if (!role) {
-          throw new Error("Role not found");
+          throw new NotFoundBusinessException("Role", input.roleId, ErrorCodes.ROLE_NOT_FOUND);
         }
 
         // Check if admin already has this role
@@ -537,7 +543,7 @@ export const adminRouter = router({
           });
 
           if (role && role.level <= 10) {
-            throw new Error("Cannot remove your own admin role");
+            throw new ForbiddenBusinessException("Cannot remove your own admin role", ErrorCodes.ADMIN_CANNOT_DEACTIVATE_SELF);
           }
         }
 
@@ -552,7 +558,7 @@ export const adminRouter = router({
           });
 
           if (remainingRoles === 0) {
-            throw new Error("Cannot remove your last admin role");
+            throw new ForbiddenBusinessException("Cannot remove your last admin role", ErrorCodes.ADMIN_CANNOT_DEACTIVATE_SELF);
           }
         }
 

@@ -690,6 +690,78 @@ export const ${camelName}Router = createCrudRouter(
 `;
 }
 
+function generateRouterSpec(moduleName: string): string {
+  const pascalName = toPascalCase(moduleName);
+  const camelName = toCamelCase(moduleName);
+
+  return `import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { createPrismaMock } from '../../../../test/prisma-mock';
+import { ${camelName}Router } from './${camelName}.router';
+
+function createTestCaller(user: any = null) {
+  const prisma = createPrismaMock(['${camelName}']);
+  const ctx = {
+    prisma,
+    fileStorage: { upload: vi.fn(), delete: vi.fn(), getSignedUrl: vi.fn(), getUploadCredentials: vi.fn() },
+    app: null,
+    req: { headers: {}, socket: { remoteAddress: '127.0.0.1' } },
+    res: {},
+    user,
+  };
+  return { caller: ${camelName}Router.createCaller(ctx), prisma };
+}
+
+describe('${pascalName}Router', () => {
+  let caller: any;
+  let prisma: any;
+
+  describe('getMany', () => {
+    it('returns paginated items', async () => {
+      const items = [{ id: '1', name: 'Test' }];
+      const result = createTestCaller({ id: 'user-1', type: 'admin' });
+      caller = result.caller;
+      prisma = result.prisma;
+
+      prisma.${camelName}.findMany.mockResolvedValue(items);
+      prisma.${camelName}.count.mockResolvedValue(1);
+
+      const res = await caller.getMany({ page: 1, limit: 10 });
+      expect(res.items).toEqual(items);
+      expect(res.total).toBe(1);
+    });
+  });
+
+  describe('getOne', () => {
+    it('returns a record by ID', async () => {
+      const record = { id: '1', name: 'Test' };
+      const result = createTestCaller({ id: 'user-1', type: 'admin' });
+      caller = result.caller;
+      prisma = result.prisma;
+
+      prisma.${camelName}.findUnique.mockResolvedValue(record);
+
+      const res = await caller.getOne({ id: '1' });
+      expect(res).toEqual(record);
+    });
+  });
+
+  describe('create', () => {
+    it('creates a record', async () => {
+      const created = { id: '1', name: 'New' };
+      const result = createTestCaller({ id: 'user-1', type: 'admin' });
+      caller = result.caller;
+      prisma = result.prisma;
+
+      prisma.${camelName}.create.mockResolvedValue(created);
+
+      const res = await caller.create({ data: { name: 'New' } });
+      expect(res).toEqual(created);
+    });
+  });
+});
+`;
+}
+
 function generateFrontendListPage(
   moduleName: string,
   fields: Field[],
@@ -1388,6 +1460,12 @@ export async function generateModule(options: GenerateOptions): Promise<void> {
   const trpcRouter = generateTRPCRouter(moduleName);
   const routerPath = getFilePath(`apps/api/src/modules/${moduleName}/trpc/${camelName}.router.ts`);
   createFile(routerPath, trpcRouter);
+
+  // Step 6.5: Generate Router Test
+  console.log('\x1b[32m%s\x1b[0m', '✓ Generating router test...');
+  const routerSpec = generateRouterSpec(moduleName);
+  const specPath = getFilePath(`apps/api/src/modules/${moduleName}/trpc/${camelName}.router.spec.ts`);
+  createFile(specPath, routerSpec);
 
   // Step 7: Generate Frontend List Page (with smart UI)
   console.log('\x1b[32m%s\x1b[0m', `✓ Generating frontend list page (${uiPattern.pattern} pattern)...`);

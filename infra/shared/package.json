@@ -12,7 +12,9 @@
   },
   "scripts": {
     "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:cov": "vitest run --coverage"
   },
   "keywords": [],
   "author": "",
@@ -25,6 +27,8 @@
     "@trpc/server": "^11.0.0"
   },
   "devDependencies": {
-    "typescript": "^5.9.3"
+    "@vitest/coverage-v8": "^4.1.6",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.6"
   }
 }

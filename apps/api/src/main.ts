@@ -19,19 +19,53 @@ import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { ValidationPipe } from "@nestjs/common";
 import express from "express";
 import { json } from "express";
+import helmet from "helmet";
+import { Logger } from "nestjs-pino";
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  const port = process.env.PORT || 3000;
-  const corsOrigin = process.env.CORS_ORIGIN || "*";
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
 
+  // Switch to pino logger
+  const logger = app.get(Logger);
+  app.useLogger(logger);
+
+  const port = process.env.PORT || 3000;
+  const isProduction = process.env.NODE_ENV === 'production';
+
+  // Security headers (Helmet)
+  app.use(helmet({
+    contentSecurityPolicy: isProduction ? {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", "data:", "https:"],
+        connectSrc: ["'self'"],
+        fontSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        upgradeInsecureRequests: [],
+      },
+    } : false,
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  }));
+
+  // CORS with production validation
+  const corsOrigin = process.env.CORS_ORIGIN || "*";
+  if (isProduction && corsOrigin === "*") {
+    logger.warn('CORS_ORIGIN is "*" in production. This is insecure.');
+  }
   app.enableCors({
-    origin: corsOrigin === "*" ? "*" : corsOrigin.split(","),
+    origin: corsOrigin === "*" ? true : corsOrigin.split(","),
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Request-ID"],
   });
 
-  // 捕获 raw body 用于微信支付/退款回调验签
+  // Body size limit + raw body capture for WeChat payment callbacks
   app.use(
     json({
+      limit: "10mb",
       verify: (req: any, _res, buf) => {
         if (req.url?.includes("/payments/wechat/callback") ||
             req.url?.includes("/payments/wechat/refund-callback")) {
@@ -74,9 +108,6 @@ async function bootstrap() {
     trpcExpress.createExpressMiddleware({
       router: appRouter,
       createContext: (opts) => createContext(opts),
-      onError({ error, path }) {
-        console.error(`tRPC Error on path '${path}':`, error);
-      },
     })
   );
 
@@ -95,8 +126,9 @@ async function bootstrap() {
   SwaggerModule.setup("api/docs", app, document);
 
   await app.listen(port);
-  console.log(`🚀 后端已启动: http://localhost:${port}/trpc`);
-  console.log(`📚 API 文档: http://localhost:${port}/api/docs`);
-  console.log(`🔌 REST API: http://localhost:${port}/api`);
+  logger.log(`Backend started: http://localhost:${port}/trpc`);
+  logger.log(`API docs: http://localhost:${port}/api/docs`);
+  logger.log(`REST API: http://localhost:${port}/api`);
+  logger.log(`Health: http://localhost:${port}/api/health`);
 }
 bootstrap();

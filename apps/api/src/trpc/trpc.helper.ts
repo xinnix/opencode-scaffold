@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { router, publicProcedure, protectedProcedure } from "./trpc";
+import { SearchSchema, FilterSchema, FilterCondition } from "./search-filter.types";
+import { buildWhereClause } from "./search-filter.builder";
 
 // Re-export protectedProcedure for use in routers
 export { protectedProcedure };
@@ -32,6 +34,10 @@ export interface CrudRouterOptions {
   protectedDelete?: boolean;
   /** Require authentication for deleteMany */
   protectedDeleteMany?: boolean;
+  /** Fields to search when `search.keyword` is provided in getMany */
+  searchFields?: string[];
+  /** Fields that are allowed in filter conditions (whitelist for security) */
+  filterableFields?: string[];
 }
 
 /**
@@ -46,6 +52,12 @@ const defaultGetManySchema = z.object({
   orderBy: z.any().optional(),
   include: z.any().optional(),
   select: z.any().optional(),
+});
+
+// Extended getMany schema with search and filter support
+const searchFilterGetManySchema = defaultGetManySchema.extend({
+  search: SearchSchema.optional(),
+  filter: FilterSchema,
 });
 
 const defaultGetOneSchema = z.object({
@@ -84,6 +96,15 @@ const defaultDeleteManySchema = z.object({
  *   create: TodoSchema.createInput,
  *   update: TodoSchema.updateInput,
  * });
+ *
+ * // With search and filter support
+ * export const productRouter = createCrudRouter('Product', {
+ *   create: ProductSchema.createInput,
+ *   update: ProductSchema.updateInput,
+ * }, {
+ *   searchFields: ['name', 'description'],
+ *   filterableFields: ['isActive', 'categoryId', 'price'],
+ * });
  * ```
  */
 export const createCrudRouter = <TModelName extends string>(
@@ -114,6 +135,8 @@ export const createCrudRouter = <TModelName extends string>(
     protectedDelete = false,
     protectedDeleteMany = false,
   } = options;
+
+  const hasSearchFilter = !!(options.searchFields?.length || options.filterableFields?.length);
 
   const procedures: Record<string, any> = {};
 
@@ -148,13 +171,15 @@ export const createCrudRouter = <TModelName extends string>(
     return result;
   };
 
-  // getMany - List records with pagination
+  // getMany - List records with pagination, search, and filter
   if (includeGetMany) {
     const procedure = protectedGetMany ? protectedProcedure : publicProcedure;
+    const getManySchema = hasSearchFilter ? searchFilterGetManySchema : defaultGetManySchema;
+
     procedures.getMany = procedure
-      .input(schemas.getMany || defaultGetManySchema)
+      .input(schemas.getMany || getManySchema)
       .query(async ({ ctx, input }) => {
-        const parsedInput = (schemas.getMany || defaultGetManySchema).safeParse(
+        const parsedInput = (schemas.getMany || getManySchema).safeParse(
           input,
         );
         if (!parsedInput.success) {
@@ -163,18 +188,38 @@ export const createCrudRouter = <TModelName extends string>(
         const data = parsedInput.data as any;
 
         const model = (ctx.prisma as any)[modelName.charAt(0).toLowerCase() + modelName.slice(1)];
+
+        // Build where clause with search + filter support
+        let where = data.where;
+        if (hasSearchFilter) {
+          // Filter by whitelist if filterableFields is configured
+          let filters: FilterCondition[] | undefined = data.filter;
+          if (options.filterableFields?.length && filters) {
+            filters = filters.filter((f: FilterCondition) =>
+              options.filterableFields!.includes(f.field),
+            );
+          }
+
+          where = buildWhereClause({
+            existingWhere: data.where,
+            searchKeyword: data.search?.keyword,
+            searchFields: data.search?.fields ?? options.searchFields,
+            filters,
+          });
+        }
+
         const [items, total] = await Promise.all([
           model.findMany({
             skip:
               data.skip ??
               (data.page ? (data.page - 1) * (data.limit || 10) : 0),
             take: data.take ?? data.limit,
-            where: data.where,
+            where,
             orderBy: data.orderBy ?? { id: 'desc' },
             include: data.include,
             select: data.select,
           }),
-          model.count({ where: data.where }),
+          model.count({ where }),
         ]);
 
         return {

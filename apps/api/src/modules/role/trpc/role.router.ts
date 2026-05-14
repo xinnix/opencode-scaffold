@@ -6,6 +6,12 @@ import {
 } from '@opencode/shared';
 import { createCrudRouterWithCustom } from '../../../trpc/trpc.helper';
 import { permissionProcedure, publicProcedure } from '../../../trpc/trpc';
+import {
+  NotFoundBusinessException,
+  ConflictException,
+  ForbiddenBusinessException,
+  ErrorCodes,
+} from '../../../core/exceptions';
 
 const roleGetManySchema = z
   .object({
@@ -112,7 +118,7 @@ export const roleRouter = createCrudRouterWithCustom(
         });
 
         if (!role) {
-          throw new Error('Role not found');
+          throw new NotFoundBusinessException('Role', input.id, ErrorCodes.ROLE_NOT_FOUND);
         }
 
         return {
@@ -140,7 +146,7 @@ export const roleRouter = createCrudRouterWithCustom(
           where: { slug: data.slug },
         });
         if (existing) {
-          throw new Error('Role slug already exists');
+          throw new ConflictException('Role slug already exists', ErrorCodes.ROLE_SLUG_EXISTS);
         }
 
         return ctx.prisma.role.create({
@@ -171,11 +177,11 @@ export const roleRouter = createCrudRouterWithCustom(
           where: { id },
         });
         if (!existing) {
-          throw new Error('Role not found');
+          throw new NotFoundBusinessException('Role', id, ErrorCodes.ROLE_NOT_FOUND);
         }
 
         if (existing.isSystem && data.level !== undefined) {
-          throw new Error('Cannot modify level of system role');
+          throw new ForbiddenBusinessException('Cannot modify level of system role', ErrorCodes.ROLE_IS_SYSTEM);
         }
 
         return ctx.prisma.role.update({
@@ -200,13 +206,13 @@ export const roleRouter = createCrudRouterWithCustom(
         });
 
         if (!role) {
-          throw new Error('Role not found');
+          throw new NotFoundBusinessException('Role', input.id, ErrorCodes.ROLE_NOT_FOUND);
         }
         if (role.isSystem) {
-          throw new Error('Cannot delete system role');
+          throw new ForbiddenBusinessException('Cannot delete system role', ErrorCodes.ROLE_IS_SYSTEM);
         }
         if (role.admins.length > 0) {
-          throw new Error('Cannot delete role that is assigned to users');
+          throw new ForbiddenBusinessException('Cannot delete role that is assigned to users', ErrorCodes.ROLE_HAS_ADMINS);
         }
 
         await ctx.prisma.role.delete({
@@ -230,10 +236,10 @@ export const roleRouter = createCrudRouterWithCustom(
         });
 
         if (roles.some((role) => role.isSystem)) {
-          throw new Error('Cannot delete system role');
+          throw new ForbiddenBusinessException('Cannot delete system role', ErrorCodes.ROLE_IS_SYSTEM);
         }
         if (roles.some((role) => role.admins.length > 0)) {
-          throw new Error('Cannot delete role that is assigned to users');
+          throw new ForbiddenBusinessException('Cannot delete role that is assigned to users', ErrorCodes.ROLE_HAS_ADMINS);
         }
 
         return ctx.prisma.role.deleteMany({
@@ -314,14 +320,14 @@ export const roleRouter = createCrudRouterWithCustom(
           where: { id: roleId },
         });
         if (!role) {
-          throw new Error('Role not found');
+          throw new NotFoundBusinessException('Role', roleId, ErrorCodes.ROLE_NOT_FOUND);
         }
 
         const permissions = await ctx.prisma.permission.findMany({
           where: { id: { in: permissionIds } },
         });
         if (permissions.length !== permissionIds.length) {
-          throw new Error('One or more permissions not found');
+          throw new NotFoundBusinessException('One or more permissions not found', undefined, ErrorCodes.PERMISSION_NOT_FOUND);
         }
 
         await ctx.prisma.rolePermission.deleteMany({
