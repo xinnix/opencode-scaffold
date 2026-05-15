@@ -52,7 +52,10 @@
     "PostToolUse": [
       {
         "matcher": "Edit|Write",
-        "hooks": [{ "type": "command", "command": "sh ./.claude/hooks/after-edit.sh" }]
+        "hooks": [
+          { "type": "command", "command": "sh ./.claude/hooks/after-edit.sh" },
+          { "type": "command", "command": "sh ./.claude/hooks/schema-change.sh" }
+        ]
       }
     ]
   }
