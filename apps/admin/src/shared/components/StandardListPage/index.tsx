@@ -197,12 +197,26 @@ export function StandardListPage<T extends Record<string, any> = any>(
       if (editingRecord) {
         update(
           { resource, id: editingRecord.id, values },
-          createMutationCallbacks('更新', query, () => setIsModalVisible(false), message),
+          createMutationCallbacks(
+            '更新',
+            query,
+            () => {
+              setIsModalVisible(false);
+            },
+            message,
+          ),
         );
       } else {
         create(
           { resource, values },
-          createMutationCallbacks('创建', query, () => setIsModalVisible(false), message),
+          createMutationCallbacks(
+            '创建',
+            query,
+            () => {
+              setIsModalVisible(false);
+            },
+            message,
+          ),
         );
       }
     } catch (error) {
@@ -363,6 +377,7 @@ export function StandardListPage<T extends Record<string, any> = any>(
           okText="确定"
           cancelText="取消"
           width={formWidth}
+          destroyOnClose
         >
           {renderModalContent ? (
             renderModalContent()
