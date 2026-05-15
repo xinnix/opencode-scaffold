@@ -6,10 +6,6 @@ import { PrismaModule } from './prisma/prisma.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_INTERCEPTOR, APP_GUARD } from '@nestjs/core';
 
-// 基础设施
-import { LoggingModule } from './core/logging/logging.module';
-import { HealthModule } from './core/health/health.module';
-
 // 基础模块
 import { AuthModule } from './modules/auth/module';
 import { UserModule } from './modules/user/module';
@@ -25,7 +21,6 @@ import { FileStorageService } from './shared/services/file-storage.service';
 
 @Module({
   imports: [
-    LoggingModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['../.env'],
@@ -38,8 +33,6 @@ import { FileStorageService } from './shared/services/file-storage.service';
     ]),
     // 数据库模块（全局，必须在最前）
     PrismaModule,
-    // 健康检查
-    HealthModule,
     // 基础模块
     AuthModule,
     UserModule,

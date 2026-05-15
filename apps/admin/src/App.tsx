@@ -13,7 +13,6 @@ import { UserListPage, UserDetailPage } from './modules/user';
 import { RoleListPage, RoleDetailPage } from './modules/role';
 import { AgentListPage, AgentChatPage } from './modules/agents';
 import { useMessageInitializer } from './shared/hooks/useMessageInitializer';
-
 // Create QueryClient outside component to prevent re-creation
 const queryClient = new QueryClient({
   defaultOptions: {

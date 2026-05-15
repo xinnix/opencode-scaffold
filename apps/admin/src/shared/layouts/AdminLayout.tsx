@@ -12,7 +12,6 @@ import {
   RobotOutlined,
 } from '@ant-design/icons';
 import { useState, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useAuth } from '../auth';
 import { ProfileModal } from '../components/ProfileModal';
 import { ChangePasswordModal } from '../components/ChangePasswordModal';
@@ -28,26 +27,25 @@ const iconMap: Record<string, React.ReactNode> = {
   UserOutlined: <UserOutlined />,
 };
 
-// 菜单配置定义（label 使用 i18n key，在组件内解析）
 // prettier-ignore
-const menuConfigDef = [
+const menuConfig = [
   {
     key: "ai",
-    labelKey: "layout.ai",
+    label: "AI 助手",
     icon: "RobotOutlined",
     permission: null,
     children: [
-      { key: "/agents", labelKey: "layout.agentManage", icon: "RobotOutlined", permission: "menu:agents" },
+      { key: "/agents", label: "Agent 管理", icon: "RobotOutlined", permission: "menu:agents" },
     ],
   },
   {
     key: "system",
-    labelKey: "layout.system",
+    label: "系统管理",
     icon: "SettingOutlined",
     permission: null,
     children: [
-      { key: "/admins", labelKey: "layout.adminManage", icon: "SafetyCertificateOutlined", permission: "menu:admins" },
-      { key: "/roles", labelKey: "layout.roleManage", icon: "SafetyCertificateOutlined", permission: "menu:roles" },
+      { key: "/admins", label: "管理员管理", icon: "SafetyCertificateOutlined", permission: "menu:admins" },
+      { key: "/roles", label: "角色管理", icon: "SafetyCertificateOutlined", permission: "menu:roles" },
     ],
   },
 ];
@@ -56,23 +54,9 @@ export function AdminLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
-  const { t } = useTranslation();
   const [collapsed, setCollapsed] = useState(false);
   const [profileModalVisible, setProfileModalVisible] = useState(false);
   const [passwordModalVisible, setPasswordModalVisible] = useState(false);
-
-  const menuConfig = useMemo(
-    () =>
-      menuConfigDef.map((group) => ({
-        ...group,
-        label: t(group.labelKey),
-        children: group.children.map((item) => ({
-          ...item,
-          label: t(item.labelKey),
-        })),
-      })),
-    [t],
-  );
 
   const allMenuItems = menuConfig.map((group) => ({
     key: group.key,
@@ -108,27 +92,27 @@ export function AdminLayout() {
 
   const menuItems = useMemo(
     () => filterMenuByPermission(allMenuItems),
-    [user?.permissions, user?.roles, menuConfig],
+    [user?.permissions, user?.roles],
   );
 
   const userMenuItems = [
     {
       key: 'profile',
       icon: <EditOutlined />,
-      label: t('layout.profile'),
+      label: '个人信息',
       onClick: () => setProfileModalVisible(true),
     },
     {
       key: 'password',
       icon: <LockOutlined />,
-      label: t('layout.changePassword'),
+      label: '修改密码',
       onClick: () => setPasswordModalVisible(true),
     },
     { type: 'divider' as const },
     {
       key: 'logout',
       icon: <LogoutOutlined />,
-      label: t('layout.logout'),
+      label: '退出登录',
       onClick: async () => {
         try {
           await logout();
@@ -215,7 +199,7 @@ export function AdminLayout() {
             <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
               <div style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
                 <Avatar size="small" icon={<UserOutlined />} src={user?.avatar} />
-                <span style={{ fontSize: 14 }}>{user?.username || t('layout.user')}</span>
+                <span style={{ fontSize: 14 }}>{user?.username || '用户'}</span>
               </div>
             </Dropdown>
           </div>

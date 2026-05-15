@@ -69,8 +69,10 @@ export function resetPrismaMock(prisma: any) {
   }
 }
 
-export function createCaller(router: any, ctxOverrides: Record<string, any> = {}) {
-  const prisma = createPrismaMock(ctxOverrides._extraModels || []);
+export function createCaller(router: any, ctxOverrides: Record<string, any> = {}): any {
+  const extraModels = (ctxOverrides as any)._extraModels || [];
+  const prisma = createPrismaMock(extraModels);
+  const { _extraModels, ...restOverrides } = ctxOverrides as any;
   const ctx = {
     prisma,
     fileStorage: {
@@ -85,10 +87,8 @@ export function createCaller(router: any, ctxOverrides: Record<string, any> = {}
     req: null,
     res: null,
     user: null,
-    ...ctxOverrides,
+    ...restOverrides,
   };
-
-  delete ctx._extraModels;
 
   return {
     caller: router.createCaller(ctx),

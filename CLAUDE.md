@@ -153,3 +153,22 @@ docker exec -i postgres psql -U xinnix -d couponHub < infra/database/prisma/seed
 - `StandardForm` — 声明式表单组件（`apps/admin/src/shared/components/StandardForm/`）
 - `FileStorageService` — 多策略文件存储（`apps/api/src/shared/services/file-storage.service.ts`）
 - `menuConfig` — 参数化菜单配置（`apps/admin/src/shared/layouts/AdminLayout.tsx`）
+
+## Module Registry
+
+| Module     | Prisma Model | tRPC Router      | REST Controller   | Admin Page    | Miniapp API |
+| ---------- | ------------ | ---------------- | ----------------- | ------------- | ----------- |
+| admin      | Admin        | adminRouter      | -                 | AdminListPage | -           |
+| user       | User         | userRouter       | UserController    | UserListPage  | authApi     |
+| role       | Role         | roleRouter       | -                 | RoleListPage  | -           |
+| agents     | Agent        | agentsRouter     | AgentsController  | AgentListPage | agentsApi   |
+| auth       | -            | authRouter       | AuthController    | LoginPage     | authApi     |
+| upload     | -            | uploadRouter     | UploadController  | -             | uploadApi   |
+| payment    | -            | paymentRouter    | PaymentController | -             | -           |
+| permission | Permission   | permissionRouter | -                 | -             | -           |
+
+## Known Issues
+
+- `types/api.ts` uses `type AppRouter = any` instead of importing the real type (tRPC monorepo type resolution issue)
+- No Prisma enums in schema — all enum-like fields are `String` with comments
+- StandardListPage and generated list pages have duplicated mutation callback patterns

@@ -9,13 +9,11 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { JwtAuthGuard } from '../../../core/guards/jwt.guard';
 import { AgentsService } from '../services/agents.service';
 import { DifyService } from '../services/dify.service';
 
-@ApiTags('agents')
 @Controller('agents')
 export class AgentsController {
   private readonly logger = new Logger(AgentsController.name);
@@ -27,7 +25,6 @@ export class AgentsController {
 
   @Post(':id/chat')
   @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: 'Agent 对话（SSE 流式，Admin 端）' })
   async chat(
     @Param('id') id: string,
     @Body() body: { query: string; conversationId?: string; inputs?: Record<string, any> },
@@ -67,7 +64,6 @@ export class AgentsController {
 
   @Post(':id/user-chat')
   @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: 'Agent 对话（SSE 流式，小程序端）' })
   async userChat(
     @Param('id') id: string,
     @Body() body: { query: string; conversationId?: string; inputs?: Record<string, any> },
@@ -112,7 +108,6 @@ export class AgentsController {
 
   @Post(':id/stop')
   @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: '停止 Agent 生成' })
   async stop(@Param('id') id: string, @Body() body: { taskId: string }, @Req() req: Request) {
     const agent = await this.agentsService.findOneWithKey(id);
     if (!agent) throw new NotFoundException('Agent not found');

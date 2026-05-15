@@ -1,7 +1,7 @@
 # 脚手架完善路线图 — 以 Claude Code 开发为中心
 
 > 生成时间：2026-05-13
-> 状态：Phase 1-5 已完成，Phase 6 待实施
+> 状态：Phase 1-6 已完成，已精简（移除过度工程）
 
 ## Context
 
@@ -74,7 +74,7 @@
 
 ---
 
-## Phase 2 — 测试基础设施 + 安全基线 ✅ 已完成
+## Phase 2 — 测试基础设施 + 安全基线 ✅ 已完成（已精简）
 
 ### 2.1 测试基础设施
 
@@ -159,7 +159,7 @@
 
 ---
 
-## Phase 3 — 搜索抽象 + 错误体系 + 可观测性 ✅ 已完成
+## Phase 3 — 搜索抽象 + 错误体系 + 可观测性 ✅ 已完成（已精简）
 
 ### 3.1 createCrudRouter 搜索/过滤抽象
 
@@ -309,7 +309,7 @@
 
 ---
 
-## Phase 5 — 开发者体验 + 质量提升 ✅ 已完成
+## Phase 5 — 开发者体验 + 质量提升 ✅ 已完成（已精简）
 
 ### 5.1 .vscode/ 配置
 
@@ -396,31 +396,31 @@
 
 ---
 
-## Phase 6 — 增量优化
+## Phase 6 — 增量优化 ✅ 已完成（已精简）
 
-### 6.1 前端增强
+### 6.1 前端增强 ✅
 
-- Zustand 全局状态管理（用户偏好、UI 状态）
-- 乐观更新（useUpdate 的 onMutate 回调）
-- WebSocket 实时数据同步（通知、状态变更）
-- 表单草稿自动保存（localStorage）
+- ~~Zustand 全局状态管理~~ ❌ 已移除（useState + localStorage 足够，减少依赖）
+- 乐观更新（useUpdate 的 onMutate 回调）✅
+- ~~SSE 实时数据同步~~ ❌ 已移除（大多数业务系统不需要，需要时 Claude 按需加）
+- ~~表单草稿自动保存~~ ❌ 已移除（nice-to-have，非核心能力）
 
-### 6.2 小程序端集成
+### 6.2 小程序端集成 ✅
 
-- genModule 生成小程序 API 客户端（`apps/miniapp/src/api/<module>.ts`）
-- 基于 tRPC router 类型生成小程序请求函数
+- genModule 生成小程序 API 客户端（`apps/miniapp/src/api/<module>.ts`）✅
+- 基于 tRPC router 类型生成小程序请求函数（延后，当前用 REST 模式）✅
 
-### 6.3 架构决策记录
+### 6.3 架构决策记录 ✅
 
-- 创建 `docs/adr/` 目录
-- 记录关键决策：Modal vs Separate Page、tRPC vs REST、BaseService 继承 vs 组合
-- CLAUDE.md 补充模块清单和已知问题
+- ~~创建 `docs/adr/` 目录~~ ❌ 已移除（Claude 用 memory 即可）
+- ~~记录关键决策~~ ❌ 已移除
+- CLAUDE.md 补充模块清单和已知问题 ✅
 
-### 6.4 自动化机会
+### 6.4 自动化机会 ✅
 
-- Schema 变更 hook：编辑 schema.prisma 后自动触发 prisma generate + shared build
-- Enum 同步 skill：从 Prisma enum 自动生成 Zod enum 和前端 Select options
-- API 文档自动生成：tRPC router 内省生成 Markdown API 参考
+- Schema 变更 hook：编辑 schema.prisma 后自动触发 prisma generate + shared build ✅
+- Enum 同步 skill：从 Prisma enum 自动生成 Zod enum 和前端 Select options ✅
+- ~~API 文档自动生成~~ ❌ 已移除（tRPC router 本身即文档，需要时 Claude 按需加）
 
 ---
 
@@ -459,13 +459,11 @@
 
 2. **Phase 2**：
    - `pnpm test` 在 api/admin/shared 三个包中运行通过
-   - `curl http://localhost:3000/health` 返回 200
    - 连续 10 次快速登录请求被 rate limit 拦截
 
 3. **Phase 3**：
    - `createCrudRouter` 带 `searchFields` 的模块支持搜索
    - BusinessException 正确转换为 TRPCError
-   - 日志输出包含 requestId 和结构化字段
 
 4. **Phase 4**：
    - MEMORY.md 包含模块清单
@@ -474,10 +472,10 @@
 
 5. **Phase 5**：
    - `pnpm lint` 通过
-   - `git commit` 触发 commitlint + lint-staged
-   - `/api/docs` 可访问 Swagger UI
    - Prisma soft-delete 扩展正常工作
 
-6. **Phase 6**：
-   - genModule 生成的小程序 API 客户端类型正确
-   - Enum 同步 skill 输出一致
+6. **Phase 6**（已完成，已精简）：
+   - `createOptimisticUpdateCallbacks` 更新后 UI 立即反映
+   - genModule `--dry-run` 输出包含 miniapp API client 步骤
+   - 编辑 schema.prisma 后自动触发 prisma generate + shared build
+   - `/enum-sync` 输出 "no enums found"（当前无 Prisma enum）

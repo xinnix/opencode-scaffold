@@ -20,19 +20,13 @@ import {
   setAppInstance,
 } from './trpc/trpc';
 import * as trpcExpress from '@trpc/server/adapters/express';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import express from 'express';
 import { json } from 'express';
 import helmet from 'helmet';
-import { Logger } from 'nestjs-pino';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { bufferLogs: true });
-
-  // Switch to pino logger
-  const logger = app.get(Logger);
-  app.useLogger(logger);
+  const app = await NestFactory.create(AppModule);
 
   const port = process.env.PORT || 3000;
   const isProduction = process.env.NODE_ENV === 'production';
@@ -62,7 +56,7 @@ async function bootstrap() {
   // CORS with production validation
   const corsOrigin = process.env.CORS_ORIGIN || '*';
   if (isProduction && corsOrigin === '*') {
-    logger.warn('CORS_ORIGIN is "*" in production. This is insecure.');
+    console.warn('CORS_ORIGIN is "*" in production. This is insecure.');
   }
   app.enableCors({
     origin: corsOrigin === '*' ? true : corsOrigin.split(','),
@@ -122,24 +116,8 @@ async function bootstrap() {
     }),
   );
 
-  // Set up Swagger/OpenAPI documentation
-  const config = new DocumentBuilder()
-    .setTitle('OpenCode API')
-    .setDescription('Full-stack monorepo with NestJS, tRPC, and Prisma')
-    .setVersion('1.0')
-    .addTag('todos', 'Todo resource operations')
-    .addTag('users', 'User resource operations')
-    .addTag('roles', 'Role resource operations')
-    .addBearerAuth()
-    .build();
-
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document);
-
   await app.listen(port);
-  logger.log(`Backend started: http://localhost:${port}/trpc`);
-  logger.log(`API docs: http://localhost:${port}/api/docs`);
-  logger.log(`REST API: http://localhost:${port}/api`);
-  logger.log(`Health: http://localhost:${port}/api/health`);
+  console.log(`Backend started: http://localhost:${port}/trpc`);
+  console.log(`REST API: http://localhost:${port}/api`);
 }
 bootstrap();

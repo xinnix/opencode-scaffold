@@ -9,11 +9,9 @@ import {
   Logger,
   BadRequestException,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { WechatPayService } from '../services/wechat-pay.service';
 
-@ApiTags('payments')
 @Controller('payments')
 export class PaymentController {
   private readonly logger = new Logger(PaymentController.name);
@@ -26,7 +24,6 @@ export class PaymentController {
    * 无需 JWT 认证，通过签名验证确保请求来自微信。
    */
   @Post('wechat/callback')
-  @ApiOperation({ summary: '微信支付回调通知（微信服务器调用）' })
   async wechatCallback(
     @Req() req: Request,
     @Res() res: Response,
@@ -63,7 +60,6 @@ export class PaymentController {
    * 微信退款回调通知
    */
   @Post('wechat/refund-callback')
-  @ApiOperation({ summary: '微信退款回调通知（微信服务器调用）' })
   async refundCallback(
     @Req() req: Request,
     @Res() res: Response,
@@ -100,8 +96,6 @@ export class PaymentController {
    * 主动查询微信支付订单状态
    */
   @Get('status/:orderNo')
-  @ApiOperation({ summary: '查询微信支付订单状态' })
-  @ApiResponse({ status: 200, description: '查询成功' })
   async getStatus(@Param('orderNo') orderNo: string) {
     if (!orderNo) {
       throw new BadRequestException('订单号不能为空');
