@@ -1285,6 +1285,12 @@ function checkModuleExists(moduleName: string): { exists: boolean; locations: st
     locations.push(`NestJS Module (${nestModulePath})`);
   }
 
+  // Check Miniapp API client
+  const miniappApiPath = getFilePath(`apps/miniapp/src/api/${camelName}.ts`);
+  if (fs.existsSync(miniappApiPath)) {
+    locations.push(`Miniapp API client (${miniappApiPath})`);
+  }
+
   return { exists: locations.length > 0, locations };
 }
 
@@ -1573,6 +1579,106 @@ export { ${pascalName}ListPage } from "./pages/${pascalName}ListPage";
   createFile(indexPath, indexContent);
 }
 
+// ============================================
+// Miniapp API Client Generation
+// ============================================
+
+function generateMiniappApiClient(moduleName: string, fields: Field[]): string {
+  const pascalName = toPascalCase(moduleName);
+  const camelName = toCamelCase(moduleName);
+  const pluralName = toPlural(camelName);
+  const label = toLabel(moduleName);
+
+  const interfaceFields = fields
+    .map((f) => {
+      const tsType =
+        f.type === 'number' || f.type === 'float'
+          ? 'number'
+          : f.type === 'boolean'
+            ? 'boolean'
+            : f.type === 'date'
+              ? 'string'
+              : 'string';
+      const optional = f.required ? '' : '?';
+      return `  ${f.name}${optional}: ${tsType};`;
+    })
+    .join('\n');
+
+  return `/**
+ * ${label} 相关 API
+ */
+import { http } from '@/utils/http';
+import { API_ENDPOINTS } from '@/config/api';
+
+export interface ${pascalName} {
+  id: string;
+${interfaceFields}
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ${pascalName}ListParams {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+}
+
+export const ${camelName}Api = {
+  /** 获取${label}列表 */
+  getList: (params?: ${pascalName}ListParams) =>
+    http.get<${pascalName}[]>(API_ENDPOINTS.${camelName}List, params, { showLoading: true }),
+
+  /** 获取${label}详情 */
+  getDetail: (id: string) =>
+    http.get<${pascalName}>(API_ENDPOINTS.${camelName}Detail(id)),
+
+  /** 创建${label} */
+  create: (data: Omit<${pascalName}, 'id' | 'createdAt' | 'updatedAt'>) =>
+    http.post<${pascalName}>(API_ENDPOINTS.${camelName}List, data),
+
+  /** 更新${label} */
+  update: (id: string, data: Partial<Omit<${pascalName}, 'id' | 'createdAt' | 'updatedAt'>>) =>
+    http.put<${pascalName}>(API_ENDPOINTS.${camelName}Detail(id), data),
+
+  /** 删除${label} */
+  delete: (id: string) =>
+    http.delete(API_ENDPOINTS.${camelName}Detail(id)),
+};
+`;
+}
+
+function updateMiniappApiConfig(moduleName: string): void {
+  const camelName = toCamelCase(moduleName);
+  const pluralName = toPlural(camelName);
+  const pascalName = toPascalCase(moduleName);
+  const configPath = getFilePath('apps/miniapp/src/config/api.ts');
+
+  modifyFile(configPath, (content) => {
+    if (content.includes(`${camelName}List:`)) return content;
+
+    const endpointLines = `  // ${pascalName} 相关
+  ${camelName}List: '/${pluralName}',
+  ${camelName}Detail: (id: string) => \`/${pluralName}/\${id}\`,`;
+
+    const closingMatch = content.lastIndexOf('} as const');
+    if (closingMatch === -1) throw new Error('Cannot find API_ENDPOINTS closing in miniapp config');
+
+    content = content.slice(0, closingMatch) + endpointLines + '\n' + content.slice(closingMatch);
+    return content;
+  });
+}
+
+function updateMiniappApiIndex(moduleName: string): void {
+  const camelName = toCamelCase(moduleName);
+  const indexPath = getFilePath('apps/miniapp/src/api/index.ts');
+
+  modifyFile(indexPath, (content) => {
+    const exportLine = `export * from './${camelName}';`;
+    if (content.includes(exportLine)) return content;
+    return content.trimEnd() + '\n' + exportLine + '\n';
+  });
+}
+
 function generateNestModule(moduleName: string): void {
   const pascalName = toPascalCase(moduleName);
   const moduleContent = `import { Module } from '@nestjs/common';
@@ -1742,6 +1848,20 @@ export async function generateModule(options: GenerateOptions): Promise<void> {
     // Step 12: Register in app.module.ts
     console.log('\x1b[32m%s\x1b[0m', '✓ Registering in app.module.ts...');
     updateAppModule(moduleName);
+
+    // Step 13: Generate Miniapp API Client
+    console.log('\x1b[32m%s\x1b[0m', '✓ Generating miniapp API client...');
+    const miniappClient = generateMiniappApiClient(moduleName, fields);
+    const miniappApiPath = getFilePath(`apps/miniapp/src/api/${camelName}.ts`);
+    createFile(miniappApiPath, miniappClient);
+
+    // Step 14: Update Miniapp API Config
+    console.log('\x1b[32m%s\x1b[0m', '✓ Updating miniapp API config...');
+    updateMiniappApiConfig(moduleName);
+
+    // Step 15: Update Miniapp API Index
+    console.log('\x1b[32m%s\x1b[0m', '✓ Updating miniapp API index...');
+    updateMiniappApiIndex(moduleName);
 
     console.log('\n\x1b[35m%s\x1b[0m', `\n✅ Module "${pascalName}" generated successfully!\n`);
     console.log('%s', '━'.repeat(50));
