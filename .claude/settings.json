@@ -3,11 +3,19 @@
   "permissions": {
     "allow": [
       "Bash(pnpm -C :*)",
+      "Bash(pnpm run :*)",
+      "Bash(pnpm test:*)",
+      "Bash(pnpm lint:*)",
       "Bash(cd :*)",
       "Bash(npx prisma:*)",
       "Bash(npx prisma migrate dev:*)",
       "Bash(npx prisma generate:*)",
       "Bash(npx prisma studio:*)",
+      "Bash(npx jest:*)",
+      "Bash(npx eslint:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx prettier:*)",
+      "Bash(npx tsx :*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git status)",
@@ -20,17 +28,39 @@
       "Bash(mkdir -p :*)",
       "Bash(test -d :*)",
       "Bash(test -f :*)",
-      "Bash(npx tsx .claude/skills/seed-data/scripts/seed-data.ts:*)",
-      "Bash(npx tsx .claude/skills/analyze/scripts/analyze-module.ts:*)",
-      "Bash(npx tsx .claude/skills/refactor/scripts/refactor-module.ts:*)",
-      "mcp__exa__get_code_context_exa",
+      "Bash(docker exec:*)",
+      "Bash(lsof -i:*)",
+      "Bash(kill :*)",
+      "Bash(wc -l :*)",
+      "Bash(head :*)",
+      "Bash(tail :*)",
       "mcp__exa__web_search_exa",
+      "mcp__exa__web_fetch_exa",
       "mcp__context7__resolve-library-id",
       "mcp__context7__query-docs",
+      "mcp__zread__get_repo_structure",
+      "mcp__zread__read_file",
+      "mcp__zread__search_doc",
+      "mcp__web-reader__webReader",
+      "mcp__memory__create_entities",
+      "mcp__memory__create_relations",
+      "mcp__memory__add_observations",
+      "mcp__memory__search_nodes",
+      "mcp__memory__open_nodes",
+      "mcp__memory__read_graph",
+      "mcp__memory__delete_entities",
+      "mcp__memory__delete_relations",
+      "mcp__memory__delete_observations",
       "WebSearch",
       "LSP"
     ],
-    "deny": []
+    "deny": [
+      "Bash(rm -rf :*)",
+      "Bash(git push --force *)",
+      "Bash(git reset --hard *)",
+      "Bash(npx prisma db push *)",
+      "Bash(curl * | bash*)"
+    ]
   },
   "hooks": {
     "UserPromptSubmit": [
@@ -46,7 +76,10 @@
     "PreToolUse": [
       {
         "matcher": "Edit|Write",
-        "hooks": [{ "type": "command", "command": "sh ./.claude/hooks/before-edit.sh" }]
+        "hooks": [
+          { "type": "command", "command": "sh ./.claude/hooks/before-edit.sh" },
+          { "type": "command", "command": "sh ./.claude/hooks/protect-migration.sh" }
+        ]
       }
     ],
     "PostToolUse": [
@@ -54,8 +87,15 @@
         "matcher": "Edit|Write",
         "hooks": [
           { "type": "command", "command": "sh ./.claude/hooks/after-edit.sh" },
-          { "type": "command", "command": "sh ./.claude/hooks/schema-change.sh" }
+          { "type": "command", "command": "sh ./.claude/hooks/schema-change.sh" },
+          { "type": "command", "command": "sh ./.claude/hooks/shared-change.sh" },
+          { "type": "command", "command": "sh ./.claude/hooks/type-check.sh" }
         ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [{ "type": "command", "command": "sh ./.claude/hooks/stop.sh" }]
       }
     ]
   }
