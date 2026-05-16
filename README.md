@@ -49,7 +49,7 @@ schema.prisma ──► Prisma Client ──► AppRouter ──► @opencode/sh
 ```
                 ┌─────────────────────────────────────────┐
                 │            apps/admin (React)            │
-                │  StandardListPage / StandardForm / Auth │
+                │  StandardListPage / StandardForm / StandardDetailPage / Auth │
                 └──────────────────┬──────────────────────┘
                                    │ tRPC Client (type-safe)
                 ┌──────────────────┴──────────────────────┐
@@ -85,7 +85,7 @@ opencode-scaffold/
 │   ├── admin/                  # React + Refine 管理后台
 │   │   └── src/
 │   │       ├── modules/        # 业务页面
-│   │       └── shared/        # StandardListPage, StandardForm, dataProvider
+│   │       └── shared/        # StandardListPage, StandardForm, StandardDetailPage, dataProvider
 │   └── miniapp/                # uni-app 微信小程序
 │       └── src/
 │           ├── pages/          # 页面
@@ -168,9 +168,18 @@ export const productRouter = createCrudRouter(
 // 生成: getMany (含搜索+过滤), getOne, create, update, delete, deleteMany
 ```
 
-### StandardListPage + StandardForm — 声明式前端
+### StandardListPage + StandardForm + StandardDetailPage — 声明式前端
+
+管理端三大标准模板组件，配置即页面：
+
+| 组件                 | 用途          | 位置                                                   |
+| -------------------- | ------------- | ------------------------------------------------------ |
+| `StandardListPage`   | 列表页        | `apps/admin/src/shared/components/StandardListPage/`   |
+| `StandardForm`       | 创建/编辑表单 | `apps/admin/src/shared/components/StandardForm/`       |
+| `StandardDetailPage` | 详情页        | `apps/admin/src/shared/components/StandardDetailPage/` |
 
 ```tsx
+// 列表页
 <StandardListPage
   resource="products"
   title="商品管理"
@@ -180,6 +189,7 @@ export const productRouter = createCrudRouter(
   permissions={{ create: 'product:create', update: 'product:update', delete: 'product:delete' }}
 />;
 
+// 表单字段定义
 const fields: FieldDefinition[] = [
   { key: 'name', label: '商品名', type: 'input', required: true },
   { key: 'price', label: '价格', type: 'number', min: 0, precision: 2 },
@@ -187,6 +197,19 @@ const fields: FieldDefinition[] = [
   { key: 'cover', label: '封面图', type: 'upload', maxFileSize: 2 },
   { key: 'isActive', label: '上架', type: 'switch' },
 ];
+
+// 详情页
+<StandardDetailPage
+  resource="products"
+  title="商品详情"
+  fields={detailFields}
+  headerMode="simple"
+  tabs={[
+    { key: 'basic', label: '基本信息' },
+    { key: 'logs', label: '操作日志' },
+  ]}
+  actions={[{ key: 'edit', label: '编辑', onClick: handleEdit }]}
+/>;
 ```
 
 ## genModule 代码生成器

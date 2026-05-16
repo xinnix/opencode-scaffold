@@ -151,8 +151,22 @@ docker exec -i postgres psql -U xinnix -d couponHub < infra/database/prisma/seed
 - `createCrudRouter` — tRPC CRUD 路由工厂（`apps/api/src/trpc/trpc.helper.ts`）
 - `StandardListPage` — 通用列表页组件（`apps/admin/src/shared/components/StandardListPage/`）
 - `StandardForm` — 声明式表单组件（`apps/admin/src/shared/components/StandardForm/`）
+- `StandardDetailPage` — 通用详情页组件（`apps/admin/src/shared/components/StandardDetailPage/`）
 - `FileStorageService` — 多策略文件存储（`apps/api/src/shared/services/file-storage.service.ts`）
 - `menuConfig` — 参数化菜单配置（`apps/admin/src/shared/layouts/AdminLayout.tsx`）
+
+### 管理端页面规范
+
+管理端页面**必须**使用三大标准模板组件，禁止手写重复的 CRUD 页面逻辑：
+
+| 组件                 | 用途          | 使用场景                 |
+| -------------------- | ------------- | ------------------------ |
+| `StandardListPage`   | 列表页        | 所有模块的数据列表展示   |
+| `StandardForm`       | 创建/编辑表单 | 所有模块的新增和编辑操作 |
+| `StandardDetailPage` | 详情页        | 所有模块的数据详情查看   |
+
+- 列表页、表单、详情页应通过配置驱动，而非手写 Ant Design 组件
+- 仅在标准组件无法满足需求时，才使用 `render*` 覆盖插槽进行自定义扩展
 
 ## Module Registry
 
