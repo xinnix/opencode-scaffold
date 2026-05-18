@@ -68,7 +68,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "sh ./.claude/hooks/user-prompt-submit.sh"
+            "command": "sh \"$(git rev-parse --show-toplevel)/.claude/hooks/user-prompt-submit.sh\""
           }
         ]
       }
@@ -77,8 +77,18 @@
       {
         "matcher": "Edit|Write",
         "hooks": [
-          { "type": "command", "command": "sh ./.claude/hooks/before-edit.sh" },
-          { "type": "command", "command": "sh ./.claude/hooks/protect-migration.sh" }
+          {
+            "type": "command",
+            "command": "sh \"$(git rev-parse --show-toplevel)/.claude/hooks/before-edit.sh\""
+          },
+          {
+            "type": "command",
+            "command": "sh \"$(git rev-parse --show-toplevel)/.claude/hooks/protect-migration.sh\""
+          },
+          {
+            "type": "command",
+            "command": "sh \"$(git rev-parse --show-toplevel)/.claude/hooks/protect-env.sh\""
+          }
         ]
       }
     ],
@@ -86,16 +96,33 @@
       {
         "matcher": "Edit|Write",
         "hooks": [
-          { "type": "command", "command": "sh ./.claude/hooks/after-edit.sh" },
-          { "type": "command", "command": "sh ./.claude/hooks/schema-change.sh" },
-          { "type": "command", "command": "sh ./.claude/hooks/shared-change.sh" },
-          { "type": "command", "command": "sh ./.claude/hooks/type-check.sh" }
+          {
+            "type": "command",
+            "command": "sh \"$(git rev-parse --show-toplevel)/.claude/hooks/after-edit.sh\""
+          },
+          {
+            "type": "command",
+            "command": "sh \"$(git rev-parse --show-toplevel)/.claude/hooks/schema-change.sh\""
+          },
+          {
+            "type": "command",
+            "command": "sh \"$(git rev-parse --show-toplevel)/.claude/hooks/shared-change.sh\""
+          },
+          {
+            "type": "command",
+            "command": "sh \"$(git rev-parse --show-toplevel)/.claude/hooks/type-check.sh\""
+          }
         ]
       }
     ],
     "Stop": [
       {
-        "hooks": [{ "type": "command", "command": "sh ./.claude/hooks/stop.sh" }]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"$(git rev-parse --show-toplevel)/.claude/hooks/stop.sh\""
+          }
+        ]
       }
     ]
   }
