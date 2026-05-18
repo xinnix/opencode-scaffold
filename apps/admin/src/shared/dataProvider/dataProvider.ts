@@ -1,4 +1,3 @@
-import type { AppRouter } from '../../types/api';
 import { TRPCClientError } from '@trpc/client';
 import { QueryClient } from '@tanstack/react-query';
 import { App } from 'antd';
@@ -51,7 +50,6 @@ function extractBusinessErrorMessage(errorMessage: string): string | null {
 
     if (tableMatch && tableMatch.length >= 2) {
       const childTable = tableMatch[0].replace(/table "|"/g, '');
-      const parentTable = tableMatch[1].replace(/table "|"/g, '');
 
       // Map table names to Chinese
       const tableNames: Record<string, string> = {

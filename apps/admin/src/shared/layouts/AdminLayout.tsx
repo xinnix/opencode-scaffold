@@ -92,7 +92,7 @@ export function AdminLayout() {
 
   const menuItems = useMemo(
     () => filterMenuByPermission(allMenuItems),
-    [user?.permissions, user?.roles],
+    [allMenuItems, filterMenuByPermission],
   );
 
   const userMenuItems = [

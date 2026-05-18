@@ -1,8 +1,14 @@
 // StandardListPage 主组件
 
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useTable, useCreate, useUpdate, useDelete, useDeleteMany, useList } from '@refinedev/core';
+import {
+  useTable,
+  useCreate,
+  useUpdate,
+  useDelete,
+  useDeleteMany,
+  type CrudFilters,
+} from '@refinedev/core';
 import { List } from '@refinedev/antd';
 import {
   Table,
@@ -24,7 +30,7 @@ import {
   createBatchMutationCallbacks,
 } from '../../utils/mutationCallbacks';
 import { SearchBar } from './SearchBar';
-import type { StandardListPageProps, FilterFieldConfig } from './types';
+import type { StandardListPageProps, StatisticConfig } from './types';
 
 /**
  * StandardListPage - 标准列表页面组件
@@ -36,7 +42,7 @@ import type { StandardListPageProps, FilterFieldConfig } from './types';
  * - 分页表格
  * - 创建/编辑 Modal
  */
-export function StandardListPage<T extends Record<string, any> = any>(
+export function StandardListPage<T extends Record<string, unknown> = Record<string, unknown>>(
   props: StandardListPageProps<T>,
 ) {
   const {
@@ -60,14 +66,13 @@ export function StandardListPage<T extends Record<string, any> = any>(
   } = props;
 
   const { message } = App.useApp();
-  const navigate = useNavigate();
 
   // 状态管理
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingRecord, setEditingRecord] = useState<T | null>(null);
   const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
   const [searchValues, setSearchValues] = useState<Record<string, string>>({});
-  const [filterValues, setFilterValues] = useState<Record<string, any>>(defaultFilters || {});
+  const [filterValues, setFilterValues] = useState<Record<string, unknown>>(defaultFilters || {});
   const [form] = Form.useForm();
 
   // 延迟搜索
@@ -81,10 +86,10 @@ export function StandardListPage<T extends Record<string, any> = any>(
 
   // 构建 filters
   const buildFilters = useCallback(
-    (searchState?: Record<string, string>, filterState?: Record<string, any>) => {
+    (searchState?: Record<string, string>, filterState?: Record<string, unknown>) => {
       const currentSearchState = searchState || debouncedSearchValues;
       const currentFilterState = filterState || filterValues;
-      const filters: any[] = [];
+      const filters: CrudFilters = [];
 
       // 搜索字段
       searchFields.forEach(({ field }) => {
@@ -104,12 +109,12 @@ export function StandardListPage<T extends Record<string, any> = any>(
             filters.push({
               field,
               operator: 'gte',
-              value: currentFilterState[field][0],
+              value: (currentFilterState[field] as unknown[])[0],
             });
             filters.push({
               field,
               operator: 'lte',
-              value: currentFilterState[field][1],
+              value: (currentFilterState[field] as unknown[])[1],
             });
           } else {
             filters.push({
@@ -149,17 +154,14 @@ export function StandardListPage<T extends Record<string, any> = any>(
 
   const result = tableQuery.data;
   const query = tableQuery;
-  const data = (result as any)?.data || [];
-  const total = (result as any)?.total || 0;
+  const data = ((result as Record<string, unknown>)?.data as T[]) || [];
+  const total = ((result as Record<string, unknown>)?.total as number) || 0;
 
   // CRUD mutations
   const { mutate: create } = useCreate();
   const { mutate: update } = useUpdate();
   const { mutate: deleteOne } = useDelete();
   const { mutate: deleteMany } = useDeleteMany();
-
-  // 下拉数据由 SearchBar 子组件自行获取
-  // 传递 filterFields 配置给 SearchBar
 
   // Handlers
   const handleCreate = () => {
@@ -178,25 +180,12 @@ export function StandardListPage<T extends Record<string, any> = any>(
     deleteOne({ resource, id }, createMutationCallbacks('删除', query, undefined, message));
   };
 
-  const handleBatchDelete = () => {
-    deleteMany(
-      { resource, ids: selectedRowKeys },
-      createBatchMutationCallbacks(
-        '删除',
-        selectedRowKeys.length,
-        query,
-        () => setSelectedRowKeys([]),
-        message,
-      ),
-    );
-  };
-
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
       if (editingRecord) {
         update(
-          { resource, id: editingRecord.id, values },
+          { resource, id: editingRecord.id as string, values },
           createMutationCallbacks(
             '更新',
             query,
@@ -228,21 +217,21 @@ export function StandardListPage<T extends Record<string, any> = any>(
     setSearchValues((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleFilterChange = (field: string, value: any) => {
+  const handleFilterChange = (field: string, value: unknown) => {
     setFilterValues((prev) => ({ ...prev, [field]: value }));
   };
 
   // 统计数据计算
-  const getStatisticValue = (config: any) => {
+  const getStatisticValue = (config: StatisticConfig) => {
     if (config.value !== undefined) return config.value;
     if (!config.field) return 0;
 
     if (config.filter) {
-      return data.filter((item: any) => item[config.filter.field] === config.filter.value).length;
+      return data.filter((item) => item[config.filter.field] === config.filter.value).length;
     }
 
     // 计算总和
-    return data.reduce((sum: number, item: any) => sum + (item[config.field] || 0), 0);
+    return data.reduce((sum: number, item) => sum + ((item[config.field] as number) || 0), 0);
   };
 
   return (
@@ -315,7 +304,18 @@ export function StandardListPage<T extends Record<string, any> = any>(
                 <Popconfirm
                   title="确认批量删除？"
                   description={`将删除 ${selectedRowKeys.length} 个${title}`}
-                  onConfirm={handleBatchDelete}
+                  onConfirm={() => {
+                    deleteMany(
+                      { resource, ids: selectedRowKeys },
+                      createBatchMutationCallbacks(
+                        '删除',
+                        selectedRowKeys.length,
+                        query,
+                        () => setSelectedRowKeys([]),
+                        message,
+                      ),
+                    );
+                  }}
                 >
                   <Button size="small" danger>
                     批量删除
@@ -338,12 +338,36 @@ export function StandardListPage<T extends Record<string, any> = any>(
                     {
                       title: '操作',
                       key: 'actions',
-                      fixed: 'right' as any,
+                      fixed: 'right' as const,
                       width: 150,
                       render: (record: T) => renderRowActions(record),
                     },
                   ]
-                : []),
+                : formComponent
+                  ? [
+                      {
+                        title: '操作',
+                        key: 'actions',
+                        fixed: 'right' as const,
+                        width: 150,
+                        render: (_: unknown, record: T) => (
+                          <Space>
+                            <Button type="link" size="small" onClick={() => handleEdit(record)}>
+                              编辑
+                            </Button>
+                            <Popconfirm
+                              title="确认删除？"
+                              onConfirm={() => handleDelete(String(record.id))}
+                            >
+                              <Button type="link" size="small" danger>
+                                删除
+                              </Button>
+                            </Popconfirm>
+                          </Space>
+                        ),
+                      },
+                    ]
+                  : []),
             ]}
             rowKey="id"
             dataSource={data}

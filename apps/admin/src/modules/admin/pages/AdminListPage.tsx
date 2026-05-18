@@ -237,7 +237,7 @@ export const AdminListPage = () => {
                         adminId: newAdminId,
                         roleId: viewerRole.id,
                       });
-                    } catch (e) {
+                    } catch {
                       // 忽略移除失败的情况（可能没有 viewer 角色）
                     }
                   }

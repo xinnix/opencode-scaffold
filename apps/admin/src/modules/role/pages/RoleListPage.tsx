@@ -39,7 +39,7 @@ export const RoleListPage = () => {
   const { message } = App.useApp();
 
   const { mutate: update } = useUpdate();
-  const { tableQuery, currentPage, setCurrentPage, pageSize, setPageSize } = useTable<Role>({
+  const { tableQuery } = useTable<Role>({
     resource: 'role',
     pagination: {
       currentPage: 1,

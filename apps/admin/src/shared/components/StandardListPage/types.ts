@@ -1,7 +1,8 @@
 // StandardListPage 类型定义
 
-import { ColumnType } from 'antd/es/table';
-import { ReactNode } from 'react';
+import type { FormInstance } from 'antd/es/form';
+import type { ColumnType } from 'antd/es/table';
+import type { ReactNode } from 'react';
 
 /**
  * 搜索字段配置
@@ -22,7 +23,7 @@ export interface FilterFieldConfig {
   placeholder?: string; // 占位符
   options?: SelectOption[]; // Select 选项（type='select'）
   resource?: string; // 下拉数据源（type='select'）
-  resourceFilter?: any; // 下拉数据筛选条件
+  resourceFilter?: Record<string, unknown>; // 下拉数据筛选条件
   width?: number; // 筛选框宽度（默认120）
 }
 
@@ -41,7 +42,7 @@ export interface StatisticConfig {
   title: string; // 统计项标题
   field?: string; // 统计字段名（可选，不填则自定义计算）
   value?: number; // 固定值（可选）
-  filter?: { field: string; value: any }; // 筛选条件（可选）
+  filter?: { field: string; value: unknown }; // 筛选条件（可选）
   icon?: ReactNode; // 图标
   color?: string; // 颜色
   precision?: number; // 数字精度（默认0）
@@ -61,7 +62,7 @@ export interface PermissionConfig {
 /**
  * StandardListPage Props
  */
-export interface StandardListPageProps<T = any> {
+export interface StandardListPageProps<T = Record<string, unknown>> {
   // 必需配置
   resource: string; // Refine resource 名称
   title: string; // 页面标题
@@ -75,7 +76,7 @@ export interface StandardListPageProps<T = any> {
   // 搜索/筛选配置
   searchFields?: SearchFieldConfig[]; // 搜索字段配置
   filterFields?: FilterFieldConfig[]; // 筛选字段配置
-  defaultFilters?: any; // 默认筛选条件
+  defaultFilters?: Record<string, unknown>; // 默认筛选条件
 
   // 统计卡片配置
   statistics?: StatisticConfig[]; // 统计项配置
@@ -88,7 +89,7 @@ export interface StandardListPageProps<T = any> {
   permissions?: PermissionConfig; // 权限配置
 
   // Refine meta
-  meta?: any; // useTable 的 meta 参数
+  meta?: Record<string, unknown>; // useTable 的 meta 参数
 
   // 自定义渲染
   renderRowActions?: (record: T) => ReactNode; // 自定义行操作
@@ -100,6 +101,6 @@ export interface StandardListPageProps<T = any> {
  * Form Props（传递给表单组件）
  */
 export interface FormProps {
-  form: any; // Antd Form 实例
+  form: FormInstance; // Antd Form 实例
   isEdit: boolean; // 编辑模式
 }

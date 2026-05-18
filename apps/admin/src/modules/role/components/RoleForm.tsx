@@ -12,7 +12,7 @@ interface RoleFormProps {
  *
  * 系统角色只允许编辑名称和描述，slug 和 level 是固定的
  */
-export const RoleForm = ({ form, isEdit = false, isSystemRole = false }: RoleFormProps) => {
+export const RoleForm = ({ form, isSystemRole = false }: RoleFormProps) => {
   return (
     <Form form={form} layout="vertical">
       <Form.Item

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Upload, Button, App, Image, Space } from 'antd';
-import { UploadOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import { UploadOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { UploadFile } from 'antd/es/upload/interface';
 import { OSSUploader } from '../utils/oss-upload';
 import type { UploadType } from '../utils/oss-upload';

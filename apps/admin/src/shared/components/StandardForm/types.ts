@@ -43,7 +43,7 @@ export interface FieldDefinition {
   // 类型特定配置
   options?: SelectOption[]; // Select 选项
   resource?: string; // 下拉数据源 resource
-  resourceFilter?: any; // 下拉数据筛选条件
+  resourceFilter?: Record<string, unknown>; // 下拉数据筛选条件
   maxFileSize?: number; // 上传文件大小限制
   accept?: string; // 上传文件类型
   maxCount?: number; // 多图上传数量限制
@@ -54,7 +54,7 @@ export interface FieldDefinition {
   showTime?: boolean; // 日期选择器显示时间
   format?: string; // 日期格式
   valuePropName?: string; // Switch/Checkbox 的 valuePropName
-  initialValue?: any; // 初始值
+  initialValue?: unknown; // 初始值
 
   // 验证规则
   rules?: Rule[]; // 自定义验证规则
@@ -64,7 +64,7 @@ export interface FieldDefinition {
   showOnlyInCreate?: boolean; // 仅在创建模式显示
   showOnlyInEdit?: boolean; // 仅在编辑模式显示
   watchDependency?: string; // 监听字段依赖
-  showCondition?: (value: any) => boolean; // 条件显示函数
+  showCondition?: (value: unknown) => boolean; // 条件显示函数
 
   // 自定义渲染
   render?: (field: FieldDefinition, form: FormInstance) => ReactNode; // 自定义字段渲染

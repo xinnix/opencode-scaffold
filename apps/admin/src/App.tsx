@@ -25,7 +25,7 @@ const queryClient = new QueryClient({
 });
 
 function App() {
-  const [isReady, setIsReady] = useState(true);
+  const [isReady] = useState(true);
 
   if (!isReady) {
     return null;

@@ -224,7 +224,9 @@ export const AgentChatPage = () => {
                   message.error(event.message || '对话出错');
                   break;
               }
-            } catch {}
+            } catch {
+              // SSE stream errors are non-fatal
+            }
           }
         }
       }

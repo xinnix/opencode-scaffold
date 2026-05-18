@@ -7,9 +7,9 @@ interface SearchBarProps {
   searchFields: SearchFieldConfig[];
   filterFields: FilterFieldConfig[];
   searchValues: Record<string, string>;
-  filterValues: Record<string, any>;
+  filterValues: Record<string, unknown>;
   onSearchChange: (field: string, value: string) => void;
-  onFilterChange: (field: string, value: any) => void;
+  onFilterChange: (field: string, value: unknown) => void;
 }
 
 /**
@@ -77,7 +77,7 @@ export function SearchBar({
             <DatePicker.RangePicker
               key={field.field}
               placeholder={[field.placeholder || '开始日期', '结束日期']}
-              value={filterValues[field.field]}
+              value={filterValues[field.field] as [unknown, unknown] | null}
               onChange={(dates) => onFilterChange(field.field, dates)}
               style={{ width: field.width || 240 }}
             />
@@ -99,21 +99,21 @@ function DynamicSelectFilter({
   onChange,
 }: {
   field: FilterFieldConfig;
-  value: any;
-  onChange: (value: any) => void;
+  value: unknown;
+  onChange: (value: unknown) => void;
 }) {
-  const { result } = useList<any>({
+  const { result } = useList<Record<string, unknown>>({
     resource: field.resource!,
     pagination: { pageSize: 100 },
     filters: field.resourceFilter ? [field.resourceFilter] : [],
   });
 
-  const data = (result as any)?.data || [];
+  const data = result?.data || [];
 
   // 转换为 Select options 格式
-  const options = data.map((item: any) => ({
-    value: item.id,
-    label: item.name || item.title || item.username || item.id,
+  const options = data.map((item) => ({
+    value: item.id as string | number,
+    label: (item.name || item.title || item.username || item.id) as string,
   }));
 
   return (

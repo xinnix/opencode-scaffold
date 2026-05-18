@@ -80,6 +80,7 @@ export const RoleDetailPage = () => {
   });
 
   const { mutate: deleteOne } = useDelete();
+  void deleteOne; // available for future delete operations
 
   const role = result;
   const users = usersResult || [];

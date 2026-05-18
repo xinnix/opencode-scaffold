@@ -1,6 +1,7 @@
 import { Form, Input, InputNumber, Select, Switch, Checkbox, DatePicker } from 'antd';
 import { useList } from '@refinedev/core';
 import { useWatch } from 'antd/es/form/Form';
+import type { FormInstance } from 'antd/es/form';
 import type { StandardFormProps, FieldDefinition } from './types';
 import { OSSUpload } from '../OSSUpload';
 import { OSSUploadMultiple } from '../OSSUploadMultiple';
@@ -18,34 +19,48 @@ import { RichTextEditor } from '../RichTextEditor';
 export function StandardForm({ form, isEdit, fields }: StandardFormProps) {
   return (
     <Form form={form} layout="vertical">
-      {fields.map((field) => {
-        // 条件显示逻辑
-        if (field.showOnlyInCreate && isEdit) return null;
-        if (field.showOnlyInEdit && !isEdit) return null;
-
-        // 字段依赖监听
-        if (field.watchDependency) {
-          const dependencyValue = useWatch(field.watchDependency, form);
-          if (field.showCondition && !field.showCondition(dependencyValue)) {
-            return null;
-          }
-        }
-
-        return (
-          <Form.Item
-            key={field.key}
-            name={field.key}
-            label={field.label}
-            tooltip={field.tooltip}
-            valuePropName={field.valuePropName || (field.type === 'switch' ? 'checked' : 'value')}
-            rules={buildRules(field)}
-            initialValue={field.initialValue}
-          >
-            {renderField(field, form)}
-          </Form.Item>
-        );
-      })}
+      {fields.map((field) => (
+        <FormFieldItem key={field.key} field={field} form={form} isEdit={isEdit} />
+      ))}
     </Form>
+  );
+}
+
+/**
+ * 单个字段的 FormItem，将 useWatch 提升到组件级别
+ */
+function FormFieldItem({
+  field,
+  form,
+  isEdit,
+}: {
+  field: FieldDefinition;
+  form: FormInstance;
+  isEdit: boolean;
+}) {
+  // 字段依赖监听 — hooks 必须无条件调用
+  const dependencyValue = useWatch(field.watchDependency ?? '', form);
+
+  // 条件显示逻辑
+  if (field.showOnlyInCreate && isEdit) return null;
+  if (field.showOnlyInEdit && !isEdit) return null;
+
+  // 字段依赖条件
+  if (field.watchDependency && field.showCondition && !field.showCondition(dependencyValue)) {
+    return null;
+  }
+
+  return (
+    <Form.Item
+      name={field.key}
+      label={field.label}
+      tooltip={field.tooltip}
+      valuePropName={field.valuePropName || (field.type === 'switch' ? 'checked' : 'value')}
+      rules={buildRules(field)}
+      initialValue={field.initialValue}
+    >
+      {renderField(field, form)}
+    </Form.Item>
   );
 }
 
@@ -53,7 +68,7 @@ export function StandardForm({ form, isEdit, fields }: StandardFormProps) {
  * 构建验证规则
  */
 function buildRules(field: FieldDefinition) {
-  const rules: any[] = [];
+  const rules: unknown[] = [];
 
   // 必填规则
   if (field.required) {
@@ -104,7 +119,7 @@ function buildRules(field: FieldDefinition) {
 /**
  * 渲染字段
  */
-function renderField(field: FieldDefinition, form: any) {
+function renderField(field: FieldDefinition, form: FormInstance) {
   // 自定义渲染
   if (field.render) {
     return field.render(field, form);
@@ -233,18 +248,18 @@ function renderField(field: FieldDefinition, form: any) {
  * DynamicSelect - 动态获取下拉选项的 Select
  */
 function DynamicSelect({ field, mode }: { field: FieldDefinition; mode?: 'multiple' }) {
-  const { result } = useList<any>({
+  const { result } = useList<Record<string, unknown>>({
     resource: field.resource!,
     pagination: { pageSize: 100 },
     filters: field.resourceFilter ? [field.resourceFilter] : [],
   });
 
-  const data = (result as any)?.data || [];
+  const data = result?.data || [];
 
   // 转换为 Select options 格式
-  const options = data.map((item: any) => ({
-    value: item.id,
-    label: item.name || item.title || item.username || item.id,
+  const options = data.map((item) => ({
+    value: item.id as string | number,
+    label: (item.name || item.title || item.username || item.id) as string,
   }));
 
   return (
