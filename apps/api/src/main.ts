@@ -1,9 +1,5 @@
 // apps/api/src/main.ts
-import dotenv from 'dotenv';
 import path from 'path';
-
-// Load .env from apps/api directory
-dotenv.config();
 
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
@@ -72,7 +68,8 @@ async function bootstrap() {
       verify: (req: any, _res, buf) => {
         if (
           req.url?.includes('/payments/wechat/callback') ||
-          req.url?.includes('/payments/wechat/refund-callback')
+          req.url?.includes('/payments/wechat/refund-callback') ||
+          req.url?.includes('/wecom/callback')
         ) {
           req.rawBody = buf.toString();
         }

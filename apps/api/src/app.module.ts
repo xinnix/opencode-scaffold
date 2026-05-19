@@ -15,6 +15,7 @@ import { UploadModule } from './modules/upload/module';
 import { WechatModule } from './modules/wechat/wechat.module';
 import { PaymentModule } from './modules/payment/module';
 import { AgentsModule } from './modules/agents/module';
+import { WecomModule } from './modules/wecom/module';
 // 全局拦截器
 import { TransformInterceptor } from './core/interceptors/transform.interceptor';
 import { FileStorageService } from './shared/services/file-storage.service';
@@ -23,7 +24,7 @@ import { FileStorageService } from './shared/services/file-storage.service';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ['../.env'],
+      envFilePath: ['.env', '../../.env'],
     }),
     ThrottlerModule.forRoot([
       {
@@ -42,6 +43,7 @@ import { FileStorageService } from './shared/services/file-storage.service';
     WechatModule,
     PaymentModule,
     AgentsModule,
+    WecomModule,
   ],
   providers: [
     Reflector,
