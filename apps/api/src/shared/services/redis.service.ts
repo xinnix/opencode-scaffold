@@ -123,9 +123,9 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     try {
       const serialized = JSON.stringify(value);
       if (ttl) {
-        // await this.client.setex(key, Math.floor(ttl / 1000), serialized);
+        await this.client.setex(key, Math.floor(ttl / 1000), serialized);
       } else {
-        // await this.client.set(key, serialized);
+        await this.client.set(key, serialized);
       }
       this.logger.debug(`设置缓存: ${key}`);
     } catch (error) {
@@ -138,9 +138,8 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
    */
   async get<T>(key: string): Promise<T | null> {
     try {
-      // const value = await this.client.get(key);
-      // return value ? JSON.parse(value) : null;
-      return null;
+      const value = await this.client.get(key);
+      return value ? JSON.parse(value) : null;
     } catch (error) {
       this.logger.error(`获取缓存失败: ${key}`, error);
       return null;
@@ -152,7 +151,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
    */
   async del(key: string): Promise<void> {
     try {
-      // await this.client.del(key);
+      await this.client.del(key);
       this.logger.debug(`删除缓存: ${key}`);
     } catch (error) {
       this.logger.error(`删除缓存失败: ${key}`, error);

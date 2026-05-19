@@ -84,6 +84,7 @@ export const PERMISSIONS = {
     ADMINS: 'menu:admins',
     ROLES: 'menu:roles',
     AGENTS: 'menu:agents',
+    WECOM: 'menu:wecom',
   },
   USER: {
     CREATE: 'user:create',
@@ -305,3 +306,71 @@ export const UpdateAgentSchema = z.object({
 
 export type CreateAgentInput = z.infer<typeof CreateAgentSchema>;
 export type UpdateAgentInput = z.infer<typeof UpdateAgentSchema>;
+
+// ============================================
+// WeCom (企业微信) Schemas
+// ============================================
+
+export const CreateWecomConfigSchema = z.object({
+  name: z.string().min(1, '应用名称不能为空'),
+  corpId: z.string().min(1, '企业ID不能为空'),
+  agentId: z.number().int().positive('AgentId必须为正整数'),
+  secret: z.string().min(1, 'Secret不能为空'),
+  token: z.string().min(1, 'Token不能为空'),
+  encodingAESKey: z.string().length(43, 'EncodingAESKey必须为43个字符'),
+  description: z.string().optional(),
+  isActive: z.boolean().optional().default(true),
+});
+
+export const UpdateWecomConfigSchema = z.object({
+  name: z.string().min(1).optional(),
+  corpId: z.string().min(1).optional(),
+  agentId: z.number().int().positive().optional(),
+  secret: z.string().min(1).optional(),
+  token: z.string().min(1).optional(),
+  encodingAESKey: z.string().length(43).optional(),
+  description: z.string().nullable().optional(),
+  isActive: z.boolean().optional(),
+});
+
+export const SendMessageSchema = z.object({
+  configId: z.string().min(1),
+  toUser: z.string().optional(),
+  toParty: z.string().optional(),
+  toTag: z.string().optional(),
+  msgType: z.enum([
+    'text',
+    'image',
+    'voice',
+    'video',
+    'file',
+    'textcard',
+    'news',
+    'mpnews',
+    'markdown',
+    'miniprogram_notice',
+    'template_card',
+  ]),
+  content: z.record(z.string(), z.any()),
+});
+
+export const SendKfMessageSchema = z.object({
+  configId: z.string().min(1),
+  kfAccount: z.string().min(1),
+  toUser: z.string().min(1),
+  msgType: z.enum(['text', 'image', 'voice', 'video', 'file', 'link', 'miniprogram', 'menu']),
+  content: z.record(z.string(), z.any()),
+});
+
+export const SyncKfMessageSchema = z.object({
+  configId: z.string().min(1),
+  kfAccount: z.string().min(1),
+  cursor: z.string().optional(),
+  limit: z.number().int().min(1).max(1000).optional().default(1000),
+});
+
+export type CreateWecomConfigInput = z.infer<typeof CreateWecomConfigSchema>;
+export type UpdateWecomConfigInput = z.infer<typeof UpdateWecomConfigSchema>;
+export type SendMessageInput = z.infer<typeof SendMessageSchema>;
+export type SendKfMessageInput = z.infer<typeof SendKfMessageSchema>;
+export type SyncKfMessageInput = z.infer<typeof SyncKfMessageSchema>;

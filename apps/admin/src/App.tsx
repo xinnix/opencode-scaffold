@@ -12,6 +12,7 @@ import { AdminListPage, AdminDetailPage } from './modules/admin';
 import { UserListPage, UserDetailPage } from './modules/user';
 import { RoleListPage, RoleDetailPage } from './modules/role';
 import { AgentListPage, AgentChatPage } from './modules/agents';
+import { WecomConfigListPage, WecomMessageListPage, WecomEventListPage } from './modules/wecom';
 import { useMessageInitializer } from './shared/hooks/useMessageInitializer';
 // Create QueryClient outside component to prevent re-creation
 const queryClient = new QueryClient({
@@ -75,6 +76,9 @@ function AppContent() {
           { name: 'admin', list: '/admins' },
           { name: 'role', list: '/roles' },
           { name: 'agents', list: '/agents' },
+          { name: 'wecom.config', list: '/wecom' },
+          { name: 'wecom.message', list: '/wecom/messages' },
+          { name: 'wecom.event', list: '/wecom/events' },
         ]}
       >
         <Routes>
@@ -90,6 +94,9 @@ function AppContent() {
             <Route path="admins/:id" element={<AdminDetailPage />} />
             <Route path="agents" element={<AgentListPage />} />
             <Route path="agents/chat/:id" element={<AgentChatPage />} />
+            <Route path="wecom" element={<WecomConfigListPage />} />
+            <Route path="wecom/messages" element={<WecomMessageListPage />} />
+            <Route path="wecom/events" element={<WecomEventListPage />} />
           </Route>
           <Route path="/404" element={<NotFoundPage />} />
           <Route path="*" element={<NotFoundPage />} />

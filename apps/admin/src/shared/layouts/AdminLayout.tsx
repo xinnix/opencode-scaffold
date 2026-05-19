@@ -10,6 +10,9 @@ import {
   EditOutlined,
   LockOutlined,
   RobotOutlined,
+  WechatOutlined,
+  MessageOutlined,
+  ThunderboltOutlined,
 } from '@ant-design/icons';
 import { useState, useMemo } from 'react';
 import { useAuth } from '../auth';
@@ -25,6 +28,9 @@ const iconMap: Record<string, React.ReactNode> = {
   SafetyCertificateOutlined: <SafetyCertificateOutlined />,
   SettingOutlined: <SettingOutlined />,
   UserOutlined: <UserOutlined />,
+  WechatOutlined: <WechatOutlined />,
+  MessageOutlined: <MessageOutlined />,
+  ThunderboltOutlined: <ThunderboltOutlined />,
 };
 
 // prettier-ignore
@@ -46,6 +52,17 @@ const menuConfig = [
     children: [
       { key: "/admins", label: "管理员管理", icon: "SafetyCertificateOutlined", permission: "menu:admins" },
       { key: "/roles", label: "角色管理", icon: "SafetyCertificateOutlined", permission: "menu:roles" },
+    ],
+  },
+  {
+    key: "wecom",
+    label: "企业微信",
+    icon: "WechatOutlined",
+    permission: null,
+    children: [
+      { key: "/wecom", label: "应用配置", icon: "SettingOutlined", permission: "menu:wecom" },
+      { key: "/wecom/messages", label: "消息记录", icon: "MessageOutlined", permission: "menu:wecom" },
+      { key: "/wecom/events", label: "事件记录", icon: "ThunderboltOutlined", permission: "menu:wecom" },
     ],
   },
 ];

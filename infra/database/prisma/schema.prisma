@@ -30,6 +30,8 @@ model Admin {
   roles         AdminRole[]
   agentCreatedBy Agent[] @relation("AgentCreatedBy")
   agentUpdatedBy Agent[] @relation("AgentUpdatedBy")
+  wecomConfigCreatedBy WecomConfig[] @relation("WecomConfigCreatedBy")
+  wecomConfigUpdatedBy WecomConfig[] @relation("WecomConfigUpdatedBy")
 
   @@index([email])
   @@index([username])
@@ -219,5 +221,77 @@ model Agent {
   @@index([slug])
   @@index([isActive])
   @@map("agents")
+}
+
+// ============================================
+// 企业微信应用配置 (WecomConfig)
+// ============================================
+model WecomConfig {
+  id             String   @id @default(cuid())
+  name           String
+  corpId         String
+  agentId        Int
+  secret         String
+  token          String
+  encodingAESKey String
+  description    String?
+  isActive       Boolean  @default(true)
+  createdById    String?
+  updatedById    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // 关联
+  messages  WecomMessage[]
+  events    WecomEvent[]
+  createdBy Admin? @relation("WecomConfigCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy Admin? @relation("WecomConfigUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@unique([corpId, agentId])
+  @@index([corpId])
+  @@index([isActive])
+  @@map("wecom_configs")
+}
+
+// ============================================
+// 企业微信消息记录 (WecomMessage)
+// ============================================
+model WecomMessage {
+  id        String   @id @default(cuid())
+  configId  String
+  direction String
+  msgType   String
+  fromUser  String?
+  toUser    String?
+  content   String?
+  rawXml    String?
+  createdAt DateTime @default(now())
+
+  config WecomConfig @relation(fields: [configId], references: [id], onDelete: Cascade)
+
+  @@index([configId])
+  @@index([createdAt])
+  @@map("wecom_messages")
+}
+
+// ============================================
+// 企业微信事件记录 (WecomEvent)
+// ============================================
+model WecomEvent {
+  id        String   @id @default(cuid())
+  configId  String
+  eventType String
+  eventKey  String?
+  fromUser  String?
+  content   String?
+  rawXml    String?
+  createdAt DateTime @default(now())
+
+  config WecomConfig @relation(fields: [configId], references: [id], onDelete: Cascade)
+
+  @@index([configId])
+  @@index([eventType])
+  @@index([createdAt])
+  @@map("wecom_events")
 }
 
