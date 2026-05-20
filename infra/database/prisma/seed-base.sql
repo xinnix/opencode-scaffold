@@ -3,18 +3,36 @@
 -- ============================================
 INSERT INTO permissions (id, resource, action, description)
 VALUES
+  -- Admin CRUD
+  ('p1', 'admin', 'create', '创建管理员'),
+  ('p2', 'admin', 'read', '查看管理员'),
+  ('p3', 'admin', 'update', '更新管理员'),
+  ('p4', 'admin', 'delete', '删除管理员'),
+  -- User CRUD
   ('p5', 'user', 'create', '创建用户'),
   ('p6', 'user', 'read', '查看用户'),
   ('p7', 'user', 'update', '更新用户'),
   ('p8', 'user', 'delete', '删除用户'),
-  ('p9', 'admin', 'create', '创建管理员'),
-  ('p10', 'admin', 'read', '查看管理员'),
-  ('p11', 'admin', 'update', '更新管理员'),
-  ('p12', 'admin', 'delete', '删除管理员'),
-  ('p13', 'role', 'create', '创建角色'),
-  ('p14', 'role', 'read', '查看角色'),
-  ('p15', 'role', 'update', '更新角色'),
-  ('p16', 'role', 'delete', '删除角色')
+  -- Role CRUD
+  ('p9', 'role', 'create', '创建角色'),
+  ('p10', 'role', 'read', '查看角色'),
+  ('p11', 'role', 'update', '更新角色'),
+  ('p12', 'role', 'delete', '删除角色'),
+  -- Agent CRUD
+  ('p13', 'agent', 'create', '创建 Agent'),
+  ('p14', 'agent', 'read', '查看 Agent'),
+  ('p15', 'agent', 'update', '更新 Agent'),
+  ('p16', 'agent', 'delete', '删除 Agent'),
+  -- WeCom CRUD
+  ('p17', 'wecom', 'create', '创建企微配置'),
+  ('p18', 'wecom', 'read', '查看企微配置'),
+  ('p19', 'wecom', 'update', '更新企微配置'),
+  ('p20', 'wecom', 'delete', '删除企微配置'),
+  -- Menu visibility
+  ('p21', 'menu', 'agents', 'Agent 管理菜单'),
+  ('p22', 'menu', 'admins', '管理员管理菜单'),
+  ('p23', 'menu', 'roles', '角色管理菜单'),
+  ('p24', 'menu', 'wecom', '企业微信菜单')
 ON CONFLICT (resource, action) DO NOTHING;
 
 -- ============================================
@@ -35,15 +53,16 @@ INSERT INTO role_permissions (id, "roleId", "permissionId", "createdAt")
 SELECT 'rp_' || permissions.id || '_r1', 'r1', permissions.id, NOW() FROM permissions
 ON CONFLICT DO NOTHING;
 
--- 管理员拥有大部分权限（非删除权限）
+-- 管理员拥有非删除权限
 INSERT INTO role_permissions (id, "roleId", "permissionId", "createdAt")
 SELECT 'rp_' || permissions.id || '_r2', 'r2', permissions.id, NOW() FROM permissions
 WHERE action != 'delete'
 ON CONFLICT DO NOTHING;
 
--- 访客只有读权限
+-- 访客拥有读权限 + 菜单权限
 INSERT INTO role_permissions (id, "roleId", "permissionId", "createdAt")
-SELECT 'rp_' || permissions.id || '_r3', 'r3', permissions.id, NOW() FROM permissions WHERE action = 'read'
+SELECT 'rp_' || permissions.id || '_r3', 'r3', permissions.id, NOW() FROM permissions
+WHERE action = 'read' OR resource = 'menu'
 ON CONFLICT DO NOTHING;
 
 -- ============================================
