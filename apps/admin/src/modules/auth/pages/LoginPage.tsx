@@ -31,7 +31,7 @@ export const LoginPage = () => {
         <div className="login-card-wrapper">
           <Card className="login-card" bordered={false}>
             <div className="login-header">
-              <h1>汉都天地数字化系统</h1>
+              <h1>管理系统</h1>
               <p>后台管理系统</p>
             </div>
             <Form form={form} name="login" onFinish={onFinish} autoComplete="off" size="large">
