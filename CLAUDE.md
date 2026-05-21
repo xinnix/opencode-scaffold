@@ -181,6 +181,38 @@ docker exec -i postgres psql -U xinnix -d couponHub < infra/database/prisma/seed
 | payment    | -            | paymentRouter    | PaymentController | -             | -           |
 | permission | Permission   | permissionRouter | -                 | -             | -           |
 
+## 编码行为准则
+
+> 偏向谨慎而非速度。简单任务用判断力灵活处理。
+
+### 先想后写
+
+- 不假设，不隐藏困惑，主动暴露权衡
+- 实现前：显式陈述假设，不确定就问；多种理解时都列出来，不静默选择
+
+### 简单优先
+
+- 只写解决问题所需的最少代码，不做投机性扩展
+- 不加没被要求的功能、不为单次使用建抽象、不加没被要求的"灵活性"
+- 不为不可能发生的场景写错误处理
+- 写了 200 行但 50 行能搞定，就重写
+- 自问："资深工程师会觉得这过度复杂吗？"如果是，简化
+
+### 外科手术式变更
+
+- 只改必须改的，只清理自己造成的混乱
+- 不"改进"相邻代码、注释、格式；不重构没坏的东西；匹配现有风格
+- 注意到无关死代码时提一句，不删除
+- 自己的变更产生了孤立 import/变量/函数时才移除，不删预先存在的死代码
+- 检验标准：每一行变更都能追溯到用户请求
+
+### 目标驱动执行
+
+- 把任务转化为可验证的目标，循环直到验证通过
+- "加验证" → "为无效输入写测试，再让测试通过"；"修 bug" → "写复现测试，再让它通过"
+- 多步任务先简述计划：1. [步骤] → verify: [检查] 2. [步骤] → verify: [检查]
+- 强成功标准让你能独立循环；弱标准（"让它能跑"）需要不断确认
+
 ## Known Issues
 
 - `types/api.ts` uses `type AppRouter = any` instead of importing the real type (tRPC monorepo type resolution issue)
