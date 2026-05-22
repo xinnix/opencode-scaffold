@@ -14,11 +14,8 @@ export function auditExtension() {
         async create({ args, query }) {
           if (currentUserId && args.data) {
             if (typeof args.data === 'object' && !Array.isArray(args.data)) {
-              args.data = {
-                ...args.data,
-                createdById: (args.data as any).createdById ?? currentUserId,
-                updatedById: (args.data as any).updatedById ?? currentUserId,
-              };
+              (args.data as any).createdById ??= currentUserId;
+              (args.data as any).updatedById ??= currentUserId;
             }
           }
           return query(args);
@@ -26,10 +23,7 @@ export function auditExtension() {
         async update({ args, query }) {
           if (currentUserId && args.data) {
             if (typeof args.data === 'object' && !Array.isArray(args.data)) {
-              args.data = {
-                ...args.data,
-                updatedById: currentUserId,
-              };
+              (args.data as any).updatedById = currentUserId;
             }
           }
           return query(args);
