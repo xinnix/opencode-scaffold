@@ -53,6 +53,22 @@ services:
         max-size: '10m'
         max-file: '3'
 
+  landing:
+    image: ${REGISTRY:-ghcr.io}/${IMAGE_NAME:-opencode}-landing:${TAG:-latest}
+    container_name: ${PROJECT_NAME:-opencode}-landing-prod
+    environment:
+      - TZ=Asia/Shanghai
+    ports:
+      - '${LANDING_PORT:-8080}:80'
+    networks:
+      - app-network
+    restart: unless-stopped
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+
 networks:
   app-network:
     driver: bridge
