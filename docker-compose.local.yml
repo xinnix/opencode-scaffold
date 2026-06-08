@@ -32,6 +32,22 @@ services:
       - api
     restart: unless-stopped
 
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    image: ${PROJECT_NAME:-opencode}-web:v1-local
+    container_name: ${PROJECT_NAME:-opencode}-web-local
+    ports:
+      - '3002:3002'
+    env_file:
+      - 1panel.env
+    environment:
+      NEXT_PUBLIC_API_URL: http://api:3000
+    depends_on:
+      - api
+    restart: unless-stopped
+
   landing:
     build:
       context: .
