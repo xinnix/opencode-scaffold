@@ -34,6 +34,8 @@
 | ------------ | --------------------------------------- | -------------------------- |
 | **Backend**  | NestJS + tRPC + Prisma + PostgreSQL     | API + 类型安全 RPC + ORM   |
 | **Admin UI** | React 19 + Refine + Ant Design 5 + tRPC | 管理后台                   |
+| **Web**      | Next.js 15 + Tailwind CSS v4 + REST     | 用户端 Web 应用            |
+| **Landing**  | Next.js 15 + Tailwind CSS v4 (SSG)      | 落地页 / 营销站            |
 | **Miniapp**  | uni-app + Vue 3 + TypeScript            | 微信小程序                 |
 | **Shared**   | Zod + `@opencode/shared`                | 验证 Schema + 类型注册中心 |
 
@@ -67,9 +69,15 @@ schema.prisma ──► Prisma Client ──► AppRouter ──► @opencode/sh
                 │  WeChat Login / User Profile / REST API │
                 └──────────────────┬──────────────────────┘
                                    │ REST (401→refresh→retry)
+
+                ┌─────────────────────────────────────────┐
+                │          apps/web (Next.js SSR)          │
+                │  Login / Dashboard / Profile / REST API │
+                └──────────────────┬──────────────────────┘
+                                   │ REST + httpOnly Cookie
 ```
 
-**双身份模型**：Admin 通过 tRPC 访问（RBAC 权限），User 通过 REST 访问（仅自己的数据）。JWT `type` 字段在网关层自动隔离跨身份访问。
+**双身份模型**：Admin 通过 tRPC 访问（RBAC 权限），User 通过 REST 访问（仅自己的数据）。JWT `type` 字段在网关层自动隔离跨身份访问。Web 端和 Miniapp 共享 User 身份体系，Token 存储在 httpOnly Cookie（Web）或本地存储（Miniapp）。
 
 ## 目录结构
 
@@ -86,6 +94,12 @@ opencode-scaffold/
 │   │   └── src/
 │   │       ├── modules/        # 业务页面
 │   │       └── shared/        # StandardListPage, StandardForm, StandardDetailPage, dataProvider
+│   ├── web/                    # Next.js 用户端 Web 应用（SSR）
+│   │   └── src/
+│   │       ├── app/            # App Router（login, register, dashboard, profile）
+│   │       ├── providers/      # AuthProvider
+│   │       └── lib/            # api-client, auth helpers
+│   ├── landing/                # Next.js 落地页 / 营销站（SSG 静态导出）
 │   └── miniapp/                # uni-app 微信小程序
 │       └── src/
 │           ├── pages/          # 页面
@@ -113,6 +127,8 @@ pnpm dev
 | ----------------- | ----------------------- | -------------------------------------- |
 | API (tRPC + REST) | `http://localhost:3000` | —                                      |
 | Admin             | `http://localhost:5173` | `superadmin@example.com / password123` |
+| Web               | `http://localhost:3002` | `user@example.com / password123`       |
+| Landing           | `http://localhost:3001` | —                                      |
 | Miniapp H5        | `http://localhost:8080` | `user@example.com / password123`       |
 
 ## 开发命令
@@ -273,7 +289,7 @@ cp .env.example .env.prod
 docker compose -f docker-compose.prod.yml up -d
 ```
 
-容器：`api`（NestJS）、`admin`（Nginx + 静态文件）、`postgres`、`redis`
+容器：`api`（NestJS）、`admin`（Nginx + 静态文件）、`web`（Next.js SSR）、`landing`（Nginx + 静态文件）、`postgres`、`redis`
 
 CI/CD：push 到 `main` 时自动执行 build + type-check + `prisma migrate deploy`（需配置 `PROD_DATABASE_URL` GitHub Secret）
 

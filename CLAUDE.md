@@ -9,7 +9,7 @@
 - 微信支付集成（JSAPI + 退款）
 - 开箱即用的 CRUD 模板生成（genModule）
 - 端到端类型安全（tRPC）
-- 多端支持（Admin 后台 + 小程序）
+- 多端支持（Admin 后台 + Web 用户端 + 小程序 + Landing）
 - Monorepo 统一管理
 
 ## 技术栈
@@ -18,6 +18,8 @@
 | ------------ | ----------------------------------------- |
 | **Backend**  | NestJS + tRPC + Prisma + PostgreSQL       |
 | **Admin UI** | React + Refine + Ant Design + tRPC Client |
+| **Web**      | Next.js 15 + Tailwind CSS v4 + REST       |
+| **Landing**  | Next.js 15 + Tailwind CSS v4 (SSG)        |
 | **Miniapp**  | uni-app + Vue 3 + TypeScript              |
 | **Monorepo** | pnpm Workspace                            |
 
@@ -27,6 +29,8 @@
 apps/
 ├── api/          # NestJS 后端，业务逻辑在 *.service.ts
 ├── admin/        # Refine 前端，tRPC 强类型调用
+├── web/          # Next.js 用户端 Web 应用（SSR，REST API）
+├── landing/      # Next.js 落地页 / 营销站（SSG 静态导出）
 └── miniapp/      # uni-app 小程序壳（登录 + 个人中心 + 首页）
 infra/
 ├── database/     # Prisma Schema + Client + Seed
@@ -51,8 +55,9 @@ pnpm dev                        # 启动全部服务（API + Admin + Miniapp）
 # 开发
 /start-backend                  # 启动后端 API（localhost:3000）
 /start-frontend                 # 启动管理后台（localhost:5173）
+/start-web                      # 启动 Web 用户端（localhost:3002）
 /start-mini                     # 启动小程序 H5
-/start-all                      # 同时启动三个服务
+/start-all                      # 同时启动全部服务
 
 # 代码质量
 /type-check                     # TypeScript 类型检查
@@ -123,10 +128,12 @@ export class ProductService extends BaseService<Product> {
 
 ## 双用户认证体系
 
-- **Admin 用户**（管理后台）：RBAC 角色-权限系统
-- **User 用户**（小程序）：支持邮箱注册 + 微信登录
+- **Admin 用户**（管理后台）：RBAC 角色-权限系统，通过 tRPC 通信
+- **User 用户**（Web + 小程序）：支持邮箱注册 + 微信登录，通过 REST 通信
 - JWT Token 包含 `type` 字段区分用户类型
-- 小程序用户无权访问管理端路由
+- Web 端 Token 存储：httpOnly Cookie（SSR 友好，防 XSS）
+- 小程序 Token 存储：本地存储（uni.getStorageSync）
+- 小程序/Web 用户无权访问管理端路由
 
 ## 数据隔离原则
 
@@ -170,16 +177,24 @@ docker exec -i postgres psql -U xinnix -d couponHub < infra/database/prisma/seed
 
 ## Module Registry
 
-| Module     | Prisma Model | tRPC Router      | REST Controller   | Admin Page    | Miniapp API |
-| ---------- | ------------ | ---------------- | ----------------- | ------------- | ----------- |
-| admin      | Admin        | adminRouter      | -                 | AdminListPage | -           |
-| user       | User         | userRouter       | UserController    | UserListPage  | authApi     |
-| role       | Role         | roleRouter       | -                 | RoleListPage  | -           |
-| agents     | Agent        | agentsRouter     | AgentsController  | AgentListPage | agentsApi   |
-| auth       | -            | authRouter       | AuthController    | LoginPage     | authApi     |
-| upload     | -            | uploadRouter     | UploadController  | -             | uploadApi   |
-| payment    | -            | paymentRouter    | PaymentController | -             | -           |
-| permission | Permission   | permissionRouter | -                 | -             | -           |
+| Module     | Prisma Model | tRPC Router      | REST Controller   | Admin Page    | Web Page       | Miniapp API |
+| ---------- | ------------ | ---------------- | ----------------- | ------------- | -------------- | ----------- |
+| admin      | Admin        | adminRouter      | -                 | AdminListPage | -              | -           |
+| user       | User         | userRouter       | UserController    | UserListPage  | -              | authApi     |
+| role       | Role         | roleRouter       | -                 | RoleListPage  | -              | -           |
+| agents     | Agent        | agentsRouter     | AgentsController  | AgentListPage | -              | agentsApi   |
+| auth       | -            | authRouter       | AuthController    | LoginPage     | Login/Register | authApi     |
+| upload     | -            | uploadRouter     | UploadController  | -             | -              | uploadApi   |
+| payment    | -            | paymentRouter    | PaymentController | -             | -              | -           |
+| permission | Permission   | permissionRouter | -                 | -             | -              | -           |
+
+### Web 端架构说明
+
+- **框架**：Next.js 15 + App Router（`output: 'standalone'`，SSR 模式）
+- **API 通信**：REST（不使用 tRPC，因为 tRPC context 仅支持 Admin 用户）
+- **认证**：httpOnly Cookie + Next.js Middleware 路由保护
+- **路由结构**：`(auth)/` 无需认证（login/register），`(protected)/` 需要认证（dashboard/profile）
+- **端口**：3002
 
 ## 编码行为准则
 
@@ -218,3 +233,5 @@ docker exec -i postgres psql -U xinnix -d couponHub < infra/database/prisma/seed
 - `types/api.ts` uses `type AppRouter = any` instead of importing the real type (tRPC monorepo type resolution issue)
 - No Prisma enums in schema — all enum-like fields are `String` with comments
 - StandardListPage and generated list pages have duplicated mutation callback patterns
+- tRPC context (`verifyJwtToken`) only resolves Admin users — Web/Miniapp users must use REST endpoints
+- `@opencode/shared` `User` interface lacks `nickname`/`phone` fields that exist in Prisma `users` model
